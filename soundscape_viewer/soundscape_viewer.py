@@ -13,8 +13,8 @@ from scipy.io import loadmat
 from scipy.io import savemat
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
-from .utility import save_parameters
-from .utility import gdrive_handle
+from soundscape_IR.soundscape_viewer.utility import save_parameters
+from soundscape_IR.soundscape_viewer.utility import gdrive_handle
 
 class lts_viewer:
   """
