@@ -15,6 +15,8 @@ from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from soundscape_IR.soundscape_viewer.utility import save_parameters
 from soundscape_IR.soundscape_viewer.utility import gdrive_handle
+a=save_parameters()
+print(a)
 
 class lts_viewer:
   """
