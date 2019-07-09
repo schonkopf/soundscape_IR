@@ -13,8 +13,8 @@ from scipy.io import loadmat
 from scipy.io import savemat
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
-import utility.save_parameters
-import utility.gdrive_handle
+from .utility import save_parameters
+from .utility import gdrive_handle
 
 class lts_viewer:
   """
