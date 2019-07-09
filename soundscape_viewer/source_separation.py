@@ -14,8 +14,8 @@ from sklearn.decomposition import non_negative_factorization as NMF
 from sklearn.decomposition.nmf import _initialize_nmf as NMF_init
 from sklearn.decomposition.nmf import _update_coordinate_descent as basis_update
 from sklearn.utils import check_array
-from soundscape_viewer.utility import save_parameters
-from soundscape_viewer.utility import gdrive_handle
+from .utility import save_parameters
+from .utility import gdrive_handle
 
 class pcnmf:
   """
