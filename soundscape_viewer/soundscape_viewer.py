@@ -13,8 +13,8 @@ from scipy.io import loadmat
 from scipy.io import savemat
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
-from soundscape_IR.soundscape_viewer.utility import save_parameters
-from .utility import gdrive_handle
+import save_parameters
+import gdrive_handle
 
 class lts_viewer:
   """
@@ -70,7 +70,6 @@ class lts_viewer:
           self.assemble(data)
         
   def collect_Gdrive(self, folder_id):
-    from .utility import gdrive_handle
     Gdrive=gdrive_handle(folder_id)
     Gdrive.list_query(file_extension='.mat')
     
