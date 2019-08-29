@@ -155,11 +155,14 @@ class lts_maker:
   def collect_Gdrive(self, folder_id):
     Gdrive=gdrive_handle(folder_id)
     Gdrive.list_query(file_extension='.wav')
-    self.cloud=1
+    self.cloud=2
+    self.link=np.array([], dtype=np.object)
+    self.audioname=np.array([], dtype=np.object)
+    self.Gdrive=Gdrive
     n=0
     for file in Gdrive.file_list:
-      self.link[n]=file['alternateLink']
-      self.audioname[n]=file['title']
+      self.link=np.append(self.link, file['alternateLink'])
+      self.audioname=np.append(self.audioname, file['title'])
       n=n+1
     
   def run(self, save_filename='LTS.mat', folder_id=[]):
@@ -177,6 +180,10 @@ class lts_maker:
       if self.cloud==1:
         print('Total ', num_file, 'files, now retrieving file #', file, ':', self.audioname[file], flush=True, end='\r')
         urllib.request.urlretrieve(self.link[file], self.audioname[file])
+        path='.'
+      elif self.cloud==2:
+        temp=self.Gdrive.file_list[file]
+        temp.GetContentFile(temp['title'])
         path='.'
       else:
         path=self.link
