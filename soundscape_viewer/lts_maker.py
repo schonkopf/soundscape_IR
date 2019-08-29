@@ -177,12 +177,12 @@ class lts_maker:
     Result_mean=np.array([]); 
     num_file=len(self.audioname)
     for file in range(num_file):
+      print('\r', end='')
+      print('Total ', num_file, 'files, now retrieving file #', file, ':', self.audioname[file], flush=True, end='')
       if self.cloud==1:
-        print('Total ', num_file, 'files, now retrieving file #', file, ':', self.audioname[file], flush=True, end='\r')
         urllib.request.urlretrieve(self.link[file], self.audioname[file])
         path='.'
       elif self.cloud==2:
-        print('Total ', num_file, 'files, now retrieving file #', file, ':', self.audioname[file], flush=True, end='\r')
         temp=self.Gdrive.file_list[file]
         temp.GetContentFile(temp['title'])
         path='.'
