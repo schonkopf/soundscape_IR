@@ -182,6 +182,7 @@ class lts_maker:
         urllib.request.urlretrieve(self.link[file], self.audioname[file])
         path='.'
       elif self.cloud==2:
+        print('Total ', num_file, 'files, now retrieving file #', file, ':', self.audioname[file], flush=True, end='\r')
         temp=self.Gdrive.file_list[file]
         temp.GetContentFile(temp['title'])
         path='.'
