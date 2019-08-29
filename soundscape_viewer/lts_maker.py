@@ -197,7 +197,7 @@ class lts_maker:
                                        noverlap=self.overlap, nfft=self.FFT_size, 
                                        return_onesided=True, mode='psd')
       P = 10*np.log10(P/np.power(self.pref,2))-self.sen
-      if self.cloud==1:
+      if self.cloud>=1:
         os.remove(self.audioname[file])
 
       infilename=self.audioname[file]
