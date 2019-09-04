@@ -43,7 +43,7 @@ class lts_viewer:
       self.Result_mean=np.array([])
       self.Result_diff=np.array([])
       
-  def assemble(self, data):
+  def assemble(self, data, time_sort=1):
       if self.Result_median.size == 0:
           self.f = data['Result']['f'].item()[0]
           self.Result_median = data['Result']['LTS_median'].item()
@@ -55,21 +55,21 @@ class lts_viewer:
           self.Result_mean = np.vstack((data['Result']['LTS_mean'].item(), self.Result_mean))
           self.Result_diff = self.Result_mean-self.Result_median
           self.Result_diff[:,0] = self.Result_mean[:,0]
-      
-      temp = np.argsort(self.Result_mean[:,0])
-      self.Result_median=self.Result_median[temp,:]
-      self.Result_mean=self.Result_mean[temp,:]
-      self.Result_diff=self.Result_diff[temp,:]
+      if time_sort == 1:
+          temp = np.argsort(self.Result_mean[:,0])
+          self.Result_median=self.Result_median[temp,:]
+          self.Result_mean=self.Result_mean[temp,:]
+          self.Result_diff=self.Result_diff[temp,:]
   
-  def collect_folder(self, path):
+  def collect_folder(self, path, time_sort=1):
       items = os.listdir(path)
       for names in items:
         if names.endswith(".mat"):
           print('Loading file: %s' % (names))
           data = loadmat(path+'/'+names)
-          self.assemble(data)
+          self.assemble(data, time_sort)
         
-  def collect_Gdrive(self, folder_id):
+  def collect_Gdrive(self, folder_id, time_sort=1):
     Gdrive=gdrive_handle(folder_id)
     Gdrive.list_query(file_extension='.mat')
     
@@ -78,7 +78,7 @@ class lts_viewer:
       infilename=file['title']
       file.GetContentFile(file['title'])
       data = loadmat(file['title'])
-      self.assemble(data)
+      self.assemble(data, time_sort)
       os.remove(infilename)
       
   def plot_lts(self, prewhiten_percent=0):
