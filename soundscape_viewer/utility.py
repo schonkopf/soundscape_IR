@@ -9,7 +9,11 @@ class gdrive_handle:
     self.folder_id=folder_id
     auth.authenticate_user()
     gauth = GoogleAuth()
-    gauth.credentials = GoogleCredentials.get_application_default()
+    #gauth.credentials = GoogleCredentials.get_application_default()
+    #
+    gauth.LocalWebserverAuth()
+    gauth.LoadCredentialsFile(gauth)
+    #
     self.Gdrive = GoogleDrive(gauth)
     print('Now establishing link to Google drive.')
     
