@@ -192,7 +192,7 @@ class lts_maker:
         urllib.request.urlretrieve(self.link[file], self.audioname[file])
         path='.'
       elif self.cloud==2:
-        self.Gdrive.renew
+        self.Gdrive.renew_token
         temp=self.Gdrive.file_list[file]
         temp.GetContentFile(temp['title'])
         path='.'
