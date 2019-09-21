@@ -14,12 +14,12 @@ class gdrive_handle:
     self.Gdrive = GoogleDrive(gauth)
     print('Now establishing link to Google drive.')
   
-  def renew(self):
+  def renew_token(self):
     if self.gauth.access_token_expired:
         # Refresh them if expired
         print('Drive token expired, refreshing')
         self.gauth.Refresh()
-        self.Gdrive = GoogleDrive(gauth)
+        self.Gdrive = GoogleDrive(self.gauth)
 
   def upload(self, filename):
     upload_ = self.Gdrive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": self.folder_id}], 'title': filename})
