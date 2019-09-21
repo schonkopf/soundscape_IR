@@ -17,7 +17,7 @@ class gdrive_handle:
   def renew(self):
     if self.gauth.access_token_expired:
         # Refresh them if expired
-        print "Google Drive Token Expired, Refreshing"
+        print('Drive token expired, refreshing')
         self.gauth.Refresh()
         self.Gdrive = GoogleDrive(gauth)
 
