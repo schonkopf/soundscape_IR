@@ -187,7 +187,7 @@ class lts_maker:
       
     for file in range(file_begin, file_end):
       print('\r', end='')
-      print('Total ', num_file, 'files, now retrieving file #', file, ':', self.audioname[file], flush=True, end='')
+      print('Total ', len(self.audioname), 'files, now retrieving file #', file, ':', self.audioname[file], flush=True, end='')
       if self.cloud==1:
         urllib.request.urlretrieve(self.link[file], self.audioname[file])
         path='.'
@@ -198,7 +198,7 @@ class lts_maker:
       else:
         path=self.link
         
-      if file==0:
+      if file==file_begin:
         with audioread.audio_open(path+'/'+self.audioname[file]) as temp:
           sf=temp.samplerate
       x, sf = librosa.load(path+'/'+self.audioname[file], sr=sf)
