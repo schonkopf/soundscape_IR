@@ -10,13 +10,16 @@ class gdrive_handle:
     auth.authenticate_user()
     gauth = GoogleAuth()
     gauth.credentials = GoogleCredentials.get_application_default()
-    #
-    gauth.LocalWebserverAuth()
-    gauth.LoadCredentialsFile(gauth)
-    #
     self.Gdrive = GoogleDrive(gauth)
     print('Now establishing link to Google drive.')
-    
+  
+  def renew(self):
+    if gauth.access_token_expired:
+        # Refresh them if expired
+        print "Google Drive Token Expired, Refreshing"
+        gauth.Refresh()
+        self.Gdrive = GoogleDrive(gauth)
+
   def upload(self, filename):
     upload_ = self.Gdrive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": self.folder_id}], 'title': filename})
     upload_.SetContentFile(filename)
