@@ -138,6 +138,7 @@ class lts_maker:
         if filename.endswith(".wav"):
             self.audioname = np.append(self.audioname, filename)
             n = n+1
+    print('Identified ', len(self.audioname), 'files')
     
   def collect_pumilio(self, filename):
     """
@@ -151,6 +152,7 @@ class lts_maker:
     self.audioname=file_list.SoundName
     self.SoundID=file_list.SoundID
     self.cloud=1
+    print('Identified ', len(self.audioname), 'files')
     
   def collect_Gdrive(self, folder_id):
     Gdrive=gdrive_handle(folder_id)
@@ -164,8 +166,9 @@ class lts_maker:
       self.link=np.append(self.link, file['alternateLink'])
       self.audioname=np.append(self.audioname, file['title'])
       n=n+1
+    print('Identified ', len(self.audioname), 'files')
     
-  def run(self, save_filename='LTS.mat', folder_id=[]):
+  def run(self, save_filename='LTS.mat', folder_id=[], file_begin=0, num_file=[]):
     import audioread
     import librosa
     import scipy.signal
@@ -175,8 +178,14 @@ class lts_maker:
     
     Result_median=np.array([]); 
     Result_mean=np.array([]); 
-    num_file=len(self.audioname)
-    for file in range(num_file):
+    
+    if not num_file:
+      num_file=len(self.audioname)
+    file_end=file_begin+num_file
+    if file_end>len(self.audioname):
+      file_end=len(self.audioname)
+      
+    for file in range(file_begin, file_end):
       print('\r', end='')
       print('Total ', num_file, 'files, now retrieving file #', file, ':', self.audioname[file], flush=True, end='')
       if self.cloud==1:
