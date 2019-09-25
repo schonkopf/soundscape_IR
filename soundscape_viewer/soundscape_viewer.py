@@ -139,7 +139,7 @@ class data_organize:
   def __init__(self):
     self.final_result=np.array([])
     self.result_header=np.array([])
-    print('Empty result is created.')
+    print('A new spreadsheet has been created.')
       
   def time_fill(self, time_vec, data, header):
     # fill the time series gap
