@@ -10,5 +10,6 @@ from .soundscape_viewer import clustering
 from .source_separation import pcnmf
 from .utility import save_parameters
 from .utility import gdrive_handle
+from .utility import matrix_operation
 
 __all__ = ["lts_maker", "soundscape_viewer", "source_separation", "utility"]
