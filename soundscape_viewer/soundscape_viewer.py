@@ -110,7 +110,7 @@ class lts_viewer:
             end_time=begin_time+1
       list=list*(self.Result_median[:,0]<end_time)
     else:
-      list=range(self.Result_median.shape[1])
+      list=range(self.Result_median.shape[0])
     
     temp,f=self.input_selection(var_name='median', prewhiten_percent=prewhiten_percent)
     temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:])
