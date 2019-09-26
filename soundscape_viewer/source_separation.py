@@ -147,7 +147,8 @@ class pcnmf:
     self.separation=separation
     self.relative_level=relative_level
                           
-  def plot_pcnmf(self, source=0):
+  def plot_pcnmf(self, source=1):
+    source=source-1
     data=self.separation[source]
     if source<self.source_num:
       W=self.W[:,self.W_cluster==source]
