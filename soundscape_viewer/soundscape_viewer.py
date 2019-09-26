@@ -315,10 +315,10 @@ class clustering:
       cluster=self.run_kmeans(input_data)
 
     # extract scene features by percentiles
-    soundscape_scene = np.zeros((np.max(cluster),), dtype=np.object)
-    scene = np.zeros((len(f),np.max(cluster)+1), dtype=np.object)
+    soundscape_scene = np.zeros((np.max(cluster)+1,), dtype=np.object)
+    scene = np.zeros((len(f),np.max(cluster)+2), dtype=np.object)
     scene[:,0]=f
-    scene_label = np.zeros((np.max(cluster)+1,), dtype=np.object)
+    scene_label = np.zeros((np.max(cluster)+2,), dtype=np.object)
     scene_label[0] = 'Frequency (Hz)'
     for c in np.arange(np.max(cluster)+1):
       soundscape_scene[c] = np.percentile(input_data[cluster==c,:], [5, 25, 50, 75, 95], axis=0).T
