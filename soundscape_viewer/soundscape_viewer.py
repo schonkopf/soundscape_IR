@@ -81,40 +81,82 @@ class lts_viewer:
       self.assemble(data, time_sort)
       os.remove(infilename)
       
-  def plot_lts(self, prewhiten_percent=0):
+  def plot_lts(self, prewhiten_percent=0, begin_date=[], end_date=[], f_range=[], fig_width=12, fig_height=18):
+    # f_range: Hz
+    if f_range:
+        f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
+        f_list=np.where(f_list==True)[0]
+    else:
+        f_list=np.arange(len(self.f))
+        f_range=[np.min(self.f), np.max(self.f)]
+    
+    # format of begin_data: yyyymmdd
+    if begin_date:
+      yy=int(begin_date[0:4])
+      mm=int(begin_date[4:6])
+      dd=int(begin_date[6:8])
+      date=datetime.datetime(yy,mm,dd)
+      begin_time=date.toordinal()+366
+      list=self.Result_median[:,0]>=begin_time
+      if end_date:
+            yy=int(end_date[0:4])
+            mm=int(end_date[4:6])
+            dd=int(end_date[6:8])
+            date=datetime.datetime(yy,mm,dd)
+            end_time=date.toordinal()+366+1
+      else:
+            end_time=begin_time+1
+      list=list*(self.Result_median[:,0]<end_time)
+    else:
+      list=range(self.Result_median.shape[1])
+    
     temp=self.input_selection(var_name='median', prewhiten_percent=prewhiten_percent)
-    fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, figsize=(12, 18))
-    im = ax1.imshow(temp[:,1:].T,
+    temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:])
+    temp[:,0]=temp[:,0]+693960-366
+    
+    fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, figsize=(fig_width, fig_height))
+    im = ax1.imshow(temp[:,f_list+1].T,
                     origin='lower',  aspect='auto', cmap=cm.jet,
-                    extent=[0, self.Result_median.shape[0], np.min(self.f), np.max(self.f)])
+                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f_range[0], f_range[1]])
     ax1.set_title('Median-based LTS')
     ax1.set_ylabel('Frequency')
-    ax1.set_xlabel('Samples')
+    ax1.set_xlabel('Date')
+    ax1.xaxis_date()
     cbar1 = fig.colorbar(im, ax=ax1)
     cbar1.set_label('Relative amplitude')
 
     temp=self.input_selection(var_name='mean', prewhiten_percent=prewhiten_percent)
-    im2 = ax2.imshow(temp[:,1:].T,
+    temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:])
+    temp[:,0]=temp[:,0]+693960-366
+    
+    im2 = ax2.imshow(temp[:,f_list+1].T,
                     origin='lower',  aspect='auto', cmap=cm.jet,
-                    extent=[0, self.Result_median.shape[0], np.min(self.f), np.max(self.f)])
+                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f_range[0], f_range[1]])
     ax2.set_title('Mean-based LTS')
     ax2.set_ylabel('Frequency')
-    ax2.set_xlabel('Samples')
+    ax2.set_xlabel('Date')
+    ax2.xaxis_date()
     cbar2 = fig.colorbar(im2, ax=ax2)
     cbar2.set_label('Relative amplitude')
 
     temp=self.input_selection(var_name='diff', prewhiten_percent=prewhiten_percent)
-    im3 = ax3.imshow(temp[:,1:].T,
+    temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:])
+    temp[:,0]=temp[:,0]+693960-366
+    
+    im3 = ax3.imshow(temp[:,f_list+1].T,
                     origin='lower',  aspect='auto', cmap=cm.jet,
-                    extent=[0, self.Result_median.shape[0], np.min(self.f), np.max(self.f)])
+                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f_range[0], f_range[1]])
 
     ax3.set_title('Difference-based LTS')
     ax3.set_ylabel('Frequency')
-    ax3.set_xlabel('Samples')
+    ax3.set_xlabel('Date')
+    ax3.xaxis_date()
     cbar3 = fig.colorbar(im3, ax=ax3)
     cbar3.set_label('Relative amplitude')
+    
+    return cbar1, cbar2, cbar3;
 
-  def input_selection(self, var_name='median', prewhiten_percent=0, threshold=0):
+  def input_selection(self, var_name='median', f_range=[], prewhiten_percent=0, threshold=0):
     if var_name=='median':
       input_data=self.Result_median
     elif var_name=='mean':
@@ -124,7 +166,18 @@ class lts_viewer:
     else:
       input_data=0
       print('Unknown input, please choose: median, mean, diff.')
-      
+    
+    # f_range: Hz
+    if f_range:
+        f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
+        f_list=np.where(f_list==True)[0]
+    else:
+        f_list=np.arange(len(self.f))
+    
+    f=self.f[f_list]
+    f_list=np.concatenate([np.array([0]), f_list+1])
+    input_data=input_data[:,f_list]
+    
     if len(input_data)>1:
       time_vec=input_data[:,0]
       if np.round(prewhiten_percent) > 0:
@@ -133,7 +186,7 @@ class lts_viewer:
         input_data = np.subtract(input_data, np.matlib.repmat(ambient, matrix_shape[0], 1))
         input_data[input_data<threshold]=threshold
         input_data[:,0]=time_vec
-      return input_data
+      return input_data, f;
     
 class data_organize:
   def __init__(self):
@@ -145,12 +198,20 @@ class data_organize:
     # fill the time series gap
     temp = np.argsort(time_vec)
     time_vec=time_vec[temp]
-    output=data[temp]
+    
+    if data.ndim>1:
+        output=data[temp,:]
+    else:
+        output=data[temp]
     resolution=np.round((time_vec[1]-time_vec[0])*24*3600)
     n_time_vec=np.arange(np.floor(np.min(time_vec))*24*3600, 
                          np.ceil(np.max(time_vec))*24*3600,resolution)/24/3600
 
-    save_result=np.zeros((n_time_vec.size, 2))
+    if data.ndim>1:
+        save_result=np.zeros((n_time_vec.size, data.shape[1]+1))
+    else:
+        save_result=np.zeros((n_time_vec.size, 2))
+    
     save_result[:,0]=n_time_vec-693960
     segment_list=np.round(np.diff(time_vec*24*3600)/resolution)
     split_point=np.vstack((np.concatenate(([0],np.where(segment_list!=1)[0]+1)),
@@ -158,8 +219,11 @@ class data_organize:
 
     for run in np.arange(split_point.shape[1]):
       i=np.argmin(np.abs(n_time_vec-time_vec[split_point[0,run]]))
-      save_result[np.arange(i,i+np.diff(split_point[:,run])+1),1]=output[np.arange(split_point[0,run],
-                                                                                   split_point[1,run]+1)]
+      if data.ndim>1:
+            save_result[np.arange(i,i+np.diff(split_point[:,run])+1),1:]=output[np.arange(split_point[0,run], split_point[1,run]+1),:]
+      else:
+            save_result[np.arange(i,i+np.diff(split_point[:,run])+1),1]=output[np.arange(split_point[0,run], split_point[1,run]+1)]
+        
     
     if len(self.final_result)==0:
       self.final_result=save_result
@@ -167,15 +231,15 @@ class data_organize:
     else:
       self.final_result=np.hstack((self.final_result, save_result[:,1:2]))
       self.result_header=np.hstack((self.result_header, header))
-    print(self.result_header)
+    print('Columns in the spreadsheet: ', self.result_header)
       
-  def plot_diurnal(self, row=0):
+  def plot_diurnal(self, row=0, fig_width=16, fig_height=6):
     row=row+1
     day=np.unique(np.floor(self.final_result[:,0]))
     hr=np.unique(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))
     python_dt = day+693960-366
 
-    fig, ax = plt.subplots(figsize=(16, 6))
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     im = plt.imshow(self.final_result[:,row].reshape((len(day), len(hr))).T,
                     origin='lower',  aspect='auto', cmap=cm.jet,
                     extent=[python_dt[0], python_dt[-1], np.min(hr), np.max(hr)])
@@ -241,6 +305,7 @@ class clustering:
     pca = PCA(n_components=self.pca_percent)
     data=pca.fit_transform(input_data)  
     self.time_vec=input_data[:,0]
+    self.f=f
     input_data=input_data[:,1:]
     
     if self.method=='kmeans':
@@ -253,11 +318,12 @@ class clustering:
     scene_label = np.zeros((np.max(cluster)+1,), dtype=np.object)
     scene_label[0] = 'Frequency (Hz)'
     for c in np.arange(np.max(cluster)):
-      soundscape_scene[c] = np.percentile(input_data[cluster==c,1:], [5, 25, 50, 75, 95], axis=0).T
-      scene[0:len(f)-1,c+1]=soundscape_scene[c][:,2]
+      soundscape_scene[c] = np.percentile(input_data[cluster==c,:], [5, 25, 50, 75, 95], axis=0).T
+      scene[0:len(f),c+1]=soundscape_scene[c][:,2]
       scene_label[c+1] = 'Scene'+ str(c+1)
  
     self.cluster=cluster+1
+    self.soundscape_scene=soundscape_scene
     self.scene_feature = pd.DataFrame(scene, columns = scene_label) 
       
   def run_kmeans(self, data):
@@ -292,3 +358,19 @@ class clustering:
       #import Gdrive_upload
       Gdrive=gdrive_handle(folder_id)
       Gdrive.upload(filename)    
+      
+  def plot_cluster_feature(self, cluster_no=1, freq_scale='linear', f_range=[], fig_width=12, fig_height=6):
+    fig = plt.figure(figsize=(fig_width, fig_height))
+    plt.plot(self.f, self.soundscape_scene[cluster_no][:,2], color='blue', linewidth=4)
+    plt.plot(self.f, self.soundscape_scene[cluster_no][:,1], color='black', linestyle='--', linewidth=1)
+    plt.plot(self.f, self.soundscape_scene[cluster_no][:,3], color='black', linestyle='--', linewidth=1)
+    plt.plot(self.f, self.soundscape_scene[cluster_no][:,0], color='black', linestyle=':', linewidth=1)
+    plt.plot(self.f, self.soundscape_scene[cluster_no][:,4], color='black', linestyle=':', linewidth=1)
+    plt.xscale(freq_scale)
+    if not f_range:
+        plt.xlim(np.min(self.f), np.max(self.f))
+    else:
+        plt.xlim(np.min(f_range), np.max(f_range))
+    plt.title('Cluster '+str(cluster_no))
+    plt.xlabel('Frequency')
+    plt.ylabel('Relative strength')
