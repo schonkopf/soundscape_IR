@@ -1,3 +1,5 @@
+import numpy as np
+
 class gdrive_handle:
   def __init__(self, folder_id):
     get_ipython().system('pip install -U -q PyDrive')
