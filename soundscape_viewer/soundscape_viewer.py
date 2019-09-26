@@ -321,7 +321,7 @@ class clustering:
     scene[:,0]=f
     scene_label = np.zeros((np.max(cluster)+1,), dtype=np.object)
     scene_label[0] = 'Frequency (Hz)'
-    for c in np.arange(np.max(cluster)):
+    for c in np.arange(np.max(cluster)+1):
       soundscape_scene[c] = np.percentile(input_data[cluster==c,:], [5, 25, 50, 75, 95], axis=0).T
       scene[0:len(f),c+1]=soundscape_scene[c][:,2]
       scene_label[c+1] = 'Scene'+ str(c+1)
