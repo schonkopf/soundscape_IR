@@ -33,7 +33,8 @@ class pcnmf:
   Examples
   --------
   >>> model=pcnmf(sparseness=0, feature_length=6)
-  >>> model.unsupervised_separation(input_data=LTS.input_selection('median'), f=LTS.f, source_num=2)     
+  >>> input_data, f=LTS.input_selection('median')
+  >>> model.unsupervised_separation(input_data, f, source_num=2)       
   >>> model.save_model(filename='LTS_median_pcnmf.mat')
   >>> model.plot_pcnmf(0)
   >>> model.plot_pcnmf(1)
