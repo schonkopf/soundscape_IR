@@ -112,7 +112,7 @@ class lts_viewer:
     else:
       list=range(self.Result_median.shape[1])
     
-    temp=self.input_selection(var_name='median', prewhiten_percent=prewhiten_percent)
+    temp,f=self.input_selection(var_name='median', prewhiten_percent=prewhiten_percent)
     temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:])
     temp[:,0]=temp[:,0]+693960-366
     
@@ -127,7 +127,7 @@ class lts_viewer:
     cbar1 = fig.colorbar(im, ax=ax1)
     cbar1.set_label('Relative amplitude')
 
-    temp=self.input_selection(var_name='mean', prewhiten_percent=prewhiten_percent)
+    temp,f=self.input_selection(var_name='mean', prewhiten_percent=prewhiten_percent)
     temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:])
     temp[:,0]=temp[:,0]+693960-366
     
@@ -141,7 +141,7 @@ class lts_viewer:
     cbar2 = fig.colorbar(im2, ax=ax2)
     cbar2.set_label('Relative amplitude')
 
-    temp=self.input_selection(var_name='diff', prewhiten_percent=prewhiten_percent)
+    temp,f=self.input_selection(var_name='diff', prewhiten_percent=prewhiten_percent)
     temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:])
     temp[:,0]=temp[:,0]+693960-366
     
@@ -250,6 +250,7 @@ class data_organize:
     plt.ylabel('Hour')
     plt.xlabel('Day')
     cbar1 = plt.colorbar(im)
+    return cbar1
     
   def save_csv(self, filename='Soundscape_analysis.csv',folder_id=[]):
     df = pd.DataFrame(self.final_result, columns = self.result_header) 
