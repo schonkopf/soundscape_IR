@@ -272,7 +272,8 @@ class clustering:
   Examples
   --------
   >>> cluster_result=clustering(k=0.8, pca_percent=0.9, method='kmeans')
-  >>> cluster_result.run(input_data=LTS.input_selection('median'), f=LTS.f)
+  >>> input_data, f=LTS.input_selection('median')
+  >>> cluster_result.run(input_data, f)
   >>> cluster_result.save_cluster_feature(filename='Cluster_feature.csv')
   >>> 
   >>> analysis_result=data_organize()
