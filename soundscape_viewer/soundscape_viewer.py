@@ -375,6 +375,6 @@ class clustering:
         plt.xlim(np.min(self.f), np.max(self.f))
     else:
         plt.xlim(np.min(f_range), np.max(f_range))
-    plt.title('Cluster '+str(cluster_no))
+    plt.title('Cluster '+str(cluster_no+1))
     plt.xlabel('Frequency')
     plt.ylabel('Relative strength')
