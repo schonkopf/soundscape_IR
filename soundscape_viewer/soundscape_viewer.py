@@ -235,8 +235,7 @@ class data_organize:
       self.result_header=np.hstack((self.result_header, header))
     print('Columns in the spreadsheet: ', self.result_header)
       
-  def plot_diurnal(self, row=0, fig_width=16, fig_height=6):
-    row=row+1
+  def plot_diurnal(self, row=1, fig_width=16, fig_height=6):
     day=np.unique(np.floor(self.final_result[:,0]))
     hr=np.unique(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))
     python_dt = day+693960-366
@@ -281,7 +280,7 @@ class clustering:
   >>> analysis_result.time_fill(time_vec=cluster_result.time_vec, data=cluster_result.cluster, header='LTS_Median_Cluster')
   >>> analysis_result.save_csv(filename='Cluster_result.csv')
   >>>
-  >>> analysis_result.plot_diurnal(0)
+  >>> analysis_result.plot_diurnal(1)
   
   Parameters
   ----------
@@ -364,6 +363,7 @@ class clustering:
       Gdrive.upload(filename)    
       
   def plot_cluster_feature(self, cluster_no=1, freq_scale='linear', f_range=[], fig_width=12, fig_height=6):
+    cluster_no=cluster_no-1
     fig = plt.figure(figsize=(fig_width, fig_height))
     plt.plot(self.f, self.soundscape_scene[cluster_no][:,2], color='blue', linewidth=4)
     plt.plot(self.f, self.soundscape_scene[cluster_no][:,1], color='black', linestyle='--', linewidth=1)
