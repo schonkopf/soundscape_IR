@@ -16,8 +16,8 @@ imporve the acoustic analysis result. Finally, apply a clustering tool to
 investigate the acoustic phenology.
 
 Future works:
-1. More source separation and clustering functions will be added (Scheduled at 2019 fall).
-2. To support the interactive visualization of clustering result (scheduled at 2019 summer).
+1. Support interactive visualization of clustering result (under development).
+2. More source separation and clustering functions will be added (scheduled at 2020 winter).
 
-Demo (in Google Colab):
+Demo (in Google Colab, recent update: 2019/9/27):
 https://colab.research.google.com/drive/1Bod1SW8YtVgFWPO4w8WFGORmku-MPCL-
