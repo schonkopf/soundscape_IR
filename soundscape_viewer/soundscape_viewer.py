@@ -125,7 +125,7 @@ class lts_viewer:
     ax1.set_xlabel('Date')
     ax1.xaxis_date()
     cbar1 = fig.colorbar(im, ax=ax1)
-    cbar1.set_label('Relative amplitude')
+    cbar1.set_label('Amplitude')
 
     temp,f=self.input_selection(var_name='mean', prewhiten_percent=prewhiten_percent)
     temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:])
@@ -139,7 +139,7 @@ class lts_viewer:
     ax2.set_xlabel('Date')
     ax2.xaxis_date()
     cbar2 = fig.colorbar(im2, ax=ax2)
-    cbar2.set_label('Relative amplitude')
+    cbar2.set_label('Amplitude')
 
     temp,f=self.input_selection(var_name='diff', prewhiten_percent=prewhiten_percent)
     temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:])
@@ -154,7 +154,7 @@ class lts_viewer:
     ax3.set_xlabel('Date')
     ax3.xaxis_date()
     cbar3 = fig.colorbar(im3, ax=ax3)
-    cbar3.set_label('Relative amplitude')
+    cbar3.set_label('Amplitude')
     
     return cbar1, cbar2, cbar3;
 
@@ -377,4 +377,4 @@ class clustering:
         plt.xlim(np.min(f_range), np.max(f_range))
     plt.title('Cluster '+str(cluster_no+1))
     plt.xlabel('Frequency')
-    plt.ylabel('Relative strength')
+    plt.ylabel('Amplitude')
