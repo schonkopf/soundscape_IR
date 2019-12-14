@@ -119,6 +119,7 @@ class pcnmf:
     
     # Reconstruct individual sources
     self.pcnmf_output(input_data, self.time_vec, baseline)
+    self.original_level = 10*np.log10((10**(input_data[:,1:]/10)).sum(axis=1))
     self.time_vec=self.time_vec[:,0]
     
   def matrix_conv(self, input_data):
@@ -155,7 +156,7 @@ class pcnmf:
       if W.shape[0]>len(self.f):
         W=np.vstack((np.zeros((len(self.f),sum(self.W_cluster==source))), W)).T.reshape((1,-1))
         W=W.reshape((-1,len(self.f))).T
-      fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(16, 6))
+      fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(14, 10))
       im = ax1.imshow(W,
                       origin='lower',  aspect='auto', cmap=cm.jet,
                       extent=[0, sum(self.W_cluster==source), 
