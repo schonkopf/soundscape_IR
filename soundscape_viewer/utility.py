@@ -55,7 +55,39 @@ class save_parameters:
         self.sensitivity=sensitivity 
         self.sampling_freq=sampling_freq 
         self.channel=channel
-    
+
+class audio_visualization:
+    def __init__(self, filename, duration_read, fft_size=512, window_overlap=0.5):
+        import audioread
+        import librosa
+        import librosa.display
+        from IPython.display import Audio
+        import matplotlib.pyplot as plt
+        import os
+        
+        # Get the sampling frequency
+        with audioread.audio_open(os.getcwd()+'/'+filename) as temp:
+            sr=temp.samplerate
+            
+        # load audio data
+        x, sr = librosa.load(filename, sr=sr, duration=duration_read)
+        
+        # plot the waveform
+        plt.figure(figsize=(14, 10))
+        ax1 = plt.subplot(2, 1, 1)
+        librosa.display.waveplot(x, sr=sr)
+        
+        # run FFT and make a log-magnitude spectrogram
+        X = librosa.core.stft(x, n_fft=fft_size, hop_length=int(fft_size*(1-window_overlap)), win_length=fft_size)
+        data = librosa.amplitude_to_db(abs(X))
+        
+        # plot the spectrogram
+        plt.subplot(2, 1, 2, sharex=ax1)
+        librosa.display.specshow(data, x_axis='time', y_axis='hz',  sr=sr, hop_length=int(fft_size*(1-window_overlap)))
+        
+        # make an interactive interface for the audio 
+        Audio(x,rate=sr)
+        
 class matrix_operation:
     def __init__(self, header=[]):
         self.header=header
