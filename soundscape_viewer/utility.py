@@ -57,7 +57,7 @@ class save_parameters:
         self.channel=channel
 
 class audio_visualization:
-    def __init__(self, filename, duration_read, fft_size=512, window_overlap=0.5):
+    def __init__(self, filename, duration_read=None, fft_size=512, window_overlap=0.5):
         import audioread
         import librosa
         import librosa.display
