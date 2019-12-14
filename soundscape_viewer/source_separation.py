@@ -119,7 +119,6 @@ class pcnmf:
     
     # Reconstruct individual sources
     self.pcnmf_output(input_data, self.time_vec, baseline)
-    self.original_level = 10*np.log10((10**(input_data[:,1:]/10)).sum(axis=1))
     self.time_vec=self.time_vec[:,0]
     
   def matrix_conv(self, input_data):
@@ -130,6 +129,7 @@ class pcnmf:
     return data
 
   def pcnmf_output(self, data, time_vec, baseline=0):
+    self.original_level = 10*np.log10((10**(data.T[:,1:]/10)).sum(axis=1))
     separation=np.zeros(self.source_num, dtype=np.object)
     relative_level=np.zeros(self.source_num, dtype=np.object)
     matrix_shape=data.shape
