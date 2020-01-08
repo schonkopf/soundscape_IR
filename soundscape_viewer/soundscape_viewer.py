@@ -199,7 +199,6 @@ class lts_viewer:
       list=np.where(list==True)[0]
     else:
       list=np.arange(self.Result_median.shape[0])
-    print(list)
     input_data=input_data[:,f_list]
     
     if len(input_data)>1:
