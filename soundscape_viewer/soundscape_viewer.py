@@ -158,7 +158,7 @@ class lts_viewer:
     
     return cbar1, cbar2, cbar3;
 
-  def input_selection(self, var_name='median', f_range=[], prewhiten_percent=0, threshold=0):
+  def input_selection(self, var_name='median', begin_date=[], end_date=[], f_range=[], prewhiten_percent=0, threshold=0):
     if var_name=='median':
       input_data=self.Result_median
     elif var_name=='mean':
@@ -178,7 +178,27 @@ class lts_viewer:
     
     f=self.f[f_list]
     f_list=np.concatenate([np.array([0]), f_list+1])
-    input_data=input_data[:,f_list]
+    
+    # format of begin_data: yyyymmdd
+    if begin_date:
+      yy=int(begin_date[0:4])
+      mm=int(begin_date[4:6])
+      dd=int(begin_date[6:8])
+      date=datetime.datetime(yy,mm,dd)
+      begin_time=date.toordinal()+366
+      list=self.Result_median[:,0]>=begin_time
+      if end_date:
+            yy=int(end_date[0:4])
+            mm=int(end_date[4:6])
+            dd=int(end_date[6:8])
+            date=datetime.datetime(yy,mm,dd)
+            end_time=date.toordinal()+366+1
+      else:
+            end_time=begin_time+1
+      list=list*(self.Result_median[:,0]<end_time)
+    else:
+      list=range(self.Result_median.shape[0])
+    input_data=input_data[list,f_list]
     
     if len(input_data)>1:
       time_vec=input_data[:,0]
