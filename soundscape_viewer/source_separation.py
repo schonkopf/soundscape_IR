@@ -91,7 +91,7 @@ class pcnmf:
     input_data=input_data[:,1:].T
     baseline=input_data.min()
     input_data=input_data-baseline
-    print('Periodicity-coded NMF')
+    print('Running periodicity-coded NMF')
     
     # Modify the input data based the feature width
     data=self.matrix_conv(input_data)
@@ -120,6 +120,7 @@ class pcnmf:
     # Reconstruct individual sources
     self.pcnmf_output(input_data, self.time_vec, baseline)
     self.time_vec=self.time_vec[:,0]
+    print('Done')
     
   def matrix_conv(self, input_data):
     matrix_shape=input_data.shape
@@ -147,6 +148,45 @@ class pcnmf:
     
     self.separation=separation
     self.relative_level=relative_level
+  
+  def output_selection(self, source=1, begin_date=[], end_date=[], f_range=[]):
+    source=source-1
+    output_data=self.separation[source]
+    
+    # f_range: Hz
+    if f_range:
+        f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
+        f_list=np.where(f_list==True)[0]
+    else:
+        f_list=np.arange(len(self.f))
+    
+    f=self.f[f_list]
+    f_list=np.concatenate([np.array([0]), f_list+1])
+    
+    # format of begin_data: yyyymmdd
+    if begin_date:
+      yy=int(begin_date[0:4])
+      mm=int(begin_date[4:6])
+      dd=int(begin_date[6:8])
+      date=datetime.datetime(yy,mm,dd)
+      begin_time=date.toordinal()+366
+      list=output_data[:,0:1]>=begin_time
+      if end_date:
+            yy=int(end_date[0:4])
+            mm=int(end_date[4:6])
+            dd=int(end_date[6:8])
+            date=datetime.datetime(yy,mm,dd)
+            end_time=date.toordinal()+366+1
+      else:
+            end_time=begin_time+1
+      list=list*(output_data[:,0:1]<end_time)
+      list=np.where(list==True)[0]
+    else:
+      list=np.arange(output_data.shape[0])
+    output_data=output_data[:,f_list]
+    output_data=output_data[list,:]
+    
+    return output_data, f;
                           
   def plot_pcnmf(self, source=1):
     source=source-1
@@ -214,7 +254,7 @@ class pcnmf:
     input_data=input_data-baseline
           
     # Modify the input data based the feature width
-    print('Supervised NMF')
+    print('Running supervised NMF')
     data=self.matrix_conv(input_data)
 
     # supervised NMF
@@ -231,3 +271,4 @@ class pcnmf:
     self.H=Ht.T
     self.pcnmf_output(input_data, self.time_vec, baseline)
     self.time_vec=self.time_vec[:,0]
+    print('Done')
