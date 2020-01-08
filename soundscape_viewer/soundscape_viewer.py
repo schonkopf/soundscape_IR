@@ -235,14 +235,14 @@ class data_organize:
       self.result_header=np.hstack((self.result_header, header))
     print('Columns in the spreadsheet: ', self.result_header)
       
-  def plot_diurnal(self, row=1, fig_width=16, fig_height=6):
+  def plot_diurnal(self, row=1, vmin=None, vmax=None, fig_width=16, fig_height=6):
     day=np.unique(np.floor(self.final_result[:,0]))
     hr=np.unique(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))
     python_dt = day+693960-366
 
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     im = plt.imshow(self.final_result[:,row].reshape((len(day), len(hr))).T,
-                    origin='lower',  aspect='auto', cmap=cm.jet,
+                    vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
                     extent=[python_dt[0], python_dt[-1], np.min(hr), np.max(hr)])
     ax.xaxis_date()
     ax.set_title(self.result_header[row])
