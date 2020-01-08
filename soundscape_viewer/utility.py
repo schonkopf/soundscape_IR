@@ -188,4 +188,20 @@ class matrix_operation:
         else:
             cbar=fig.colorbar(cbar, ticks=self.percentile)
         cbar.set_label('Percentile')
+    
+    def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=12, fig_height=18):
+        temp=matrix_operation().gap_fill(time_vec=input_data[:,0], data=input_data[:,1:])
+        temp[:,0]=temp[:,0]+693960-366
+        
+        fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+        im = ax.imshow(temp[:,1:].T, vmin=None, vmax=None,
+                       origin='lower',  aspect='auto', cmap=cm.jet,
+                       extent=[np.min(temp[:,0]), np.max(temp[:,0]), f_range[0], f_range[1]])
+        ax.set_ylabel('Frequency')
+        ax.set_xlabel('Date')
+        ax.xaxis_date()
+        cbar = fig.colorbar(im, ax=ax)
+        cbar.set_label('Amplitude')
+        
+        return ax, cbar;
         
