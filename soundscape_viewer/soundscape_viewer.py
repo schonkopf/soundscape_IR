@@ -199,7 +199,7 @@ class lts_viewer:
       list=np.where(list==True)[0]
     else:
       list=np.arange(self.Result_median.shape[0])
-    input_data=input_data[:,f_list]
+    input_data=input_data[list,f_list]
     
     if len(input_data)>1:
       time_vec=input_data[:,0]
