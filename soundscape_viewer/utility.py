@@ -189,7 +189,7 @@ class matrix_operation:
             cbar=fig.colorbar(cbar, ticks=self.percentile)
         cbar.set_label('Percentile')
     
-    def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=12, fig_height=18):
+    def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6):
         import matplotlib.pyplot as plt
         import matplotlib.cm as cm
         
