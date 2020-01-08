@@ -198,7 +198,7 @@ class lts_viewer:
       list=list*(self.Result_median[:,0]<end_time)
     else:
       list=range(self.Result_median.shape[0])
-    input_data=input_data[list,f_list]
+    input_data=input_data[:,f_list]
     
     if len(input_data)>1:
       time_vec=input_data[:,0]
