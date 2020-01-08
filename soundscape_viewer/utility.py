@@ -197,7 +197,7 @@ class matrix_operation:
         temp[:,0]=temp[:,0]+693960-366
         
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-        im = ax.imshow(temp[:,1:].T, vmin=None, vmax=None,
+        im = ax.imshow(temp[:,1:].T, vmin=vmin, vmax=vmax,
                        origin='lower',  aspect='auto', cmap=cm.jet,
                        extent=[np.min(temp[:,0]), np.max(temp[:,0]), f[0], f[-1]])
         ax.set_ylabel('Frequency')
