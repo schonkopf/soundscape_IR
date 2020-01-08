@@ -190,6 +190,9 @@ class matrix_operation:
         cbar.set_label('Percentile')
     
     def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=12, fig_height=18):
+        import matplotlib.pyplot as plt
+        import matplotlib.cm as cm
+        
         temp=matrix_operation().gap_fill(time_vec=input_data[:,0], data=input_data[:,1:])
         temp[:,0]=temp[:,0]+693960-366
         
