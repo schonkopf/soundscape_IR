@@ -196,8 +196,9 @@ class lts_viewer:
       else:
             end_time=begin_time+1
       list=list*(self.Result_median[:,0]<end_time)
+      list=np.where(list==True)[0]
     else:
-      list=range(self.Result_median.shape[0])
+      list=np.arange(self.Result_median.shape[0])
     input_data=input_data[:,f_list]
     
     if len(input_data)>1:
