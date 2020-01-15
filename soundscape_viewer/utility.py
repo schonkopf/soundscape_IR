@@ -103,7 +103,7 @@ class matrix_operation:
         
         resolution=np.round((time_vec[1]-time_vec[0])*24*3600)
         n_time_vec=np.arange(np.floor(np.min(time_vec))*24*3600, 
-                             np.ceil(np.max(time_vec))*24*3600,resolution)/24/3600
+                             np.ceil(np.max(time_vec))*24*3600+resolution,resolution)/24/3600
 
         if data.ndim>1:
             save_result=np.zeros((n_time_vec.size, data.shape[1]+1))
