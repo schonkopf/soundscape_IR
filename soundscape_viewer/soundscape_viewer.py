@@ -258,9 +258,10 @@ class data_organize:
     print('Columns in the spreadsheet: ', self.result_header)
       
   def plot_diurnal(self, row=1, vmin=None, vmax=None, fig_width=16, fig_height=6):
-    day=np.unique(np.floor(self.final_result[:,0]))
     hr=np.unique(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))
-    python_dt = day+693960-366
+    no_sample=len(self.final_result[:,0])-np.remainder(len(self.final_result[:,0]), len(hr))
+    day=np.unique(np.floor(self.final_result[0:no_sample,0]))
+    python_dt=day+693960-366
 
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     im = plt.imshow(self.final_result[:,row].reshape((len(day), len(hr))).T,
