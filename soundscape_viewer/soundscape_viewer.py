@@ -325,13 +325,19 @@ class clustering:
     self.pca_percent=pca_percent
     self.method=method
 
-  def run(self, input_data, f):
-    # dimension reduction by PCA
-    pca = PCA(n_components=self.pca_percent)
-    data=pca.fit_transform(input_data)  
+  def run(self, input_data, f, standardization=[]):
     self.time_vec=input_data[:,0]
     self.f=f
     input_data=input_data[:,1:]
+
+    # standardization
+    if standardization=='max-min':
+      input_data=input_data-np.matlib.repmat(input_data.min(axis=1), input_data.shape[1],1).T
+      input_data=np.divide(input_data, np.matlib.repmat(input_data.max(axis=1), input_data.shape[1], 1).T)
+    
+    # dimension reduction by PCA
+    pca = PCA(n_components=self.pca_percent)
+    data=pca.fit_transform(input_data)
     
     if self.method=='kmeans':
       cluster=self.run_kmeans(input_data)
