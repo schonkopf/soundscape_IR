@@ -337,6 +337,7 @@ class clustering:
       input_data=np.divide(input_data, np.matlib.repmat(input_data.max(axis=1), input_data.shape[1], 1).T)
     
     # dimension reduction by PCA
+    input_data[np.isnan(input_data)]=0
     pca = PCA(n_components=self.pca_percent)
     data=pca.fit_transform(input_data)
     
