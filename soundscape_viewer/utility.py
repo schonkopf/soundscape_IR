@@ -57,7 +57,7 @@ class save_parameters:
         self.channel=channel
 
 class audio_visualization:
-    def __init__(self, filename, duration_read=None, fft_size=512, window_overlap=0.5):
+    def __init__(self, filename, offset_read=0, duration_read=None, fft_size=512, window_overlap=0.5):
         import audioread
         import librosa
         import librosa.display
@@ -70,7 +70,7 @@ class audio_visualization:
             sr=temp.samplerate
             
         # load audio data
-        x, sr = librosa.load(filename, sr=sr, duration=duration_read)
+        x, sr = librosa.load(filename, sr=sr, offset=offset_read, duration=duration_read)
         
         # plot the waveform
         plt.figure(figsize=(14, 10))
