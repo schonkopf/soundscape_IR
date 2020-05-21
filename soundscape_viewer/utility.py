@@ -135,9 +135,14 @@ class matrix_operation:
 
         if len(hour_selection)==1:
             hour_selection=np.concatenate((np.array(hour_selection), np.array(hour_selection)+1))
+        
         hour=24*(time_vec-np.floor(time_vec))
         if len(hour_selection)>1:
-            list_hour=(hour>=np.min(hour_selection))*(hour<np.max(hour_selection))
+            if hour_selection[1]>hour_selection[0]:
+                list_hour=(hour>=np.min(hour_selection))*(hour<np.max(hour_selection))
+            if hour_selection[1]<hour_selection[0]:
+                hour=(hour<hour_selection[1])*24+hour
+                list_hour=(hour>=hour_selection[0])
         else:
             list_hour=hour>0
             
@@ -146,7 +151,6 @@ class matrix_operation:
         
         month=np.array(time_vec-693960-2)
         month=pd.to_datetime(month, unit='D',origin=pd.Timestamp('1900-01-01')).month
-        
         if len(month_selection) > 1:
             if(month_selection[0] < month_selection[1]):
                 list_month=(month >= np.min(month_selection))*(month < np.max(month_selection))
