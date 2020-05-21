@@ -143,10 +143,15 @@ class matrix_operation:
             
         if len(month_selection)==1:
             month_selection=np.concatenate((np.array(month_selection), np.array(month_selection)+1))
+        
         month=np.array(time_vec-693960-2)
         month=pd.to_datetime(month, unit='D',origin=pd.Timestamp('1900-01-01')).month
-        if len(month_selection)>1:
-            list_month=(month>=np.min(month_selection))*(month<np.max(month_selection))
+        
+        if len(month_selection) > 1:
+            if(month_selection[0] < month_selection[1]):
+                list_month=(month >= np.min(month_selection))*(month < np.max(month_selection))
+            if(month_selection[0] > month_selection[1]):
+                list_month = (month >= month_selection[0]) + (month < month_selection[1])
         else:
             list_month=month>0
             
