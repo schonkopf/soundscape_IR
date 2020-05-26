@@ -203,18 +203,13 @@ class matrix_operation:
             cbar=fig.colorbar(cbar, ticks=self.percentile)
         cbar.set_label('Percentile')
     
-    def plot_lts(self, input_data, f, vmin=None, vmax=None, gap_white=[], fig_width=18, fig_height=6):
+    def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6):
         import matplotlib.pyplot as plt
         import matplotlib.cm as cm
         import matplotlib.colors as co
         
         temp=matrix_operation().gap_fill(time_vec=input_data[:,0], data=input_data[:,1:], tail=[])
         temp[:,0]=temp[:,0]+693960-366
-        
-        cmap = cm.jet(np.arange(256))
-        if gap_white:
-            cmap[0,:]=1
-        cmap = co.ListedColormap(cmap, name='myColorMap', N=cmap.shape[0])
         
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
         im = ax.imshow(temp[:,1:].T, vmin=vmin, vmax=vmax,
