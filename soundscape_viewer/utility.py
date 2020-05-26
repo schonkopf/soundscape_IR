@@ -206,7 +206,7 @@ class matrix_operation:
         import matplotlib.pyplot as plt
         import matplotlib.cm as cm
         
-        temp=matrix_operation().gap_fill(time_vec=input_data[:,0], data=input_data[:,1:])
+        temp=matrix_operation().gap_fill(time_vec=input_data[:,0], data=input_data[:,1:], tail=[])
         temp[:,0]=temp[:,0]+693960-366
         
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
