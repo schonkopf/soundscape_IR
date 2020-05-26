@@ -92,28 +92,40 @@ class lts_viewer:
         f_list=np.arange(len(self.f))
         f_range=[np.min(self.f), np.max(self.f)]
     
-    # format of begin_data: yyyymmdd
+    # format of begin_date: yyyymmdd or yyyymmdd_HHMMSS
     if begin_date:
       yy=int(begin_date[0:4])
       mm=int(begin_date[4:6])
       dd=int(begin_date[6:8])
+      frac=0
+      if len(begin_date)>8:
+        HH=int(begin_date[9:11])
+        MM=int(begin_date[11:13])
+        SS=int(begin_date[13:15])
+        frac=((SS/60+MM)/60+HH)/24
       date=datetime.datetime(yy,mm,dd)
-      begin_time=date.toordinal()+366
+      begin_time=date.toordinal()+366+frac
       list=self.Result_median[:,0]>=begin_time
       if end_date:
-            yy=int(end_date[0:4])
-            mm=int(end_date[4:6])
-            dd=int(end_date[6:8])
-            date=datetime.datetime(yy,mm,dd)
-            end_time=date.toordinal()+366+1
+        yy=int(end_date[0:4])
+        mm=int(end_date[4:6])
+        dd=int(end_date[6:8])
+        frac=0
+        if len(end_date)>8:
+          HH=int(end_date[9:11])
+          MM=int(end_date[11:13])
+          SS=int(end_date[13:15])
+          frac=((SS/60+MM)/60+HH)/24
+        date=datetime.datetime(yy,mm,dd)
+        end_time=date.toordinal()+366+frac
       else:
-            end_time=begin_time+1
+        end_time=begin_time+1
       list=list*(self.Result_median[:,0]<end_time)
     else:
       list=range(self.Result_median.shape[0])
     
     temp,f=self.input_selection(var_name='median', prewhiten_percent=prewhiten_percent)
-    temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:])
+    temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
     fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, figsize=(fig_width, fig_height))
@@ -128,7 +140,7 @@ class lts_viewer:
     cbar1.set_label('Amplitude')
 
     temp,f=self.input_selection(var_name='mean', prewhiten_percent=prewhiten_percent)
-    temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:])
+    temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
     im2 = ax2.imshow(temp[:,f_list+1].T,
@@ -142,7 +154,7 @@ class lts_viewer:
     cbar2.set_label('Amplitude')
 
     temp,f=self.input_selection(var_name='diff', prewhiten_percent=prewhiten_percent)
-    temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:])
+    temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
     im3 = ax3.imshow(temp[:,f_list+1].T,
@@ -179,20 +191,32 @@ class lts_viewer:
     f=self.f[f_list]
     f_list=np.concatenate([np.array([0]), f_list+1])
     
-    # format of begin_data: yyyymmdd
+    # format of begin_date: yyyymmdd or yyyymmdd_HHMMSS
     if begin_date:
       yy=int(begin_date[0:4])
       mm=int(begin_date[4:6])
       dd=int(begin_date[6:8])
+      frac=0
+      if len(begin_date)>8:
+        HH=int(begin_date[9:11])
+        MM=int(begin_date[11:13])
+        SS=int(begin_date[13:15])
+        frac=((SS/60+MM)/60+HH)/24
       date=datetime.datetime(yy,mm,dd)
-      begin_time=date.toordinal()+366
+      begin_time=date.toordinal()+366+frac
       list=self.Result_median[:,0:1]>=begin_time
       if end_date:
             yy=int(end_date[0:4])
             mm=int(end_date[4:6])
             dd=int(end_date[6:8])
+            frac=0
+            if len(end_date)>8:
+              HH=int(end_date[9:11])
+              MM=int(end_date[11:13])
+              SS=int(end_date[13:15])
+              frac=((SS/60+MM)/60+HH)/24
             date=datetime.datetime(yy,mm,dd)
-            end_time=date.toordinal()+366+1
+            end_time=date.toordinal()+366+frac
       else:
             end_time=begin_time+1
       list=list*(self.Result_median[:,0:1]<end_time)
