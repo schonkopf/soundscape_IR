@@ -113,6 +113,7 @@ class matrix_operation:
             save_result=np.zeros((n_time_vec.size, data.shape[1]+1))
         else:
             save_result=np.zeros((n_time_vec.size, 2))
+        save_result[:] = np.nan
 
         save_result[:,0]=n_time_vec-693960
         segment_list=np.round(np.diff(time_vec*24*3600)/resolution)
@@ -202,16 +203,22 @@ class matrix_operation:
             cbar=fig.colorbar(cbar, ticks=self.percentile)
         cbar.set_label('Percentile')
     
-    def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6):
+    def plot_lts(self, input_data, f, vmin=None, vmax=None, gap_white=[], fig_width=18, fig_height=6):
         import matplotlib.pyplot as plt
         import matplotlib.cm as cm
+        import matplotlib.colors as co
         
         temp=matrix_operation().gap_fill(time_vec=input_data[:,0], data=input_data[:,1:], tail=[])
         temp[:,0]=temp[:,0]+693960-366
         
+        cmap = cm.jet(np.arange(256))
+        if gap_white:
+            cmap[0,:]=1
+        cmap = co.ListedColormap(cmap, name='myColorMap', N=cmap.shape[0])
+        
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
         im = ax.imshow(temp[:,1:].T, vmin=vmin, vmax=vmax,
-                       origin='lower',  aspect='auto', cmap=cm.jet,
+                       origin='lower',  aspect='auto', cmap=cmap,
                        extent=[np.min(temp[:,0]), np.max(temp[:,0]), f[0], f[-1]])
         ax.set_ylabel('Frequency')
         ax.set_xlabel('Date')
