@@ -113,7 +113,7 @@ class matrix_operation:
             save_result=np.zeros((n_time_vec.size, data.shape[1]+1))
         else:
             save_result=np.zeros((n_time_vec.size, 2))
-        save_result[:] = np.nan
+        #save_result[:] = np.nan
 
         save_result[:,0]=n_time_vec-693960
         segment_list=np.round(np.diff(time_vec*24*3600)/resolution)
