@@ -201,7 +201,7 @@ class pcnmf:
       im = ax1.imshow(W,
                       origin='lower',  aspect='auto', cmap=cm.jet,
                       extent=[0, sum(self.W_cluster==source), 
-                              np.min(self.f), np.max(self.f)])
+                              np.min(self.f), np.max(self.f)], interpolation='none')
 
       ax1.set_title('Features')
       ax1.set_ylabel('Frequency')
@@ -211,7 +211,7 @@ class pcnmf:
 
       im2 = ax2.imshow(data[:,1:].T,
                       origin='lower',  aspect='auto', cmap=cm.jet,
-                      extent=[0, data.shape[0], np.min(self.f), np.max(self.f)])
+                      extent=[0, data.shape[0], np.min(self.f), np.max(self.f)], interpolation='none')
 
       ax2.set_title('Separation result')
       ax2.set_ylabel('Frequency')
