@@ -131,7 +131,7 @@ class lts_viewer:
     fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, figsize=(fig_width, fig_height))
     im = ax1.imshow(temp[:,f_list+1].T,
                     origin='lower',  aspect='auto', cmap=cm.jet,
-                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f_range[0], f_range[1]])
+                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f_range[0], f_range[1]], interpolation='none')
     ax1.set_title('Median-based LTS')
     ax1.set_ylabel('Frequency')
     ax1.set_xlabel('Date')
@@ -145,7 +145,7 @@ class lts_viewer:
     
     im2 = ax2.imshow(temp[:,f_list+1].T,
                     origin='lower',  aspect='auto', cmap=cm.jet,
-                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f_range[0], f_range[1]])
+                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f_range[0], f_range[1]], interpolation='none')
     ax2.set_title('Mean-based LTS')
     ax2.set_ylabel('Frequency')
     ax2.set_xlabel('Date')
@@ -159,7 +159,7 @@ class lts_viewer:
     
     im3 = ax3.imshow(temp[:,f_list+1].T,
                     origin='lower',  aspect='auto', cmap=cm.jet,
-                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f_range[0], f_range[1]])
+                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f_range[0], f_range[1]], interpolation='none')
 
     ax3.set_title('Difference-based LTS')
     ax3.set_ylabel('Frequency')
@@ -290,7 +290,7 @@ class data_organize:
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     im = plt.imshow(self.final_result[:,row].reshape((len(day), len(hr))).T,
                     vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
-                    extent=[python_dt[0], python_dt[-1], np.min(hr), np.max(hr)])
+                    extent=[python_dt[0], python_dt[-1], np.min(hr), np.max(hr)], interpolation='none')
     ax.xaxis_date()
     ax.set_title(self.result_header[row])
     plt.ylabel('Hour')
