@@ -247,4 +247,11 @@ class matrix_operation:
         cbar.set_label('Amplitude')
         
         return ax, cbar;
-        
+    
+    def prewhiten(input_data, prewhiten_percent, axis):
+        ambient = np.percentile(input_data, prewhiten_percent, axis=axis)
+        if axis==0:
+            input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1))
+        elif axis==1:
+            input_data = np.subtract(input_data, 1, np.matlib.repmat(ambient, input_data.shape[axis]))
+        return input_data
