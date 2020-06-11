@@ -84,7 +84,7 @@ class lts_viewer:
       os.remove(infilename)
       
   def plot_lts(self, fig_width=12, fig_height=18):
-    temp,f=self.input_selection(var_name='median', prewhiten_percent=prewhiten_percent)
+    temp,f=self.input_selection(var_name='median')
     temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
@@ -99,7 +99,7 @@ class lts_viewer:
     cbar1 = fig.colorbar(im, ax=ax1)
     cbar1.set_label('PSD')
 
-    temp,f=self.input_selection(var_name='mean', prewhiten_percent=prewhiten_percent)
+    temp,f=self.input_selection(var_name='mean')
     temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
@@ -113,7 +113,7 @@ class lts_viewer:
     cbar2 = fig.colorbar(im2, ax=ax2)
     cbar2.set_label('PSD')
 
-    temp,f=self.input_selection(var_name='diff', prewhiten_percent=prewhiten_percent)
+    temp,f=self.input_selection(var_name='diff')
     temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
