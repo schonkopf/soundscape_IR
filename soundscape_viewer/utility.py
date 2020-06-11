@@ -57,7 +57,7 @@ class save_parameters:
         self.channel=channel
 
 class audio_visualization:
-    def __init__(self, filename, offset_read=0, duration_read=None, fft_size=512, window_overlap=0.5, sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None):
+    def __init__(self, filename, offset_read=0, duration_read=None, fft_size=512, window_overlap=0.5, sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0):
         import audioread
         import librosa
         import matplotlib.pyplot as plt
@@ -96,6 +96,8 @@ class audio_visualization:
                                        noverlap=window_overlap, nfft=fft_size, 
                                        return_onesided=True, mode='psd')
         data = 10*np.log10(P/np.power(P_ref,2))-sensitivity
+        if prewhiten_percent>0:
+          data=matrix_operation.prewhiten(data, prewhiten_percent, 1)
         t=t+offset_read
         
         # plot the spectrogram
@@ -249,9 +251,10 @@ class matrix_operation:
         return ax, cbar;
     
     def prewhiten(input_data, prewhiten_percent, axis):
+        import numpy.matlib
         ambient = np.percentile(input_data, prewhiten_percent, axis=axis)
         if axis==0:
             input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1))
         elif axis==1:
-            input_data = np.subtract(input_data, 1, np.matlib.repmat(ambient, input_data.shape[axis]))
+            input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1).T)
         return input_data
