@@ -57,13 +57,18 @@ class save_parameters:
         self.channel=channel
 
 class audio_visualization:
-    def __init__(self, filename, offset_read=0, duration_read=None, fft_size=512, window_overlap=0.5):
+    def __init__(self, filename, offset_read=0, duration_read=None, fft_size=512, window_overlap=0.5, sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None):
         import audioread
         import librosa
-        import librosa.display
-        from IPython.display import Audio
         import matplotlib.pyplot as plt
+        import matplotlib.cm as cm
         import os
+        import scipy.signal
+
+        if environment=='wat':
+          P_ref=1
+        elif environment=='air':
+          P_ref=20
         
         # Get the sampling frequency
         with audioread.audio_open(os.getcwd()+'/'+filename) as temp:
@@ -73,20 +78,40 @@ class audio_visualization:
         x, sr = librosa.load(filename, sr=sr, offset=offset_read, duration=duration_read)
         
         # plot the waveform
-        plt.figure(figsize=(14, 10))
-        ax1 = plt.subplot(2, 1, 1)
-        librosa.display.waveplot(x, sr=sr)
+        if plot_type=='Both':
+          fig, (ax1, ax2) = plt.subplots(nrows=2,figsize=(8, 12))
+        elif plot_type=='Waveform':
+          fig, ax1 = plt.subplots(figsize=(8, 6))
+        elif plot_type=='Spectrogram':
+          fig, ax2 = plt.subplots(figsize=(8, 6))
+        
+        if plot_type=='Both' or plot_type=='Waveform':
+          ax1.plot(offset_read+np.arange(1,len(x)+1)/sr, x)
+          ax1.set_ylabel('Amplitude')
+          ax1.set_xlabel('Time')
+          ax1.set_xlim(offset_read, offset_read+len(x)/sr)
         
         # run FFT and make a log-magnitude spectrogram
-        X = librosa.core.stft(x, n_fft=fft_size, hop_length=int(fft_size*(1-window_overlap)), win_length=fft_size)
-        data = librosa.amplitude_to_db(abs(X))
+        f,t,P = scipy.signal.spectrogram(x, fs=sr, window=('hamming'), nperseg=None, 
+                                       noverlap=window_overlap, nfft=fft_size, 
+                                       return_onesided=True, mode='psd')
+        data = 10*np.log10(P/np.power(P_ref,2))-sensitivity
+        t=t+offset_read
         
         # plot the spectrogram
-        plt.subplot(2, 1, 2, sharex=ax1)
-        librosa.display.specshow(data, x_axis='time', y_axis='hz',  sr=sr, hop_length=int(fft_size*(1-window_overlap)))
-        
-        # make an interactive interface for the audio 
-        Audio(x,rate=sr)
+        if plot_type=='Both' or plot_type=='Spectrogram':
+          im = ax2.imshow(data, vmin=vmin, vmax=vmax,
+                       origin='lower',  aspect='auto', cmap=cm.jet,
+                       extent=[t[0], t[-1], f[0], f[-1]], interpolation='none')
+          ax2.set_ylabel('Frequency')
+          ax2.set_xlabel('Time')
+          cbar = fig.colorbar(im, ax=ax2)
+          cbar.set_label('PSD')
+
+        self.x=x
+        self.sr=sr
+        self.data=np.hstack((t[:,None],data.T))
+        self.f=f
         
 class matrix_operation:
     def __init__(self, header=[]):
