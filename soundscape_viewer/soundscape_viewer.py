@@ -83,90 +83,50 @@ class lts_viewer:
       self.assemble(data, time_sort)
       os.remove(infilename)
       
-  def plot_lts(self, prewhiten_percent=0, begin_date=[], end_date=[], f_range=[], fig_width=12, fig_height=18):
-    # f_range: Hz
-    if f_range:
-        f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
-        f_list=np.where(f_list==True)[0]
-    else:
-        f_list=np.arange(len(self.f))
-        f_range=[np.min(self.f), np.max(self.f)]
-    
-    # format of begin_date: yyyymmdd or yyyymmdd_HHMMSS
-    if begin_date:
-      yy=int(begin_date[0:4])
-      mm=int(begin_date[4:6])
-      dd=int(begin_date[6:8])
-      frac=0
-      if len(begin_date)>8:
-        HH=int(begin_date[9:11])
-        MM=int(begin_date[11:13])
-        SS=int(begin_date[13:15])
-        frac=((SS/60+MM)/60+HH)/24
-      date=datetime.datetime(yy,mm,dd)
-      begin_time=date.toordinal()+366+frac
-      list=self.Result_median[:,0]>=begin_time
-      if end_date:
-        yy=int(end_date[0:4])
-        mm=int(end_date[4:6])
-        dd=int(end_date[6:8])
-        frac=0
-        if len(end_date)>8:
-          HH=int(end_date[9:11])
-          MM=int(end_date[11:13])
-          SS=int(end_date[13:15])
-          frac=((SS/60+MM)/60+HH)/24
-        date=datetime.datetime(yy,mm,dd)
-        end_time=date.toordinal()+366+frac
-      else:
-        end_time=begin_time+1
-      list=list*(self.Result_median[:,0]<end_time)
-    else:
-      list=range(self.Result_median.shape[0])
-    
+  def plot_lts(self, fig_width=12, fig_height=18):
     temp,f=self.input_selection(var_name='median', prewhiten_percent=prewhiten_percent)
-    temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:], tail=[])
+    temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
     fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, figsize=(fig_width, fig_height))
-    im = ax1.imshow(temp[:,f_list+1].T,
+    im = ax1.imshow(temp.T,
                     origin='lower',  aspect='auto', cmap=cm.jet,
-                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f_range[0], f_range[1]], interpolation='none')
+                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f[0], f[-1]], interpolation='none')
     ax1.set_title('Median-based LTS')
     ax1.set_ylabel('Frequency')
     ax1.set_xlabel('Date')
     ax1.xaxis_date()
     cbar1 = fig.colorbar(im, ax=ax1)
-    cbar1.set_label('Amplitude')
+    cbar1.set_label('PSD')
 
     temp,f=self.input_selection(var_name='mean', prewhiten_percent=prewhiten_percent)
-    temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:], tail=[])
+    temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
-    im2 = ax2.imshow(temp[:,f_list+1].T,
+    im2 = ax2.imshow(temp.T,
                     origin='lower',  aspect='auto', cmap=cm.jet,
-                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f_range[0], f_range[1]], interpolation='none')
+                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f[0], f[-1]], interpolation='none')
     ax2.set_title('Mean-based LTS')
     ax2.set_ylabel('Frequency')
     ax2.set_xlabel('Date')
     ax2.xaxis_date()
     cbar2 = fig.colorbar(im2, ax=ax2)
-    cbar2.set_label('Amplitude')
+    cbar2.set_label('PSD')
 
     temp,f=self.input_selection(var_name='diff', prewhiten_percent=prewhiten_percent)
-    temp=matrix_operation().gap_fill(time_vec=temp[list,0], data=temp[list,1:], tail=[])
+    temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
-    im3 = ax3.imshow(temp[:,f_list+1].T,
+    im3 = ax3.imshow(temp.T,
                     origin='lower',  aspect='auto', cmap=cm.jet,
-                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f_range[0], f_range[1]], interpolation='none')
+                    extent=[np.min(temp[:,0]), np.max(temp[:,0]), f[0], f[-1]], interpolation='none')
 
     ax3.set_title('Difference-based LTS')
     ax3.set_ylabel('Frequency')
     ax3.set_xlabel('Date')
     ax3.xaxis_date()
     cbar3 = fig.colorbar(im3, ax=ax3)
-    cbar3.set_label('Amplitude')
+    cbar3.set_label('SNR')
     
     return cbar1, cbar2, cbar3;
 
@@ -228,12 +188,10 @@ class lts_viewer:
     
     if len(input_data)>1:
       time_vec=input_data[:,0]
-      if np.round(prewhiten_percent) > 0:
-        matrix_shape=input_data.shape
-        ambient = np.percentile(input_data, prewhiten_percent, axis=0)
-        input_data = np.subtract(input_data, np.matlib.repmat(ambient, matrix_shape[0], 1))
-        input_data[input_data<threshold]=threshold
-        input_data[:,0]=time_vec
+      if prewhiten_percent>0:
+          input_data=matrix_operation.prewhiten(input_data, prewhiten_percent, 0)
+          input_data[input_data<threshold]=threshold
+          input_data[:,0]=time_vec
       return input_data, f;
     
 class data_organize:
