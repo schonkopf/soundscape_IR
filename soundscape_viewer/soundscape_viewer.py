@@ -89,7 +89,7 @@ class lts_viewer:
     temp[:,0]=temp[:,0]+693960-366
     
     fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, figsize=(fig_width, fig_height))
-    im = ax1.imshow(temp.T,
+    im = ax1.imshow(temp.T, vmin=np.min(temp[:,1:]), vmax=np.max(temp[:,1:]),
                     origin='lower',  aspect='auto', cmap=cm.jet,
                     extent=[np.min(temp[:,0]), np.max(temp[:,0]), f[0], f[-1]], interpolation='none')
     ax1.set_title('Median-based LTS')
@@ -103,7 +103,7 @@ class lts_viewer:
     temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
-    im2 = ax2.imshow(temp.T,
+    im2 = ax2.imshow(temp.T, vmin=np.min(temp[:,1:]), vmax=np.max(temp[:,1:]),
                     origin='lower',  aspect='auto', cmap=cm.jet,
                     extent=[np.min(temp[:,0]), np.max(temp[:,0]), f[0], f[-1]], interpolation='none')
     ax2.set_title('Mean-based LTS')
@@ -117,7 +117,7 @@ class lts_viewer:
     temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
-    im3 = ax3.imshow(temp.T,
+    im3 = ax3.imshow(temp.T, vmin=np.min(temp[:,1:]), vmax=np.max(temp[:,1:]),
                     origin='lower',  aspect='auto', cmap=cm.jet,
                     extent=[np.min(temp[:,0]), np.max(temp[:,0]), f[0], f[-1]], interpolation='none')
 
