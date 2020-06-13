@@ -200,16 +200,18 @@ class data_organize:
     self.result_header=np.array([])
     print('A new spreadsheet has been created.')
       
-  def time_fill(self, time_vec, data, header):
+  def time_fill(self, time_vec, data, header, time_resolution=None):
     # fill the time series gap
     temp = np.argsort(time_vec)
     time_vec=time_vec[temp]
+    if time_resolution==None:
+      time_resolution=time_vec[1]-time_vec[0]
     
     if data.ndim>1:
         output=data[temp,:]
     else:
         output=data[temp]
-    resolution=np.round((time_vec[1]-time_vec[0])*24*3600)
+    resolution=np.round(time_resolution*24*3600)
     n_time_vec=np.arange(np.floor(np.min(time_vec))*24*3600, 
                          np.ceil(np.max(time_vec))*24*3600,resolution)/24/3600
 
@@ -239,6 +241,11 @@ class data_organize:
       self.result_header=np.hstack((self.result_header, header))
     print('Columns in the spreadsheet: ', self.result_header)
       
+  def remove_column(self, col):
+    self.final_result=np.delete(self.final_result, col, 1)
+    self.result_header=np.delete(self.result_header, col)
+    print('Columns in the spreadsheet: ', self.result_header)
+    
   def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6):
     hr=np.unique(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))
     no_sample=len(self.final_result[:,0])-np.remainder(len(self.final_result[:,0]), len(hr))
