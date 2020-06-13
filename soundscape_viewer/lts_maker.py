@@ -71,27 +71,19 @@ class lts_maker:
       Default: 0
   
   """
-  def __init__(self, sensitivity=0, channel=1, environment='wat', FFT_size=512, window_overlap=0, initial_skip=0):
+  def __init__(self, sensitivity=0, channel=1, environment='wat', FFT_size=512, window_overlap=0, initial_skip=0, time_resolution=None):
     if environment=='wat':
         P_ref=1
     elif environment=='air':
         P_ref=20
-      
-    print('Please review the following parameters:')
-    print('Sensitivity (dB re 1 V/Pa): %s' % (sensitivity))
-    print('Recording channel: %s' % (channel))
-    print('Recording environment: %s' % (environment))
-    print('Reference: %s' % (P_ref))
-    print('FFT size: %s' % (FFT_size))
-    print('Window overlap (%%): %s' % (window_overlap))
-    print('Initial seconds to skip: %s' % (initial_skip))
         
     self.sen = sensitivity
     self.channel = channel
     self.pref = P_ref 
     self.FFT_size = FFT_size
     self.overlap=window_overlap
-    self.avoid_duration=initial_skip
+    self.skip_duration=initial_skip
+    self.time_resolution=time_resolution
  
   def filename_check(self, dateformat='yyyymmdd_HHMMSS', initial=[], year_initial=2000):
     """
@@ -120,7 +112,8 @@ class lts_maker:
     self.MM_pos = np.array([dateformat.find('MM')+idx, dateformat.find('MM')+2+idx])
     self.SS_pos = np.array([dateformat.find('SS')+idx, dateformat.find('SS')+2+idx])
       
-    print(filename)
+    print('Example: ', filename)
+    print('Please review whether the date and time are retrieved correctly.')
     print('Year:', self.yy_pos[2]+int(filename[self.yy_pos[0]:self.yy_pos[1]]))
     print('Month:', filename[self.mm_pos[0]:self.mm_pos[1]])
     print('Day:', filename[self.dd_pos[0]:self.dd_pos[1]])
@@ -187,7 +180,21 @@ class lts_maker:
       
     for file in range(file_begin, file_end):
       print('\r', end='')
-      print('Total ', len(self.audioname), 'files, now retrieving file #', file, ':', self.audioname[file], flush=True, end='')
+      print('Total ', len(self.audioname), ' files, now analyzing file #', file, ': ', self.audioname[file], flush=True, end='')
+      
+      # Generate MATLAB time format
+      infilename=self.audioname[file]
+      yy = int(infilename[self.yy_pos[0]:self.yy_pos[1]])
+      if self.yy_pos.size == 3:
+          yy = yy+self.yy_pos[2]
+      mm = int(infilename[self.mm_pos[0]:self.mm_pos[1]])
+      dd = int(infilename[self.dd_pos[0]:self.dd_pos[1]])
+      HH = int(infilename[self.HH_pos[0]:self.HH_pos[1]])
+      MM = int(infilename[self.MM_pos[0]:self.MM_pos[1]])
+      SS = int(infilename[self.SS_pos[0]:self.SS_pos[1]])
+      date=datetime.datetime(yy,mm,dd)
+      time_vec=date.toordinal()+HH/24+MM/(24*60)+SS/(24*3600)+366 
+
       if self.cloud==1:
         urllib.request.urlretrieve(self.link[file], self.audioname[file])
         path='.'
@@ -202,39 +209,40 @@ class lts_maker:
         with audioread.audio_open(path+'/'+self.audioname[file]) as temp:
           sf=temp.samplerate
       x, sf = librosa.load(path+'/'+self.audioname[file], sr=sf)
-      x=x[self.avoid_duration*sf:]
-      f,t,P = scipy.signal.spectrogram(x, fs=sf, window=('hamming'), nperseg=None, 
+      
+      if self.time_resolution:
+        total_segment=np.ceil(len(x)/sf/self.time_resolution)
+      else:
+        total_segment=1
+        self.time_resolution=np.ceil(len(x)/sf)
+
+      for segment_run in range(int(total_segment)):
+        read_interval=[self.time_resolution*segment_run*sf, self.time_resolution*(segment_run+1)*sf]
+        if segment_run==0:
+          read_interval[0]=self.skip_duration*sf
+        if read_interval[1]>len(x):
+          read_interval[1]=len(x)
+        
+        f,t,P = scipy.signal.spectrogram(x[read_interval[0]:read_interval[1]], fs=sf, window=('hamming'), nperseg=None, 
                                        noverlap=self.overlap, nfft=self.FFT_size, 
                                        return_onesided=True, mode='psd')
-      P = 10*np.log10(P/np.power(self.pref,2))-self.sen
+        P = P/np.power(self.pref,2)
+                
+        if Result_median.size == 0:
+          Result_median=np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.median(P,axis=1))-self.sen))
+          Result_mean=np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.mean(P,axis=1))-self.sen))
+        else:
+          Result_median=np.vstack((np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),
+                                              10*np.log10(np.median(P,axis=1))-self.sen)), Result_median))
+          Result_mean=np.vstack((np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.mean(P,axis=1))-self.sen)), Result_mean))
+      
       if self.cloud>=1:
         os.remove(self.audioname[file])
-
-      infilename=self.audioname[file]
-      yy = int(infilename[self.yy_pos[0]:self.yy_pos[1]])
-      if self.yy_pos.size == 3:
-          yy = yy+self.yy_pos[2]
-      mm = int(infilename[self.mm_pos[0]:self.mm_pos[1]])
-      dd = int(infilename[self.dd_pos[0]:self.dd_pos[1]])
-      HH = int(infilename[self.HH_pos[0]:self.HH_pos[1]])
-      MM = int(infilename[self.MM_pos[0]:self.MM_pos[1]])
-      SS = int(infilename[self.SS_pos[0]:self.SS_pos[1]])
-
-      # Generate MATLAB time format
-      date=datetime.datetime(yy,mm,dd)
-      time_vec=date.toordinal()+HH/24+MM/(24*60)+SS/(24*3600)+366 
-
-      if Result_median.size == 0:
-          Result_median=np.hstack((np.array(time_vec),10*np.log10(np.median(np.power(10,np.divide(P,10)),axis=1))))
-          Result_mean=np.hstack((np.array(time_vec),10*np.log10(np.mean(np.power(10,np.divide(P,10)),axis=1))))
-      else:
-          Result_median=np.vstack((np.hstack((np.array(time_vec),
-                                              10*np.log10(np.median(np.power(10,np.divide(P,10)),axis=1)))), Result_median))
-          Result_mean=np.vstack((np.hstack((np.array(time_vec),10*np.log10(np.mean(np.power(10,np.divide(P,10)),axis=1)))), Result_mean))
     
+    temp = np.argsort(Result_median[:,0])
     Result=save_parameters()
     Parameters=save_parameters()
-    Result.LTS_Result(Result_median, Result_mean, f, self.link)
+    Result.LTS_Result(Result_median[temp,:], Result_mean[temp,:], f, self.link)
     Parameters.LTS_Parameters(self.FFT_size, self.overlap, self.sen, sf, self.channel)
     scipy.io.savemat(save_filename, {'Result':Result,'Parameters':Parameters})
     print('Successifully save to '+save_filename)
