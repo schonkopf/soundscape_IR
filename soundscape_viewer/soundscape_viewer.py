@@ -239,18 +239,18 @@ class data_organize:
       self.result_header=np.hstack((self.result_header, header))
     print('Columns in the spreadsheet: ', self.result_header)
       
-  def plot_diurnal(self, row=1, vmin=None, vmax=None, fig_width=16, fig_height=6):
+  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6):
     hr=np.unique(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))
     no_sample=len(self.final_result[:,0])-np.remainder(len(self.final_result[:,0]), len(hr))
     day=np.unique(np.floor(self.final_result[0:no_sample,0]))
     python_dt=day+693960-366
 
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-    im = plt.imshow(self.final_result[:,row].reshape((len(day), len(hr))).T,
+    im = plt.imshow(self.final_result[:,col].reshape((len(day), len(hr))).T,
                     vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
                     extent=[python_dt[0], python_dt[-1], np.min(hr), np.max(hr)], interpolation='none')
     ax.xaxis_date()
-    ax.set_title(self.result_header[row])
+    ax.set_title(self.result_header[col])
     plt.ylabel('Hour')
     plt.xlabel('Day')
     cbar1 = plt.colorbar(im)
