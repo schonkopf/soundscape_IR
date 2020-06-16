@@ -230,7 +230,7 @@ class matrix_operation:
             cbar=fig.colorbar(cbar, ticks=self.percentile)
         cbar.set_label('Percentile')
     
-    def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6):
+    def plot_lts(input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6):
         import matplotlib.pyplot as plt
         import matplotlib.cm as cm
         import matplotlib.colors as co
