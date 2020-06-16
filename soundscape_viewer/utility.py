@@ -105,7 +105,7 @@ class audio_visualization:
             else:
               data=np.vstack((data, 10*np.log10(np.mean(P,axis=1))-sensitivity))
           data=data.T
-          t=np.arange(time_resolution-time_resolution/2, time_resolution*segment_run, time_resolution)
+          t=np.arange(time_resolution-time_resolution/2, time_resolution*(segment_run+1), time_resolution)
         else:
           f,t,P = scipy.signal.spectrogram(x, fs=sf, window=('hamming'), nperseg=None, 
                                            noverlap=window_overlap, nfft=FFT_size, return_onesided=True, mode='psd')
