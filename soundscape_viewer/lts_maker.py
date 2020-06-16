@@ -217,13 +217,13 @@ class lts_maker:
         self.time_resolution=np.ceil(len(x)/sf)
 
       for segment_run in range(int(total_segment)):
-        read_interval=[self.time_resolution*segment_run*sf, self.time_resolution*(segment_run+1)*sf]
+        read_interval=[np.floor(self.time_resolution*segment_run*sf), np.ceil(self.time_resolution*(segment_run+1)*sf)]
         if segment_run==0:
           read_interval[0]=self.skip_duration*sf
         if read_interval[1]>len(x):
           read_interval[1]=len(x)
         
-        f,t,P = scipy.signal.spectrogram(x[read_interval[0]:read_interval[1]], fs=sf, window=('hamming'), nperseg=None, 
+        f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hamming'), nperseg=None, 
                                        noverlap=self.overlap, nfft=self.FFT_size, 
                                        return_onesided=True, mode='psd')
         P = P/np.power(self.pref,2)
