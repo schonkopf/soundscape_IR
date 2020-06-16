@@ -57,7 +57,7 @@ class save_parameters:
         self.channel=channel
 
 class audio_visualization:
-    def __init__(self, filename, offset_read=0, duration_read=None, fft_size=512, window_overlap=0.5, sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0):
+    def __init__(self, filename, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0):
         import audioread
         import librosa
         import matplotlib.pyplot as plt
@@ -72,10 +72,10 @@ class audio_visualization:
         
         # Get the sampling frequency
         with audioread.audio_open(os.getcwd()+'/'+filename) as temp:
-            sr=temp.samplerate
+            sf=temp.samplerate
             
         # load audio data
-        x, sr = librosa.load(filename, sr=sr, offset=offset_read, duration=duration_read)
+        x, _ = librosa.load(filename, sr=sf, offset=offset_read, duration=duration_read)
         
         # plot the waveform
         if plot_type=='Both':
@@ -86,19 +86,34 @@ class audio_visualization:
           fig, ax2 = plt.subplots(figsize=(14, 6))
         
         if plot_type=='Both' or plot_type=='Waveform':
-          ax1.plot(offset_read+np.arange(1,len(x)+1)/sr, x)
+          ax1.plot(offset_read+np.arange(1,len(x)+1)/sf, x)
           ax1.set_ylabel('Amplitude')
           ax1.set_xlabel('Time')
-          ax1.set_xlim(offset_read, offset_read+len(x)/sr)
+          ax1.set_xlim(offset_read, offset_read+len(x)/sf)
         
         # run FFT and make a log-magnitude spectrogram
-        f,t,P = scipy.signal.spectrogram(x, fs=sr, window=('hamming'), nperseg=None, 
-                                       noverlap=window_overlap, nfft=fft_size, 
-                                       return_onesided=True, mode='psd')
-        data = 10*np.log10(P/np.power(P_ref,2))-sensitivity
+        if time_resolution:
+          for segment_run in range(int(np.ceil(len(x)/sf/time_resolution))):
+            read_interval=[np.floor(time_resolution*segment_run*sf), np.ceil(time_resolution*(segment_run+1)*sf)]
+            if read_interval[1]>len(x):
+              read_interval[1]=len(x)
+            f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hamming'), nperseg=None, 
+                                        noverlap=window_overlap, nfft=FFT_size, return_onesided=True, mode='psd')
+            P = P/np.power(P_ref,2)
+            if segment_run==0:
+              data=10*np.log10(np.mean(P,axis=1))-sensitivity
+            else:
+              data=np.vstack((data, 10*np.log10(np.mean(P,axis=1))-sensitivity))
+          data=data.T
+          t=np.arange(time_resolution-time_resolution/2, time_resolution*segment_run, time_resolution)
+        else:
+          f,t,P = scipy.signal.spectrogram(x, fs=sf, window=('hamming'), nperseg=None, 
+                                           noverlap=window_overlap, nfft=FFT_size, return_onesided=True, mode='psd')
+          data = 10*np.log10(P/np.power(P_ref,2))-sensitivity
+        t=t+offset_read
+        
         if prewhiten_percent>0:
           data=matrix_operation.prewhiten(data, prewhiten_percent, 1)
-        t=t+offset_read
         
         # plot the spectrogram
         if plot_type=='Both' or plot_type=='Spectrogram':
@@ -111,7 +126,7 @@ class audio_visualization:
           cbar.set_label('PSD')
 
         self.x=x
-        self.sr=sr
+        self.sf=sf
         self.data=np.hstack((t[:,None],data.T))
         self.f=f
         
