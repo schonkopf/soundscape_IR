@@ -79,11 +79,11 @@ class audio_visualization:
         
         # plot the waveform
         if plot_type=='Both':
-          fig, (ax1, ax2) = plt.subplots(nrows=2,figsize=(8, 12))
+          fig, (ax1, ax2) = plt.subplots(nrows=2,figsize=(14, 12))
         elif plot_type=='Waveform':
-          fig, ax1 = plt.subplots(figsize=(8, 6))
+          fig, ax1 = plt.subplots(figsize=(14, 6))
         elif plot_type=='Spectrogram':
-          fig, ax2 = plt.subplots(figsize=(8, 6))
+          fig, ax2 = plt.subplots(figsize=(14, 6))
         
         if plot_type=='Both' or plot_type=='Waveform':
           ax1.plot(offset_read+np.arange(1,len(x)+1)/sr, x)
