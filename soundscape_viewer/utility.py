@@ -34,6 +34,12 @@ class save_parameters:
     def __init__(self):
         self.platform='python'
     
+    def supervised_nmf(self, f, W, feature_length, basis_num):
+        self.f=f
+        self.W=W
+        self.time_frame=feature_length
+        self.basis_num=basis_num
+    
     def pcnmf(self, f, W, W_cluster, source_num, feature_length, sparseness, basis_num):
         self.f=f
         self.W=W
