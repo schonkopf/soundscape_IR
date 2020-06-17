@@ -242,10 +242,6 @@ class pcnmf:
     self.sparseness=model['save_pcnmf']['sparseness'].item()[0][0]
     self.feature_length=model['save_pcnmf']['time_frame'].item()[0][0]
     self.basis_num=model['save_pcnmf']['basis_num'].item()[0][0]
-    self.initial='custom'
-    self.alpha=10
-    self.beta_loss='frobenius'
-    self.solver='cd'
   
   def supervised_separation(self, input_data, f, iter=50):
     self.f=f    
