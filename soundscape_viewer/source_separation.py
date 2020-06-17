@@ -127,7 +127,7 @@ class pcnmf:
     matrix_shape=input_data.shape
     data=np.zeros((matrix_shape[0]*self.feature_length, matrix_shape[1]-1+self.feature_length))
     for x in range(self.feature_length):
-      data[x*matrix_shape[0]:(x+1)*matrix_shape[0],x:matrix_shape[1]+x]=input_data
+      data[(self.feature_length-(x+1))*matrix_shape[0]:(self.feature_length-x)*matrix_shape[0],x:matrix_shape[1]+x]=input_data
     return data
 
   def pcnmf_output(self, data, time_vec, baseline=0):
