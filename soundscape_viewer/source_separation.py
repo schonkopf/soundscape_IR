@@ -250,7 +250,7 @@ class pcnmf:
     baseline=input_data.min()
     input_data=input_data-baseline
           
-    # Modify the input data based the feature width
+    # Modify the input data based on the feature length
     print('Running supervised NMF')
     data=self.matrix_conv(input_data)
 
