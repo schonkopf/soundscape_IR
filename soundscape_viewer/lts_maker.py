@@ -223,7 +223,7 @@ class lts_maker:
         if read_interval[1]>len(x):
           read_interval[1]=len(x)
         
-        f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hamming'), nperseg=None, 
+        f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=None, 
                                        noverlap=self.overlap, nfft=self.FFT_size, 
                                        return_onesided=True, mode='psd')
         P = P/np.power(self.pref,2)
