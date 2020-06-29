@@ -141,7 +141,8 @@ class pcnmf:
       mask=np.divide(source,source0)
       temp=np.zeros((matrix_shape))
       for x in range(self.feature_length):
-        temp=temp+mask[x*matrix_shape[0]:(x+1)*matrix_shape[0],x:matrix_shape[1]+x]
+        temp=temp+mask[(self.feature_length-(x+1))*matrix_shape[0]:(self.feature_length-x)*matrix_shape[0],x:matrix_shape[1]+x]
+        #temp=temp+mask[x*matrix_shape[0]:(x+1)*matrix_shape[0],x:matrix_shape[1]+x]
       mask=np.divide(temp,self.feature_length)
       mask[np.isnan(mask)]=0
       separation[run] = np.hstack((time_vec, np.multiply(data,mask).T+baseline))
