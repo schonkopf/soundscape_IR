@@ -113,7 +113,7 @@ class audio_visualization:
           data=data.T
           t=np.arange(time_resolution-time_resolution/2, time_resolution*(segment_run+1), time_resolution)
         else:
-          f,t,P = scipy.signal.spectrogram(x, fs=sf, window=('hamming'), nperseg=None, 
+          f,t,P = scipy.signal.spectrogram(x, fs=sf, window=('hann'), nperseg=None, 
                                            noverlap=window_overlap, nfft=FFT_size, return_onesided=True, mode='psd')
           data = 10*np.log10(P/np.power(P_ref,2))-sensitivity
         t=t+offset_read
