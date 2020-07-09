@@ -40,13 +40,12 @@ class save_parameters:
         self.time_frame=feature_length
         self.basis_num=basis_num
     
-    def pcnmf(self, f, W, W_cluster, source_num, feature_length, sparseness, basis_num):
+    def pcnmf(self, f, W, W_cluster, source_num, feature_length, basis_num):
         self.f=f
         self.W=W
         self.W_cluster=W_cluster
         self.k=source_num
         self.time_frame=feature_length
-        self.sparseness=sparseness
         self.basis_num=basis_num
 
     def LTS_Result(self, LTS_median, LTS_mean, f, link):
