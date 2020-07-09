@@ -122,6 +122,7 @@ class pcnmf:
     self.pcnmf_output(input_data, self.time_vec, baseline)
     self.time_vec=self.time_vec[:,0]
     print('Done')
+    return self.W, self.H, self.W_cluster
     
   def matrix_conv(self, input_data):
     matrix_shape=input_data.shape
@@ -188,7 +189,7 @@ class pcnmf:
     output_data=output_data[:,f_list]
     output_data=output_data[list,:]
     
-    return output_data, f;
+    return output_data, f
                           
   def plot_pcnmf(self, source=1):
     source=source-1
