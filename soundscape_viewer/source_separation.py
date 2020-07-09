@@ -241,7 +241,6 @@ class pcnmf:
     self.W=model['save_pcnmf']['W'].item()
     self.W_cluster=model['save_pcnmf']['W_cluster'].item()[0]
     self.source_num=model['save_pcnmf']['k'].item()[0][0]
-    self.sparseness=model['save_pcnmf']['sparseness'].item()[0][0]
     self.feature_length=model['save_pcnmf']['time_frame'].item()[0][0]
     self.basis_num=model['save_pcnmf']['basis_num'].item()[0][0]
   
