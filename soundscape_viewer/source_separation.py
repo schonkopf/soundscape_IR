@@ -223,12 +223,11 @@ class pcnmf:
     else:
       print('Higher than the number of separated sources, choose a smaller number.')
       
-  def save_model(self, filename='PCNMF_model.mat', folder_id=[]):
+  def save_model(self, filename='NMF_model.mat', folder_id=[]):
     #import save_parameters
     pcnmf_model=save_parameters()
-    pcnmf_model.pcnmf(self.f, self.W, self.W_cluster, self.source_num, 
-                      self.feature_length, self.sparseness, self.basis_num)
-    savemat(filename, {'save_pcnmf':pcnmf_model})
+    pcnmf_model.pcnmf(self.f, self.W, self.W_cluster, self.source_num, self.feature_length, self.basis_num)
+    savemat(filename, {'save_nmf':nmf_model})
     print('Successifully save to '+filename)
     
     # save the result in Gdrive as a mat file
@@ -238,11 +237,11 @@ class pcnmf:
       
   def load_model(self, filename):
     model = loadmat(filename)
-    self.W=model['save_pcnmf']['W'].item()
-    self.W_cluster=model['save_pcnmf']['W_cluster'].item()[0]
-    self.source_num=model['save_pcnmf']['k'].item()[0][0]
-    self.feature_length=model['save_pcnmf']['time_frame'].item()[0][0]
-    self.basis_num=model['save_pcnmf']['basis_num'].item()[0][0]
+    self.W=model['save_nmf']['W'].item()
+    self.W_cluster=model['save_nmf']['W_cluster'].item()[0]
+    self.source_num=model['save_nmf']['k'].item()[0][0]
+    self.feature_length=model['save_nmf']['time_frame'].item()[0][0]
+    self.basis_num=model['save_nmf']['basis_num'].item()[0][0]
   
   def supervised_separation(self, input_data, f, iter=50):
     self.f=f    
