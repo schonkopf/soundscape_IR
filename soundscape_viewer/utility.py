@@ -309,10 +309,9 @@ class spectrogram_detection:
           f_temp=f[psd>(np.max(psd)-frequency_cut)]
           min_F=np.append(min_F, np.min(f_temp))
           max_F=np.append(max_F, np.max(f_temp))
-      output=np.vstack([np.arange(len(begin))+1, np.repeat('Spectrogram',len(begin)), np.repeat(1,len(begin)), begin, ending, min_F, max_F]).T
-      save_txt(output, ['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)'], filename=filename, folder_id=folder_id)
-      print(output)
-      return output
+      self.output=np.vstack([np.arange(len(begin))+1, np.repeat('Spectrogram',len(begin)), np.repeat(1,len(begin)), begin, ending, min_F, max_F]).T
+      self.save_txt(output, ['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)'], filename=filename, folder_id=folder_id)
+      print(self.output)
 
   def save_txt(self, output, header, filename='Separation.txt',folder_id=[]):
       df = pd.DataFrame(output, columns = header) 
