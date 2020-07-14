@@ -278,3 +278,50 @@ class matrix_operation:
         elif axis==1:
             input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1).T)
         return input_data
+
+class spectrogram_detection:
+  def __init__(self):
+      from scipy.ndimage import gaussian_filter1d
+      import pandas as pd
+
+  def detection(self, input, f, threshold, smooth=3, frequency_cut=25, pad_size=0, filename='Detection.txt',folder_id=[]):
+      time_vec=input[:,0]
+      data=input[:,1:]
+      level = 10*np.log10((10**(data/10)).sum(axis=1))
+      if smooth>0:
+        level = gaussian_filter1d(level, smooth)
+      level=level>threshold
+      begin=time_vec[np.where(np.diff(level.astype(int),1)==1)[0]]
+      ending=time_vec[np.where(np.diff(level.astype(int),1)==-1)[0]+1]
+
+      if level[0]>threshold:
+        begin=np.append(time_vec[0], begin)
+      if level[-1]>threshold:
+        ending=np.append(ending, time_vec[-1])
+
+      begin=begin-pad_size
+      ending=ending+pad_size
+
+      min_F=np.array([])
+      max_F=np.array([])
+      if frequency_cut:
+        for n in range(len(begin)):
+          psd=np.mean(data[(time_vec>=begin[n])*(time_vec<=ending[n]),:], axis=0)
+          f_temp=f[psd>(np.max(psd)-frequency_cut)]
+          min_F=np.append(min_F, np.min(f_temp))
+          max_F=np.append(max_F, np.max(f_temp))
+      output=np.vstack([np.arange(len(begin))+1, np.repeat('Spectrogram',len(begin)), np.repeat(1,len(begin)), begin, ending, min_F, max_F]).T
+      save_txt(output, ['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)'], filename=filename, folder_id=folder_id)
+      print(output)
+      return output
+
+  def save_txt(self, output, header, filename='Separation.txt',folder_id=[]):
+      df = pd.DataFrame(output, columns = header) 
+      df.to_csv(filename, sep='\t', index=False)
+      print('Successifully save to '+filename)
+        
+      if folder_id:
+        #import Gdrive_upload
+        Gdrive=gdrive_handle(folder_id)
+        Gdrive.upload(filename)
+    
