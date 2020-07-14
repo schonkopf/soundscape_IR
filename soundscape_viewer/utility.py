@@ -282,8 +282,7 @@ class matrix_operation:
 class spectrogram_detection:
   def __init__(self, input, f, threshold, smooth=3, frequency_cut=25, pad_size=0, filename='Detection.txt',folder_id=[]):
       from scipy.ndimage import gaussian_filter1d
-      import pandas as pd
-    
+      
       time_vec=input[:,0]
       data=input[:,1:]
       level = 10*np.log10((10**(data/10)).sum(axis=1))
@@ -315,6 +314,7 @@ class spectrogram_detection:
       print(self.output)
 
   def save_txt(self, filename='Separation.txt',folder_id=[]):
+      import pandas as pd
       df = pd.DataFrame(self.output, columns = self.header) 
       df.to_csv(filename, sep='\t', index=False)
       print('Successifully save to '+filename)
