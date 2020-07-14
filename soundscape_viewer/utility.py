@@ -310,11 +310,12 @@ class spectrogram_detection:
           min_F=np.append(min_F, np.min(f_temp))
           max_F=np.append(max_F, np.max(f_temp))
       self.output=np.vstack([np.arange(len(begin))+1, np.repeat('Spectrogram',len(begin)), np.repeat(1,len(begin)), begin, ending, min_F, max_F]).T
-      self.save_txt(output, ['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)'], filename=filename, folder_id=folder_id)
+      self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)']
+      self.save_txt(filename=filename, folder_id=folder_id)
       print(self.output)
 
-  def save_txt(self, output, header, filename='Separation.txt',folder_id=[]):
-      df = pd.DataFrame(output, columns = header) 
+  def save_txt(self, filename='Separation.txt',folder_id=[]):
+      df = pd.DataFrame(self.output, columns = self.header) 
       df.to_csv(filename, sep='\t', index=False)
       print('Successifully save to '+filename)
         
