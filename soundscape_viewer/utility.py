@@ -282,7 +282,7 @@ class matrix_operation:
 
 class spectrogram_detection:
   def __init__(self, input, f, threshold, smooth=3, frequency_cut=25, pad_size=0, filename='Detection.txt',folder_id=[]):
-      from scipy.ndimage import gaussian_filter1d
+      from scipy.ndimage import gaussian_filter
       
       time_vec=input[:,0]
       data=input[:,1:]
