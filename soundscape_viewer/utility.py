@@ -119,6 +119,7 @@ class audio_visualization:
         
         if prewhiten_percent>0:
           data=matrix_operation.prewhiten(data, prewhiten_percent, 1)
+          data[data<0]=0
         
         # plot the spectrogram
         if plot_type=='Both' or plot_type=='Spectrogram':
