@@ -431,7 +431,7 @@ class supervised_nmf:
     self.source_num = int(np.max(self.W_cluster)+1)
     self.basis_num = len(self.W_cluster)
 
-  def supervised_separation(self, input_data, f, iter=50, adaptive_alpha=[0], additional_basis=0):
+  def supervised_separation(self, input_data, f, iter=50, adaptive_alpha=0, additional_basis=0):
     self.f=f    
     self.time_vec=input_data[:,0:1]
     input_data=input_data[:,1:].T
