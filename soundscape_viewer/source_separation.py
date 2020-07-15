@@ -361,7 +361,7 @@ class supervised_nmf:
       plt.plot(self.time_vec, self.original_level)
       legend_text=np.array(['Original data'])
       
-      for n in np.arange(int(np.max(self.W_cluster))):
+      for n in np.arange(int(np.max(self.W_cluster+1))):
         plt.plot(self.time_vec, self.relative_level[n])
         legend_text=np.append(legend_text, 'Source '+str(n+1))
       
@@ -422,7 +422,7 @@ class supervised_nmf:
     for i in range(0, len(model)):
       self.W = np.hstack((self.W, model[i].W))
       if model[i].method=='NMF':
-        self.W_cluster=np.hstack((self.W_cluster, model[i].W_cluster+i+current_source))
+        self.W_cluster=np.hstack((self.W_cluster, model[i].W_cluster+i+1+current_source))
       elif model[i].method=='PCNMF':
         temp=np.array(model[i].W_cluster)+i+current_source
         temp[model[i].W_cluster==0]=0
@@ -431,7 +431,7 @@ class supervised_nmf:
     self.source_num = int(np.max(self.W_cluster)+1)
     self.basis_num = len(self.W_cluster)
 
-  def supervised_separation(self, input_data, f, iter=50, adaptive_alpha=0, additional_basis=0):
+  def supervised_separation(self, input_data, f, iter=50, adaptive_alpha=[0], additional_basis=0):
     self.f=f    
     self.time_vec=input_data[:,0:1]
     input_data=input_data[:,1:].T
@@ -442,11 +442,12 @@ class supervised_nmf:
     data=pcnmf(feature_length=self.feature_length).matrix_conv(input_data)
     
     # Check the learning rate (adaptive_alpha) for each source (adaptive NMF)
-    if ((len(adaptive_alpha) != self.source_num) and (len(adaptive_alpha)!= 1)):
+    if isinstance(adaptive_alpha, int):
+      adaptive_alpha = np.ones(self.source_num)*adaptive_alpha
+    else:
+      if len(adaptive_alpha) != self.source_num:
         print("Error: The model has " +str(self.source_num) +" sources. Please specify adaptive_alpha for every source")
         return
-    if (len(adaptive_alpha) == 1):
-      adaptive_alpha = np.ones(self.source_num)*adaptive_alpha[0]
 
     # Add additional basis for feature learning (semi-supervised NMF)
     if additional_basis>0:
