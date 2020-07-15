@@ -281,15 +281,15 @@ class matrix_operation:
         return input_data
 
 class spectrogram_detection:
-  def __init__(self, input, f, threshold, smooth=3, frequency_cut=25, pad_size=0, filename='Detection.txt',folder_id=[]):
+  def __init__(self, input, f, threshold, smooth=3, frequency_cut=25, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[]):
       from scipy.ndimage import gaussian_filter
       
       time_vec=input[:,0]
       data=input[:,1:]
 
       if smooth>0:
-        level = gaussian_filter(data, smooth).sum(axis = 1)
-      level=level>threshold
+        level = gaussian_filter(data, smooth)>threshold
+      level=level.astype(int).sum(axis = 1)>frequency_count
       begin=time_vec[np.where(np.diff(level.astype(int),1)==1)[0]]
       ending=time_vec[np.where(np.diff(level.astype(int),1)==-1)[0]+1]
 
