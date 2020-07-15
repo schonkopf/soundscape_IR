@@ -286,9 +286,9 @@ class spectrogram_detection:
       
       time_vec=input[:,0]
       data=input[:,1:]
-      level = 10*np.log10((10**(data/10)).sum(axis=1))
+
       if smooth>0:
-        level = gaussian_filter1d(level, smooth)
+        level = gaussian_filter(data, smooth).sum(axis = 1)
       level=level>threshold
       begin=time_vec[np.where(np.diff(level.astype(int),1)==1)[0]]
       ending=time_vec[np.where(np.diff(level.astype(int),1)==-1)[0]+1]
