@@ -442,7 +442,7 @@ class supervised_nmf:
     data=pcnmf(feature_length=self.feature_length).matrix_conv(input_data)
     
     # Check the learning rate (adaptive_alpha) for each source (adaptive NMF)
-    if len(adaptive_alpha)==1:
+    if isinstance(adaptive_alpha, int) or isinstance(adaptive_alpha, float):
       adaptive_alpha = np.ones(self.source_num)*adaptive_alpha
     else:
       if len(adaptive_alpha) != self.source_num:
