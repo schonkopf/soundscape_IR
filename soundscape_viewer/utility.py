@@ -62,7 +62,7 @@ class save_parameters:
         self.channel=channel
 
 class audio_visualization:
-    def __init__(self, filename, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0):
+    def __init__(self, filename, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0):
         import audioread
         import librosa
         import matplotlib.pyplot as plt
@@ -120,6 +120,16 @@ class audio_visualization:
         if prewhiten_percent>0:
           data=matrix_operation.prewhiten(data, prewhiten_percent, 1)
           data[data<0]=0
+            
+        # f_range: Hz
+        if f_range:
+            f_list=(f>=min(f_range))*(f<=max(f_range))
+            f_list=np.where(f_list==True)[0]
+        else:
+            f_list=np.arange(len(f))
+            
+        f=f[f_list]
+        data=data[f_list,:]
         
         # plot the spectrogram
         if plot_type=='Both' or plot_type=='Spectrogram':
