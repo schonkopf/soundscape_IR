@@ -327,7 +327,7 @@ class supervised_nmf:
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     if plot_type=='W':
       im = ax.imshow(W, origin='lower',  aspect='auto', cmap=cm.jet,
-                      extent=[0, self.W.shape[1], self.f[0], self.f[-1]], interpolation='none')
+                      extent=[0, len(W_list), self.f[0], self.f[-1]], interpolation='none')
       ax.set_ylabel('Frequency')
       ax.set_xlabel('Basis')
       cbar = fig.colorbar(im, ax=ax)
@@ -335,7 +335,7 @@ class supervised_nmf:
 
     elif plot_type=='H':
       im = ax.imshow(self.H[W_list,:], origin='lower',  aspect='auto', cmap=cm.jet,
-                       extent=[self.time_vec[0], self.time_vec[-1], 0, self.W.shape[1]], interpolation='none')
+                       extent=[self.time_vec[0], self.time_vec[-1], 0, len(W_list)], interpolation='none')
       ax.set_ylabel('Basis')
       ax.set_xlabel('Time')
       cbar = fig.colorbar(im, ax=ax)
