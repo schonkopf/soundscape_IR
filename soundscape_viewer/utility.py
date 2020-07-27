@@ -339,3 +339,27 @@ class spectrogram_detection:
         Gdrive=gdrive_handle(folder_id)
         Gdrive.upload(filename)
     
+class performance_evaluation:
+  def __init__(self, label_filename):
+    import pandas as pd
+    self.annotations = pd.read_table(label_filename,index_col=0)
+
+  def spectrogram(self, ori_spec, test_spec, fpr_control=0.05, plot=True):
+    from sklearn.metrics import roc_curve, auc
+    import matplotlib.pyplot as plt
+    time_vec=ori_spec[:,0]
+    label=0*time_vec
+    for n in range(len(self.annotations)):
+      label[time_vec>=(self.annotations.iloc[n,2])*(time_vec<=self.annotations.iloc[n,3])]=1
+    
+    level=test_spec[:,1:].max(axis=1)
+    self.fpr, self.tpr, thresholds = roc_curve(label, level)
+    self.auc = auc(self.fpr, self.tpr)
+
+    self.threshold = thresholds[(np.abs(self.fpr - fpr_control)).argmin()]
+    if plot:
+      plt.figure()
+      plt.plot(self.fpr, self.tpr)
+      plt.xlabel('False Positive Rate')
+      plt.ylabel('True Positive Rate')
+      plt.show()
