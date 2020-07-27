@@ -62,25 +62,32 @@ class save_parameters:
         self.channel=channel
 
 class audio_visualization:
-    def __init__(self, filename, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0):
+    def __init__(self, filename=None, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0):
         import audioread
         import librosa
+        import os
+        
+        
+        if filename:
+          # Get the sampling frequency
+          with audioread.audio_open(os.getcwd()+'/'+filename) as temp:
+              sf=temp.samplerate
+              
+          # load audio data
+          x, _ = librosa.load(filename, sr=sf, offset=offset_read, duration=duration_read)
+          self.x=x
+          self.sf=sf
+          self.run(x, sf, offset_read, duration_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent)
+        
+    def run(self, x, sf, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0):
+        import scipy.signal
         import matplotlib.pyplot as plt
         import matplotlib.cm as cm
-        import os
-        import scipy.signal
 
         if environment=='wat':
           P_ref=1
         elif environment=='air':
           P_ref=20
-        
-        # Get the sampling frequency
-        with audioread.audio_open(os.getcwd()+'/'+filename) as temp:
-            sf=temp.samplerate
-            
-        # load audio data
-        x, _ = librosa.load(filename, sr=sf, offset=offset_read, duration=duration_read)
         
         # plot the waveform
         if plot_type=='Both':
@@ -141,8 +148,6 @@ class audio_visualization:
           cbar = fig.colorbar(im, ax=ax2)
           cbar.set_label('PSD')
 
-        self.x=x
-        self.sf=sf
         self.data=np.hstack((t[:,None],data.T))
         self.f=f
         
