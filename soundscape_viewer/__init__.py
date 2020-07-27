@@ -14,5 +14,6 @@ from .utility import gdrive_handle
 from .utility import matrix_operation
 from .utility import audio_visualization
 from .utility import spectrogram_detection
+from .utility import performance_evaluation
 
 __all__ = ["lts_maker", "soundscape_viewer", "source_separation", "utility"]
