@@ -350,7 +350,7 @@ class performance_evaluation:
     time_vec=ori_spec[:,0]
     label=0*time_vec
     for n in range(len(self.annotations)):
-      label[time_vec>=(self.annotations.iloc[n,2])*(time_vec<=self.annotations.iloc[n,3])]=1
+      label[(time_vec>=self.annotations.iloc[n,2])*(time_vec<=self.annotations.iloc[n,3])]=1
     
     level=test_spec[:,1:].max(axis=1)
     self.fpr, self.tpr, thresholds = roc_curve(label, level)
