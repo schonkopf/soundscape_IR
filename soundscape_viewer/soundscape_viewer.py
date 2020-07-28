@@ -45,16 +45,27 @@ class lts_viewer:
       self.Result_mean=np.array([])
       self.Result_diff=np.array([])
       
-  def assemble(self, data, time_sort=1):
+  def assemble(self, data, time_sort=1, f_range=[]):
+      f = data['Result']['f'].item()[0]
+      if f_range:
+          f_list=(f>=min(f_range))*(f<=max(f_range))
+          f_list=np.where(f_list==True)[0]
+      else:
+          f_list=np.arange(len(f))
+      f=f[f_list]
+      f_list=np.concatenate([np.array([0]), f_list+1])
+      Result_median = data['Result']['LTS_median'].item()[:,f_list]
+      Result_mean = data['Result']['LTS_mean'].item()[:,f_list]
+
       if self.Result_median.size == 0:
-          self.f = data['Result']['f'].item()[0]
-          self.Result_median = data['Result']['LTS_median'].item()
-          self.Result_mean = data['Result']['LTS_mean'].item()
+          self.f = np.array(f)
+          self.Result_median = np.array(Result_median)
+          self.Result_mean = np.array(Result_mean)
           self.Result_diff = self.Result_mean-self.Result_median
           self.Result_diff[:,0] = self.Result_mean[:,0]
       else:
-          self.Result_median = np.vstack((data['Result']['LTS_median'].item(), self.Result_median))
-          self.Result_mean = np.vstack((data['Result']['LTS_mean'].item(), self.Result_mean))
+          self.Result_median = np.vstack((Result_median, self.Result_median))
+          self.Result_mean = np.vstack((Result_mean, self.Result_mean))
           self.Result_diff = self.Result_mean-self.Result_median
           self.Result_diff[:,0] = self.Result_mean[:,0]
       if time_sort == 1:
@@ -63,15 +74,15 @@ class lts_viewer:
           self.Result_mean=self.Result_mean[temp,:]
           self.Result_diff=self.Result_diff[temp,:]
   
-  def collect_folder(self, path, time_sort=1):
+  def collect_folder(self, path, f_range=[], time_sort=1):
       items = os.listdir(path)
       for names in items:
         if names.endswith(".mat"):
           print('Loading file: %s' % (names))
           data = loadmat(path+'/'+names)
-          self.assemble(data, time_sort)
+          self.assemble(data, time_sort, f_range)
         
-  def collect_Gdrive(self, folder_id, time_sort=1):
+  def collect_Gdrive(self, folder_id, f_range=[], time_sort=1):
     Gdrive=gdrive_handle(folder_id)
     Gdrive.list_query(file_extension='.mat')
     
@@ -80,7 +91,7 @@ class lts_viewer:
       infilename=file['title']
       file.GetContentFile(file['title'])
       data = loadmat(file['title'])
-      self.assemble(data, time_sort)
+      self.assemble(data, time_sort, f_range)
       os.remove(infilename)
       
   def plot_lts(self, fig_width=12, fig_height=18):
