@@ -308,9 +308,9 @@ class spectrogram_detection:
       begin=time_vec[np.where(np.diff(level.astype(int),1)==1)[0]]
       ending=time_vec[np.where(np.diff(level.astype(int),1)==-1)[0]+1]
 
-      if level[0]>threshold:
+      if level[0]:
         begin=np.append(time_vec[0], begin)
-      if level[-1]>threshold:
+      if level[-1]:
         ending=np.append(ending, time_vec[-1])
 
       begin=begin-pad_size
