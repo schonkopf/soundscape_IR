@@ -62,15 +62,17 @@ class save_parameters:
         self.channel=channel
 
 class audio_visualization:
-    def __init__(self, filename=None, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0):
+    def __init__(self, filename=None,  path=None, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0):
         import audioread
         import librosa
         import os
         
+        if not path:
+          path=os.getcwd()
         
         if filename:
           # Get the sampling frequency
-          with audioread.audio_open(os.getcwd()+'/'+filename) as temp:
+          with audioread.audio_open(path+'/'+filename) as temp:
               sf=temp.samplerate
               
           # load audio data
