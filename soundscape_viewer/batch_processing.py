@@ -56,7 +56,7 @@ class batch_processing:
     self.adaptive_alpha = adaptive_alpha
     self.additional_basis = additional_basis
   
-  def params_spetrogram_detection(self, source = 1, threshold = 20, smooth=3, frequency_cut=20, folder_id = []):
+  def params_spetrogram_detection(self, source = 1, threshold = 20, smooth=3, frequency_cut=20, padding=0, folder_id = []):
     if isinstance(source, int):
       self.source = [source]
     else:
@@ -73,6 +73,7 @@ class batch_processing:
       self.frequency_cut = frequency_cut
     
     self.smooth = smooth
+    self.padding = padding
     self.folder_id = folder_id
   
   def supervised_separation(self, model):
@@ -105,7 +106,7 @@ class batch_processing:
       model.supervised_separation(audio.data, audio.f, iter = self.iter, adaptive_alpha = self.adaptive_alpha, additional_basis = self.additional_basis)
       for n in range(0, len(self.source)):
         filename=self.audioname[file][:-4]+'_S'+str(self.source[n])+'.txt'
-        spectrogram_detection(model.separation[self.source[n]-1], model.f, threshold=self.threshold[n], smooth=self.smooth, frequency_cut=self.frequency_cut[n], filename=filename, folder_id = self.folder_id)
+        spectrogram_detection(model.separation[self.source[n]-1], model.f, threshold=self.threshold[n], smooth=self.smooth, frequency_cut=self.frequency_cut[n], pad_size=self.padding, filename=filename, folder_id = self.folder_id)
       
       if self.cloud>=1:
         os.remove(self.audioname[file])
