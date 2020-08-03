@@ -29,7 +29,7 @@ class batch_processing:
     print('Identified ', len(self.audioname), 'files')
     
   def collect_Gdrive(self, folder_id):
-    from soundscape_IR.soundscape_viewer.utility import gdrive_handle
+    from .utility import gdrive_handle
     Gdrive=gdrive_handle(folder_id)
     Gdrive.list_query(file_extension='.wav')
     self.cloud=2
@@ -110,3 +110,41 @@ class batch_processing:
       
       if self.cloud>=1:
         os.remove(self.audioname[file])
+        
+  def pulse_interval_analysis(self, energy_percentile, interval_range, plot_type= None):
+    from .utility import audio_visualization
+    from .utility import pulse_interval
+    
+    import copy
+    import os
+    if self.cloud==1:
+      import urllib.request
+
+    for file in range(0,len(self.audioname)):
+      if self.cloud==1:
+        urllib.request.urlretrieve(self.link[file], self.audioname[file])
+        path='.'
+      elif self.cloud==2:
+        #title = self.Gdrive.filelist[i]['title']
+        temp = self.Gdrive.file_list[file]
+        temp.GetContentFile(temp['title'])
+        path='.'
+      else:
+        path=self.link
+
+      print('processing '+str(file+1)+'/'+str(len(self.audioname))+' file...')
+      audio = audio_visualization(self.audioname[file], path, FFT_size = self.fft_size, time_resolution=self.time_resolution, window_overlap=self.window_overlap, f_range = self.f_range,
+                                  environment=self.environment, plot_type=self.plot_type, prewhiten_percent=self.prewhiten_percent)
+      pulse_analysis_result=pulse_interval(audio, energy_percentile, interval_range, plot_type=None)
+      if file==0:
+        result=pulse_analysis_result.result[None]
+      else:
+        result=np.vstack((result, pulse_analysis_result.result[None]))
+
+      if self.cloud>=1:
+        os.remove(self.audioname[file])
+      
+      self.energy_percentile=energy_percentile
+      self.interval_range=interval_range
+      self.result=result
+      self.PI=pulse_analysis_result.PI
