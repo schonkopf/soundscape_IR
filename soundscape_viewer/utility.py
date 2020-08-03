@@ -365,3 +365,40 @@ class performance_evaluation:
       plt.xlabel('False Positive Rate')
       plt.ylabel('True Positive Rate')
       plt.show()
+
+class pulse_interval:
+  def __init__(self, sound, energy_percentile=50, interval_range=None, plot_type='Both'):
+    duration=len(sound.x)/sound.sf
+    data=np.percentile(sound.data[:,1:], energy_percentile, axis=1)
+    time_vec=sound.data[:,0]
+    self.autocorrelation(data, time_vec, duration, interval_range, plot_type)
+
+  def autocorrelation(self, data, time_vec, duration, interval_range=None, plot_type='Both', millisec=True):
+    self.data=data
+    PI=np.arange(-1*data.shape[0], data.shape[0])
+    time_resolution=time_vec[1]-time_vec[0]
+    if millisec:
+      PI=1000*PI*time_resolution
+
+    PI_list=(PI>=min(interval_range))*(PI<=max(interval_range))
+    PI_list=np.where(PI_list)[0]
+    self.PI=PI[PI_list]
+    
+    # plot the waveform
+    if plot_type=='Both':
+        fig, (ax1, ax2) = plt.subplots(nrows=2,figsize=(14, 12))
+    elif plot_type=='Time':
+        fig, ax1 = plt.subplots(figsize=(14, 6))
+    elif plot_type=='PI':
+        fig, ax2 = plt.subplots(figsize=(14, 6))
+
+    if plot_type=='Both' or plot_type=='Time':
+      ax1.plot(time_vec, data)
+      ax1.set_xlabel('Time')
+      ax1.set_ylabel('Amplitude')
+      
+    if plot_type=='Both' or plot_type=='PI':
+      self.result=np.correlate(data, data, mode='full')[PI_list]
+      ax2.plot(self.PI, self.result)
+      ax2.set_xlabel('Pulse interval')
+      ax2.set_ylabel('Correlation coefficient')
