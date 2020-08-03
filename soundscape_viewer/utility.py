@@ -374,6 +374,7 @@ class pulse_interval:
     self.autocorrelation(data, time_vec, duration, interval_range, plot_type)
 
   def autocorrelation(self, data, time_vec, duration, interval_range=None, plot_type='Both', millisec=True):
+    import matplotlib.pyplot as plt
     self.data=data
     PI=np.arange(-1*data.shape[0], data.shape[0])
     time_resolution=time_vec[1]-time_vec[0]
