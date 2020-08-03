@@ -383,6 +383,7 @@ class pulse_interval:
     PI_list=(PI>=min(interval_range))*(PI<=max(interval_range))
     PI_list=np.where(PI_list)[0]
     self.PI=PI[PI_list]
+    self.result=np.correlate(data, data, mode='full')[PI_list]
     
     # plot the waveform
     if plot_type=='Both':
@@ -398,7 +399,6 @@ class pulse_interval:
       ax1.set_ylabel('Amplitude')
       
     if plot_type=='Both' or plot_type=='PI':
-      self.result=np.correlate(data, data, mode='full')[PI_list]
       ax2.plot(self.PI, self.result)
       ax2.set_xlabel('Pulse interval')
       ax2.set_ylabel('Correlation coefficient')
