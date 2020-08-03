@@ -316,7 +316,7 @@ class spectrogram_detection:
         ending=np.append(ending, time_vec[-1])
       
       if minimum_interval>0:
-        remove_list=np.where((ending[0:-1]-begin[1:])>minimum_interval)[0]
+        remove_list=np.where((begin[1:]-ending[0:-1])>minimum_interval)[0]
         begin=begin[np.append(0,remove_list+1)]
         ending=ending[np.append(remove_list, len(ending)-1)]
 
