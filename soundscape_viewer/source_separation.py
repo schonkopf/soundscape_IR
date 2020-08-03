@@ -294,18 +294,13 @@ class supervised_nmf:
     matrix_shape=data.shape
 
     # Use a ratio mask (e.g., S1 = V*((W1*H1)/(W*H))) to separate different sources
-    source0 = np.dot(self.W, self.H)
+    source0 = self.reconstruct() #np.dot(self.W, self.H)
     for run in range(self.source_num):
-      source = np.dot(self.W[:,self.W_cluster==run],self.H[self.W_cluster==run,:])
+      source = self.reconstruct(source=run+1) #np.dot(self.W[:,self.W_cluster==run],self.H[self.W_cluster==run,:])
       mask=np.divide(source,source0)
-      temp=np.zeros((matrix_shape))
-      for x in range(self.feature_length):
-        temp=temp+mask[(self.feature_length-(x+1))*matrix_shape[0]:(self.feature_length-x)*matrix_shape[0],x:matrix_shape[1]+x]
-      mask=np.divide(temp,self.feature_length)
       mask[np.isnan(mask)]=0
       separation[run] = np.hstack((time_vec, np.multiply(data,mask).T+baseline))
       relative_level[run] = 10*np.log10((10**(separation[run][:,1:]/10)).sum(axis=1))
-    
     self.separation=separation
     self.relative_level=relative_level
 
