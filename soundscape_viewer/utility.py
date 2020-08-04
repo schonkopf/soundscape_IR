@@ -112,7 +112,7 @@ class audio_visualization:
             if read_interval[1]>len(x):
               read_interval[1]=len(x)
             f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=None, 
-                                        noverlap=window_overlap, nfft=FFT_size, return_onesided=True, mode='psd')
+                                        noverlap=int((1-window_overlap)*FFT_size), nfft=FFT_size, return_onesided=True, mode='psd')
             P = P/np.power(P_ref,2)
             if segment_run==0:
               data=10*np.log10(np.mean(P,axis=1))-sensitivity
@@ -122,7 +122,7 @@ class audio_visualization:
           t=np.arange(time_resolution-time_resolution/2, time_resolution*(segment_run+1), time_resolution)
         else:
           f,t,P = scipy.signal.spectrogram(x, fs=sf, window=('hann'), nperseg=None, 
-                                           noverlap=window_overlap, nfft=FFT_size, return_onesided=True, mode='psd')
+                                           noverlap=int((1-window_overlap)*FFT_size), nfft=FFT_size, return_onesided=True, mode='psd')
           data = 10*np.log10(P/np.power(P_ref,2))-sensitivity
         t=t+offset_read
         
