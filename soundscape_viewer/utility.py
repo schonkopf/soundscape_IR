@@ -62,7 +62,7 @@ class save_parameters:
         self.channel=channel
 
 class audio_visualization:
-    def __init__(self, filename=None,  path=None, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0):
+    def __init__(self, filename=None,  path=None, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0):
         import audioread
         import librosa
         import os
@@ -79,9 +79,9 @@ class audio_visualization:
           x, _ = librosa.load(filename, sr=sf, offset=offset_read, duration=duration_read)
           self.x=x
           self.sf=sf
-          self.run(x, sf, offset_read, duration_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent)
+          self.run(x, sf, offset_read, duration_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp)
         
-    def run(self, x, sf, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0):
+    def run(self, x, sf, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0):
         import scipy.signal
         import matplotlib.pyplot as plt
         import matplotlib.cm as cm
@@ -126,6 +126,11 @@ class audio_visualization:
           data = 10*np.log10(P/np.power(P_ref,2))-sensitivity
         t=t+offset_read
         
+        if mel_comp>0:
+          mel_basis = librosa.filters.mel(sr = sf, n_fft=FFT_size, n_mels=mel_comp)
+          data = 10*np.log10(np.dot(mel_basis, np.power(10, data/10)))
+          f = librosa.core.mel_frequencies(n_mels=mel_comp)
+
         if prewhiten_percent>0:
           data=matrix_operation.prewhiten(data, prewhiten_percent, 1)
           data[data<0]=0
