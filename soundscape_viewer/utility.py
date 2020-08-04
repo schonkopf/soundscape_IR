@@ -108,20 +108,25 @@ class audio_visualization:
         
         # run FFT and make a log-magnitude spectrogram
         if time_resolution:
+          if FFT_size>time_resolution*sf:
+            samples=int(time_resolution*sf/2)
+            print('FFT_size has been changed to '+str(samples))
+          else:
+            samples=FFT_size
           for segment_run in range(int(np.ceil(len(x)/sf/time_resolution))):
             read_interval=[np.floor(time_resolution*segment_run*sf), np.ceil(time_resolution*(segment_run+1)*sf)]
             if read_interval[1]>len(x):
               read_interval[1]=len(x)
-            if read_interval[1]-read_interval[0]>FFT_size:
-              f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=FFT_size, 
-                                               noverlap=int(window_overlap*FFT_size), nfft=FFT_size, return_onesided=True, mode='psd')
+            if read_interval[1]-read_interval[0]>=samples:
+              f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=samples, 
+                                               noverlap=int(window_overlap*samples), nfft=FFT_size, return_onesided=True, mode='psd')
               P = P/np.power(P_ref,2)
               if segment_run==0:
                 data=10*np.log10(np.mean(P,axis=1))-sensitivity
               else:
                 data=np.vstack((data, 10*np.log10(np.mean(P,axis=1))-sensitivity))
           data=data.T
-          t=np.arange(time_resolution-time_resolution/2, time_resolution*(segment_run+1), time_resolution)
+          t=np.arange(time_resolution-time_resolution/2, time_resolution*(data.shape[1]), time_resolution)
         else:
           f,t,P = scipy.signal.spectrogram(x, fs=sf, window=('hann'), nperseg=FFT_size, 
                                            noverlap=int(window_overlap*FFT_size), nfft=FFT_size, return_onesided=True, mode='psd')
@@ -154,7 +159,6 @@ class audio_visualization:
                        extent=[t[0], t[-1], f[0], f[-1]], interpolation='none')
           ax2.set_ylabel('Frequency')
           ax2.set_xlabel('Time')
-          #ax2.yscale('log')
           cbar = fig.colorbar(im, ax=ax2)
           cbar.set_label('PSD')
 
