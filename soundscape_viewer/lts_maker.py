@@ -81,7 +81,7 @@ class lts_maker:
     self.channel = channel
     self.pref = P_ref 
     self.FFT_size = FFT_size
-    self.overlap=window_overlap
+    self.overlap=int(window_overlap*FFT_size)
     self.skip_duration=initial_skip
     self.time_resolution=time_resolution
  
