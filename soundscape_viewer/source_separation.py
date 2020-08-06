@@ -304,12 +304,18 @@ class supervised_nmf:
     self.separation=separation
     self.relative_level=relative_level
 
-  def plot_nmf(self, plot_type='W', source=None, fig_width=14, fig_height=6):      
+  def plot_nmf(self, plot_type='W', source=None, time_range=[], fig_width=14, fig_height=6):      
     # Choose source accoridng to W_cluster
     if source:
       W_list=np.where(self.W_cluster==source-1)[0]
     else:
       W_list=np.arange(self.W.shape[1])
+
+    # Only display part of the result
+    if time_range:
+      H_list=np.where((self.time_vec>=time_range[0])*(self.time_vec<time_range[1])==1)[0]
+    else:
+      H_list=np.arange(len(self.time_vec))
 
     # Prepare W
     if self.W.shape[0]>len(self.f):
@@ -319,6 +325,7 @@ class supervised_nmf:
       W=np.array(self.W[:,W_list])
         
     # Plot
+    x_lim=np.array([self.time_vec[H_list[0]], self.time_vec[H_list[-1]]])
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     if plot_type=='W':
       im = ax.imshow(W, origin='lower',  aspect='auto', cmap=cm.jet,
@@ -329,40 +336,28 @@ class supervised_nmf:
       cbar.set_label('Amplitude')
 
     elif plot_type=='H':
-      im = ax.imshow(self.H[W_list,:], origin='lower',  aspect='auto', cmap=cm.jet,
-                       extent=[self.time_vec[0], self.time_vec[-1], 0, len(W_list)], interpolation='none')
+      im = ax.imshow(self.H[W_list,:][:,H_list+int(self.feature_length/2)], origin='lower',  aspect='auto', cmap=cm.jet,
+                       extent=[x_lim[0], x_lim[1], 0, len(W_list)], interpolation='none')
       ax.set_ylabel('Basis')
       ax.set_xlabel('Time')
       cbar = fig.colorbar(im, ax=ax)
       cbar.set_label('Amplitude')
       
     elif plot_type=='reconstruction':
-      im = ax.imshow(self.reconstruct(source=source), origin='lower',  aspect='auto', cmap=cm.jet,
-                      extent=[self.time_vec[0], self.time_vec[-1], self.f[0], self.f[-1]], interpolation='none')
+      im = ax.imshow(self.reconstruct(source=source)[:,H_list], origin='lower',  aspect='auto', cmap=cm.jet,
+                      extent=[x_lim[0], x_lim[1], self.f[0], self.f[-1]], interpolation='none')
       ax.set_ylabel('Frequency')
       ax.set_xlabel('Time')
       cbar = fig.colorbar(im, ax=ax)
       cbar.set_label('Amplitude')
 
     elif plot_type=='separation':
-      im = ax.imshow(self.separation[source-1][:,1:].T, origin='lower',  aspect='auto', cmap=cm.jet,
-                      extent=[self.time_vec[0], self.time_vec[-1], self.f[0], self.f[-1]], interpolation='none')
+      im = ax.imshow(self.separation[source-1][H_list,:][:,1:].T, origin='lower',  aspect='auto', cmap=cm.jet,
+                      extent=[x_lim[0], x_lim[1], self.f[0], self.f[-1]], interpolation='none')
       ax.set_ylabel('Frequency')
       ax.set_xlabel('Time')
       cbar = fig.colorbar(im, ax=ax)
       cbar.set_label('Amplitude')
-
-    elif plot_type=='spl':
-      plt.plot(self.time_vec, self.original_level)
-      legend_text=np.array(['Original data'])
-      
-      for n in np.arange(int(np.max(self.W_cluster+1))):
-        plt.plot(self.time_vec, self.relative_level[n])
-        legend_text=np.append(legend_text, 'Source '+str(n+1))
-      
-      plt.xlabel('Time (sec)')
-      plt.ylabel('Amplitude')
-      plt.legend(legend_text)
 
   def learn_feature(self, input_data, f, alpha=1, l1_ratio=1, beta=2, method='NMF', show_result=True):   
     self.f=f
