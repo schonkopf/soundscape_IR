@@ -392,6 +392,21 @@ class pulse_interval:
 
   def autocorrelation(self, data, time_vec, duration, interval_range=None, plot_type='Both', millisec=True):
     import matplotlib.pyplot as plt
+    if plot_type=='Both':
+        fig, (ax1, ax2) = plt.subplots(nrows=2,figsize=(14, 12))
+    elif plot_type=='Time':
+        fig, ax1 = plt.subplots(figsize=(14, 6))
+    elif plot_type=='PI':
+        fig, ax2 = plt.subplots(figsize=(14, 6))
+
+    # plot the waveform
+    if plot_type=='Both' or plot_type=='Time':
+      ax1.plot(time_vec, data)
+      ax1.set_xlabel('Time')
+      ax1.set_ylabel('Amplitude')
+
+    data=data-np.min(data)
+    data=data/np.max(data)
     self.data=data
     PI=np.arange(-1*data.shape[0], data.shape[0])
     time_resolution=time_vec[1]-time_vec[0]
@@ -402,19 +417,6 @@ class pulse_interval:
     PI_list=np.where(PI_list)[0]
     self.PI=PI[PI_list]
     self.result=np.correlate(data, data, mode='full')[PI_list]
-    
-    # plot the waveform
-    if plot_type=='Both':
-        fig, (ax1, ax2) = plt.subplots(nrows=2,figsize=(14, 12))
-    elif plot_type=='Time':
-        fig, ax1 = plt.subplots(figsize=(14, 6))
-    elif plot_type=='PI':
-        fig, ax2 = plt.subplots(figsize=(14, 6))
-
-    if plot_type=='Both' or plot_type=='Time':
-      ax1.plot(time_vec, data)
-      ax1.set_xlabel('Time')
-      ax1.set_ylabel('Amplitude')
       
     if plot_type=='Both' or plot_type=='PI':
       ax2.plot(self.PI, self.result)
