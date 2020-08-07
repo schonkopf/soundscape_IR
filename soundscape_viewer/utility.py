@@ -4,6 +4,12 @@ Author: Tzu-Hao Harry Lin (schonkopf@gmail.com)
 """
 
 import numpy as np
+import pandas as pd
+import audioread
+import librosa
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+import os
 
 class gdrive_handle:
     def __init__(self, folder_id):
@@ -62,11 +68,7 @@ class save_parameters:
         self.channel=channel
 
 class audio_visualization:
-    def __init__(self, filename=None,  path=None, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0):
-        import audioread
-        import librosa
-        import os
-        
+    def __init__(self, filename=None,  path=None, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0, annotation=None, padding=0):
         if not path:
           path=os.getcwd()
         
@@ -74,19 +76,39 @@ class audio_visualization:
           # Get the sampling frequency
           with audioread.audio_open(path+'/'+filename) as temp:
               sf=temp.samplerate
-              
-          # load audio data
-          x, _ = librosa.load(filename, sr=sf, offset=offset_read, duration=duration_read)
-          self.x=x
           self.sf=sf
-          self.run(x, sf, offset_read, duration_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp)
-        
-    def run(self, x, sf, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0):
-        import scipy.signal
-        import librosa
-        import matplotlib.pyplot as plt
-        import matplotlib.cm as cm
 
+          # load audio data  
+          if annotation:
+            df = pd.read_table(annotation,index_col=0) 
+            for i in range(len(df)):
+              x, _ = librosa.load(filename, sr=sf, offset=df.iloc[i,2]-padding, duration=df.iloc[i,3]-df.iloc[i,2]+padding*2)
+              self.run(x, sf, df.iloc[i,2]-padding, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, None, vmin, vmax, prewhiten_percent, mel_comp)
+              if i==0:
+                spec = np.array(self.data)
+              else:
+                spec = np.vstack((spec, self.data))
+            spec[:,0]=np.arange(spec.shape[0])*(spec[1,0]-spec[0,0])
+            self.data=np.array(spec)
+
+            if plot_type=='Spectrogram':
+              fig, ax2 = plt.subplots(figsize=(14, 6))
+              im = ax2.imshow(self.data[:,1:].T, vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
+                          extent=[self.data[0,0], self.data[-1,0], self.f[0], self.f[-1]], interpolation='none')
+              ax2.set_ylabel('Frequency')
+              ax2.set_xlabel('Time')
+              cbar = fig.colorbar(im, ax=ax2)
+              cbar.set_label('PSD')
+            
+          else:
+            x, _ = librosa.load(filename, sr=sf, offset=offset_read, duration=duration_read)
+            self.x=x
+            self.run(x, sf, offset_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp)
+
+            
+    def run(self, x, sf, offset_read=0, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0):
+        import scipy.signal
+        
         if environment=='wat':
           P_ref=1
         elif environment=='air':
@@ -207,9 +229,7 @@ class matrix_operation:
         return save_result
 
     def spectral_variation(self, input_data, f, percentile=[], hour_selection=[], month_selection=[]):
-        import pandas as pd
-        
-        if not percentile:
+         if not percentile:
             percentile=np.arange(1,100)
         
         time_vec=input_data[:,0]
@@ -249,9 +269,6 @@ class matrix_operation:
         self.month_selection=month_selection
 
     def plot_psd(self, freq_scale='linear', amplitude_range=[], f_range=[], fig_width=6, fig_height=6):
-        import matplotlib.pyplot as plt
-        import matplotlib.cm as cm
-        
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
         cmap=cm.get_cmap('jet', len(self.percentile))
         cmap_table=cmap(range(len(self.percentile)))
@@ -281,10 +298,6 @@ class matrix_operation:
         cbar.set_label('Percentile')
     
     def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6):
-        import matplotlib.pyplot as plt
-        import matplotlib.cm as cm
-        import matplotlib.colors as co
-        
         temp=matrix_operation().gap_fill(time_vec=input_data[:,0], data=input_data[:,1:], tail=[])
         temp[:,0]=temp[:,0]+693960-366
         
@@ -348,7 +361,6 @@ class spectrogram_detection:
       self.save_txt(filename=filename, folder_id=folder_id)
 
   def save_txt(self, filename='Separation.txt',folder_id=[]):
-      import pandas as pd
       df = pd.DataFrame(self.output, columns = self.header) 
       df.to_csv(filename, sep='\t', index=False)
       print('Successifully save to '+filename)
@@ -360,12 +372,10 @@ class spectrogram_detection:
     
 class performance_evaluation:
   def __init__(self, label_filename):
-    import pandas as pd
     self.annotations = pd.read_table(label_filename,index_col=0)
 
   def spectrogram(self, ori_spec, test_spec, fpr_control=0.05, plot=True):
     from sklearn.metrics import roc_curve, auc
-    import matplotlib.pyplot as plt
     time_vec=ori_spec[:,0]
     label=0*time_vec
     for n in range(len(self.annotations)):
@@ -391,7 +401,6 @@ class pulse_interval:
     self.autocorrelation(data, time_vec, duration, interval_range, plot_type)
 
   def autocorrelation(self, data, time_vec, duration, interval_range=None, plot_type='Both', millisec=True):
-    import matplotlib.pyplot as plt
     if plot_type=='Both':
         fig, (ax1, ax2) = plt.subplots(nrows=2,figsize=(14, 12))
     elif plot_type=='Time':
