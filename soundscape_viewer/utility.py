@@ -229,7 +229,7 @@ class matrix_operation:
         return save_result
 
     def spectral_variation(self, input_data, f, percentile=[], hour_selection=[], month_selection=[]):
-         if not percentile:
+        if not percentile:
             percentile=np.arange(1,100)
         
         time_vec=input_data[:,0]
