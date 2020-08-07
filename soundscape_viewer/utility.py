@@ -298,8 +298,11 @@ class matrix_operation:
         cbar.set_label('Percentile')
     
     def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6, lts=True):
-        temp=matrix_operation().gap_fill(time_vec=input_data[:,0], data=input_data[:,1:], tail=[])
-        temp[:,0]=temp[:,0]+693960-366
+        if lts:
+            temp=matrix_operation().gap_fill(time_vec=input_data[:,0], data=input_data[:,1:], tail=[])
+            temp[:,0]=temp[:,0]+693960-366
+        else:
+            temp=input_data
         
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
         im = ax.imshow(temp[:,1:].T, vmin=vmin, vmax=vmax,
