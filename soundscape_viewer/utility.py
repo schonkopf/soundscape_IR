@@ -331,6 +331,7 @@ class spectrogram_detection:
       
       time_vec=input[:,0]
       data=input[:,1:]
+      begin=np.array([])
 
       if smooth>0:
         level = gaussian_filter(data, smooth)>threshold
@@ -345,11 +346,13 @@ class spectrogram_detection:
       
       if minimum_interval>0:
         remove_list=np.where((begin[1:]-ending[0:-1])>minimum_interval)[0]
-        begin=begin[np.append(0,remove_list+1)]
-        ending=ending[np.append(remove_list, len(ending)-1)]
-
-      begin=begin-pad_size
-      ending=ending+pad_size
+        if len(remove_list)>0:
+          begin=begin[np.append(0,remove_list+1)]
+          ending=ending[np.append(remove_list, len(ending)-1)]
+      
+      if len(begin)>0:
+        begin=begin-pad_size
+        ending=ending+pad_size
 
       min_F=np.array([])
       max_F=np.array([])
