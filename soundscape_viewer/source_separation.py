@@ -312,10 +312,9 @@ class supervised_nmf:
       W_list=np.arange(self.W.shape[1])
 
     # Only display part of the result
+    H_list=np.arange(len(self.time_vec))
     if time_range:
       H_list=np.where((self.time_vec>=time_range[0])*(self.time_vec<time_range[1])==1)[0]
-    else:
-      H_list=np.arange(len(self.time_vec))
 
     # Prepare W
     if self.W.shape[0]>len(self.f):
