@@ -147,9 +147,9 @@ class lts_maker:
     self.cloud=1
     print('Identified ', len(self.audioname), 'files')
     
-  def collect_Gdrive(self, folder_id):
+  def collect_Gdrive(self, folder_id, file_extension='.wav'):
     Gdrive=gdrive_handle(folder_id)
-    Gdrive.list_query(file_extension='.wav')
+    Gdrive.list_query(file_extension=file_extension)
     self.cloud=2
     self.link=np.array([], dtype=np.object)
     self.audioname=np.array([], dtype=np.object)
