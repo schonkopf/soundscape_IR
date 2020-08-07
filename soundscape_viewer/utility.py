@@ -297,7 +297,7 @@ class matrix_operation:
             cbar=fig.colorbar(cbar, ticks=self.percentile)
         cbar.set_label('Percentile')
     
-    def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6):
+    def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6, lts=True):
         temp=matrix_operation().gap_fill(time_vec=input_data[:,0], data=input_data[:,1:], tail=[])
         temp[:,0]=temp[:,0]+693960-366
         
@@ -306,11 +306,11 @@ class matrix_operation:
                        origin='lower',  aspect='auto', cmap=cm.jet,
                        extent=[np.min(temp[:,0]), np.max(temp[:,0]), f[0], f[-1]], interpolation='none')
         ax.set_ylabel('Frequency')
-        ax.set_xlabel('Date')
-        ax.xaxis_date()
+        if lts:
+            ax.set_xlabel('Date')
+            ax.xaxis_date()
         cbar = fig.colorbar(im, ax=ax)
         cbar.set_label('Amplitude')
-        
         return ax, cbar;
     
     def prewhiten(input_data, prewhiten_percent, axis):
