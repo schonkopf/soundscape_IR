@@ -88,7 +88,7 @@ class audio_visualization:
                 spec = np.array(self.data)
               else:
                 spec = np.vstack((spec, self.data))
-            spec[:,0]=np.arange(spec.shape[0])*(spec[1,0]-spec[0,0])
+            spec[:,0]=np.arange(spec.shape[0])*(spec[1,0]-spec[0,0])+spec[0,0]
             self.data=np.array(spec)
 
             if plot_type=='Spectrogram':
