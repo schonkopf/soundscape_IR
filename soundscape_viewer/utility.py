@@ -35,6 +35,12 @@ class gdrive_handle:
     def list_query(self, file_extension):
         location_cmd="title contains '"+file_extension+"' and '"+self.folder_id+"' in parents and trashed=false"
         self.file_list = self.Gdrive.ListFile({'q': location_cmd}).GetList()
+        
+    def list_display(self):
+        n=0
+        for file in self.Gdrive.file_list:
+            print('File No.'+str(n)+': '+file['title'])
+            n+=1
     
 class save_parameters:
     def __init__(self):
