@@ -38,7 +38,7 @@ class gdrive_handle:
         
     def list_display(self):
         n=0
-        for file in self.Gdrive.file_list:
+        for file in self.file_list:
             print('File No.'+str(n)+': '+file['title'])
             n+=1
     
