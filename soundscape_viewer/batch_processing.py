@@ -45,7 +45,7 @@ class batch_processing:
     print('Identified ', len(audioname), 'files')
     return Gdrive, link, audioname
 
-  def params_spectrogram(self, fft_size=512, environment='wav', time_resolution=None, window_overlap=0, f_range=[], prewhiten_percent=0, padding=0, folder_combine=False):
+  def params_spectrogram(self, fft_size=512, environment='wav', time_resolution=None, window_overlap=0, f_range=[], prewhiten_percent=0, padding=0, folder_combine=False, mel_comp=0):
     self.fft_size = fft_size 
     self.time_resolution = time_resolution
     self.window_overlap = window_overlap
@@ -57,6 +57,7 @@ class batch_processing:
     self.run_pulse_analysis=False
     self.folder_combine=folder_combine
     self.annotation_padding=padding
+    self.mel_comp=mel_comp
 
   def params_separation(self, model, iter=50, adaptive_alpha=0, additional_basis=0):
     self.model = model
@@ -129,7 +130,7 @@ class batch_processing:
       print('Processing file no. '+str(file+1)+' :'+temp['title']+', in total: '+str(len(self.audioname))+' files')
       if self.Raven_selections:
         audio = audio_visualization(self.audioname[file], path, FFT_size = self.fft_size, time_resolution=self.time_resolution, window_overlap=self.window_overlap, f_range = self.f_range, 
-                                    environment=self.environment, plot_type=None, prewhiten_percent=self.prewhiten_percent, annotation = temp2['title'], padding = self.annotation_padding)
+                                    environment=self.environment, plot_type=None, prewhiten_percent=self.prewhiten_percent, annotation = temp2['title'], padding = self.annotation_padding, mel_comp=self.mel_comp)
         if self.folder_combine:
           if file==0:
             folder_data=audio.data
