@@ -92,10 +92,14 @@ class audio_visualization:
               self.run(x, sf, df.iloc[i,2]-padding, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, None, vmin, vmax, prewhiten_percent, mel_comp)
               if i==0:
                 spec = np.array(self.data)
+                time_notation = (i+1)*np.ones((len(spec[:,0]),1),dtype = int)
               else:
                 spec = np.vstack((spec, self.data))
+                time_notation = np.vstack((time_notation, (i+1)*np.ones((len(spec[:,0]),1),dtype = int)))              
+
             spec[:,0]=np.arange(spec.shape[0])*(spec[1,0]-spec[0,0])
             self.data=np.array(spec)
+            self.time_notation=time_notation
 
             if plot_type=='Spectrogram':
               fig, ax2 = plt.subplots(figsize=(14, 6))
@@ -107,8 +111,8 @@ class audio_visualization:
                 ymin, ymax = ax2.get_ylim()
                 N=6
                 ax2.set_yticks(np.round(np.linspace(ymin, ymax, N), 2)) 
-                idx = np.linspace(0, len(f)-1, N, dtype = 'int')
-                yticks = f[idx]+0.5
+                idx = np.linspace(0, len(self.f)-1, N, dtype = 'int')
+                yticks = self.f[idx]+0.5
                 ax2.set_yticklabels(yticks.astype(int))
               cbar = fig.colorbar(im, ax=ax2)
               cbar.set_label('PSD')
