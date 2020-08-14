@@ -103,6 +103,13 @@ class audio_visualization:
                           extent=[self.data[0,0], self.data[-1,0], self.f[0], self.f[-1]], interpolation='none')
               ax2.set_ylabel('Frequency')
               ax2.set_xlabel('Time')
+              if(mel_comp > 0):
+                ymin, ymax = ax2.get_ylim()
+                N=6
+                ax2.set_yticks(np.round(np.linspace(ymin, ymax, N), 2)) 
+                idx = np.linspace(0, len(f)-1, N, dtype = 'int')
+                yticks = f[idx]+0.5
+                ax2.set_yticklabels(yticks.astype(int))
               cbar = fig.colorbar(im, ax=ax2)
               cbar.set_label('PSD')
             
@@ -187,6 +194,13 @@ class audio_visualization:
                        extent=[t[0], t[-1], f[0], f[-1]], interpolation='none')
           ax2.set_ylabel('Frequency')
           ax2.set_xlabel('Time')
+          if(mel_comp > 0):
+              ymin, ymax = ax2.get_ylim()
+              N=6
+              ax2.set_yticks(np.round(np.linspace(ymin, ymax, N), 2)) 
+              idx = np.linspace(0, len(f)-1, N, dtype = 'int')
+              yticks = f[idx]+0.5
+              ax2.set_yticklabels(yticks.astype(int))
           cbar = fig.colorbar(im, ax=ax2)
           cbar.set_label('PSD')
 
