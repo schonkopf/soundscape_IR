@@ -92,10 +92,10 @@ class audio_visualization:
               self.run(x, sf, df.iloc[i,2]-padding, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, None, vmin, vmax, prewhiten_percent, mel_comp)
               if i==0:
                 spec = np.array(self.data)
-                time_notation = (i+1)*np.ones((len(spec[:,0]),1),dtype = int)
+                time_notation = (i+1)*np.ones((spec.shape[0],1),dtype = int)
               else:
                 spec = np.vstack((spec, self.data))
-                time_notation = np.vstack((time_notation, (i+1)*np.ones((len(spec[:,0]),1),dtype = int)))              
+                time_notation = np.vstack((time_notation, (i+1)*np.ones((self.data.shape[0],1),dtype = int)))              
 
             spec[:,0]=np.arange(spec.shape[0])*(spec[1,0]-spec[0,0])
             self.data=np.array(spec)
