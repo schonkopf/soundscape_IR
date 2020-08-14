@@ -134,11 +134,15 @@ class batch_processing:
         if self.folder_combine:
           if file==0:
             folder_data=audio.data
+            time_notation=np.add((file+1)*np.ones((audio.data.shape[0],1),dtype = int)*10000, audio.time_notation)
           else:
             folder_data=np.vstack((folder_data, audio.data))
+            time_notation = np.vstack((time_notation, np.add((file+1)*np.ones((audio.data.shape[0],1),dtype = int)*10000, audio.time_notation)))
+            
           folder_data[:,0]=np.arange(folder_data.shape[0])*(folder_data[1,0]-folder_data[0,0])
           self.spectrogram=np.array(folder_data)
           self.f=np.array(audio.f)
+          self.time_notation=time_notation
       else:
         audio = audio_visualization(self.audioname[file], path, FFT_size = self.fft_size, time_resolution=self.time_resolution, window_overlap=self.window_overlap, f_range = self.f_range,
                                   environment=self.environment, plot_type=None, prewhiten_percent=self.prewhiten_percent)
