@@ -348,6 +348,14 @@ class matrix_operation:
         elif axis==1:
             input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1).T)
         return input_data
+    
+    def frame_normalization(input, axis=0):
+        if axis==0:
+            input=input/np.matlib.repmat(np.sum(input, axis=axis),input.shape[0],1)
+        elif axis==1:
+            input=input/np.matlib.repmat(np.sum(input, axis=axis).T,input.shape[1],1).T
+        input[np.isnan(input)]=0
+        return input
 
 class spectrogram_detection:
   def __init__(self, input, f, threshold, smooth=3, frequency_cut=25, minimum_interval=0, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[]):
