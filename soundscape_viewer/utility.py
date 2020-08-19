@@ -424,13 +424,12 @@ class performance_evaluation:
       plt.show()
 
 class pulse_interval:
-  def __init__(self, sound, energy_percentile=50, interval_range=None, plot_type='Both'):
-    duration=len(sound.x)/sound.sf
-    data=np.percentile(sound.data[:,1:], energy_percentile, axis=1)
-    time_vec=sound.data[:,0]
-    self.autocorrelation(data, time_vec, duration, interval_range, plot_type)
+  def __init__(self, spectrogram, energy_percentile=50, interval_range=None, plot_type='Both'):
+    data=np.percentile(spectrogram[:,1:], energy_percentile, axis=1)
+    time_vec=spectrogram[:,0]
+    self.autocorrelation(data, time_vec, interval_range, plot_type)
 
-  def autocorrelation(self, data, time_vec, duration, interval_range=None, plot_type='Both', millisec=True):
+  def autocorrelation(self, data, time_vec, interval_range=None, plot_type='Both', millisec=True):
     if plot_type=='Both':
         fig, (ax1, ax2) = plt.subplots(nrows=2,figsize=(14, 12))
     elif plot_type=='Time':
