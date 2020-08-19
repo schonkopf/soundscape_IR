@@ -162,9 +162,9 @@ class batch_processing:
 
       if self.run_pulse_analysis:
         if self.run_separation:
-          pulse_analysis_result=pulse_interval(model.separation[self.source[n]-1], self.energy_percentile, self.interval_range, plot_type= None)
+          pulse_analysis_result=pulse_interval(model.separation[self.source-1], self.energy_percentile, self.interval_range, plot_type= None)
         else:
-          pulse_analysis_result=pulse_interval(audio, self.energy_percentile, self.interval_range, plot_type= None)
+          pulse_analysis_result=pulse_interval(audio.data, self.energy_percentile, self.interval_range, plot_type= None)
         if file==0:
           self.result=pulse_analysis_result.result[None]
           self.PI=pulse_analysis_result.PI
