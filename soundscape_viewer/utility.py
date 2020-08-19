@@ -349,10 +349,18 @@ class matrix_operation:
             input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1).T)
         return input_data
     
-    def frame_normalization(input, axis=0):
+    def frame_normalization(input, axis=0, type='min-max'):
         if axis==0:
+          if type=='min-max':
+            input=input-np.matlib.repmat(np.min(input, axis=axis),input.shape[0],1)
+            input=input/np.matlib.repmat(np.max(input, axis=axis),input.shape[0],1)
+          elif type=='sum':
             input=input/np.matlib.repmat(np.sum(input, axis=axis),input.shape[0],1)
         elif axis==1:
+          if type=='min-max':
+            input=input-np.matlib.repmat(np.min(input, axis=axis).T,input.shape[1],1).T
+            input=input/np.matlib.repmat(np.max(input, axis=axis).T,input.shape[1],1).T
+          elif type=='sum':
             input=input/np.matlib.repmat(np.sum(input, axis=axis).T,input.shape[1],1).T
         input[np.isnan(input)]=0
         return input
