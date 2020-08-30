@@ -371,6 +371,14 @@ class matrix_operation:
             input=input/np.matlib.repmat(np.sum(input, axis=axis).T,input.shape[1],1).T
         input[np.isnan(input)]=0
         return input
+    
+    def max_pooling(input, sample=3):
+        output=np.zeros([input.shape[0],int(sample*np.ceil(input.shape[1]/sample))])
+        output[:,0:input.shape[1]]=input
+        output=np.reshape(output, (-1,int(output.shape[1]/sample)))
+        output=np.max(output, axis=1)
+        output=np.reshape(output,(-1,sample))
+        return output
 
 class spectrogram_detection:
   def __init__(self, input, f, threshold, smooth=3, frequency_cut=25, minimum_interval=0, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[]):
