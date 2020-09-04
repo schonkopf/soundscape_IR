@@ -119,7 +119,7 @@ class audio_visualization:
             
           else:
             x, _ = librosa.load(filename, sr=sf, offset=offset_read, duration=duration_read)
-            self.x=x
+            self.x=x-np.mean(x)
             self.run(x, sf, offset_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp)
 
             
@@ -157,9 +157,8 @@ class audio_visualization:
             if read_interval[1]>len(x):
               read_interval[1]=len(x)
             if read_interval[1]-read_interval[0]>=samples:
-              f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=samples, 
-                                               noverlap=int(window_overlap*samples), nfft=FFT_size, return_onesided=True, mode='psd')
-              P = P/np.power(P_ref,2)
+              f,t,P = scipy.signal.stft(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window='hann', nperseg=samples, noverlap=int(window_overlap*FFT_size), nfft=FFT_size, detrend='constant', boundary=None, padded=False)
+              P = np.abs(P)/np.power(P_ref,2)
               if segment_run==0:
                 data=10*np.log10(np.mean(P,axis=1))-sensitivity
               else:
@@ -167,9 +166,8 @@ class audio_visualization:
           data=data.T
           t=np.arange(time_resolution-time_resolution/2, time_resolution*(data.shape[1]), time_resolution)
         else:
-          f,t,P = scipy.signal.spectrogram(x, fs=sf, window=('hann'), nperseg=FFT_size, 
-                                           noverlap=int(window_overlap*FFT_size), nfft=FFT_size, return_onesided=True, mode='psd')
-          data = 10*np.log10(P/np.power(P_ref,2))-sensitivity
+          f,t,P = scipy.signal.stft(x, fs=sf, window='hann', nperseg=FFT_size, noverlap=int(window_overlap*FFT_size), nfft=FFT_size, detrend='constant', boundary=None, padded=False)
+          data = 10*np.log10(np.abs(P)/np.power(P_ref,2))-sensitivity
         t=t+offset_read
         
         if mel_comp>0:
@@ -190,6 +188,7 @@ class audio_visualization:
             
         f=f[f_list]
         data=data[f_list,:]
+        P=P[f_list,:]
         
         # plot the spectrogram
         if plot_type=='Both' or plot_type=='Spectrogram':
@@ -210,6 +209,8 @@ class audio_visualization:
 
         self.data=np.hstack((t[:,None],data.T))
         self.f=f
+        if not time_resolution:
+          self.phase=np.angle(P)
         
 class matrix_operation:
     def __init__(self, header=[]):
