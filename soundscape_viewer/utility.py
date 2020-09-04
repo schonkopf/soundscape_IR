@@ -456,10 +456,14 @@ class performance_evaluation:
       plt.show()
 
 class pulse_interval:
-  def __init__(self, spectrogram, energy_percentile=50, interval_range=None, plot_type='Both'):
-    data=np.percentile(spectrogram[:,1:], energy_percentile, axis=1)
-    time_vec=spectrogram[:,0]
-    self.autocorrelation(data, time_vec, interval_range, plot_type)
+  def __init__(self, data, sf=None, energy_percentile=50, interval_range=None, plot_type='Both'):
+    if len(data.shape)==2:
+      input=np.percentile(data[:,1:], energy_percentile, axis=1)
+      time_vec=data[:,0]
+    elif len(data.shape)==1:
+      input=np.power(data,2)
+      time_vec=np.arange(len(data))/sf
+    self.autocorrelation(input, time_vec, interval_range, plot_type)
 
   def autocorrelation(self, data, time_vec, interval_range=None, plot_type='Both', millisec=True):
     if plot_type=='Both':
@@ -490,5 +494,5 @@ class pulse_interval:
       
     if plot_type=='Both' or plot_type=='PI':
       ax2.plot(self.PI, self.result)
-      ax2.set_xlabel('Pulse interval')
+      ax2.set_xlabel('Lagged time (ms)')
       ax2.set_ylabel('Correlation coefficient')
