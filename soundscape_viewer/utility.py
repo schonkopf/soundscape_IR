@@ -419,6 +419,7 @@ class spectrogram_detection:
           min_F=np.append(min_F, np.min(f_temp))
           max_F=np.append(max_F, np.max(f_temp))
       self.output=np.vstack([np.arange(len(begin))+1, np.repeat('Spectrogram',len(begin)), np.repeat(1,len(begin)), begin, ending, min_F, max_F]).T
+      self.detection=np.vstack((begin, ending)).T
       self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)']
       if filename:
         self.save_txt(filename=filename, folder_id=folder_id)
