@@ -225,8 +225,8 @@ class pcnmf:
       
   def save_model(self, filename='NMF_model.mat', folder_id=[]):
     #import save_parameters
-    pcnmf_model=save_parameters()
-    pcnmf_model.pcnmf(self.f, self.W, self.W_cluster, self.source_num, self.feature_length, self.basis_num)
+    nmf_model=save_parameters()
+    nmf_model.pcnmf(self.f, self.W, self.W_cluster, self.source_num, self.feature_length, self.basis_num)
     savemat(filename, {'save_nmf':nmf_model})
     print('Successifully save to '+filename)
     
