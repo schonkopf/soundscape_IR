@@ -463,8 +463,11 @@ class pulse_interval:
       input=np.percentile(data[:,1:], energy_percentile, axis=1)
       time_vec=data[:,0]
     elif len(data.shape)==1:
-      input=10*np.log10(np.power(data,2))
+      data=data/np.max(np.abs(data))
+      #input=np.power(data,2)
+      input=np.abs(hilbert(data))
       time_vec=np.arange(len(data))/sf
+    self.data=data
     self.autocorrelation(input, time_vec, interval_range, plot_type)
 
   def autocorrelation(self, data, time_vec, interval_range=None, plot_type='Both', millisec=True):
@@ -477,13 +480,12 @@ class pulse_interval:
 
     # plot the waveform
     if plot_type=='Both' or plot_type=='Time':
-      ax1.plot(time_vec, data)
+      ax1.plot(time_vec, self.data)
       ax1.set_xlabel('Time')
       ax1.set_ylabel('Amplitude')
 
-    data=data-np.min(data)
-    data=data/np.max(data)
-    self.data=data
+    data=data-np.median(data)
+    data=data/np.max(np.abs(data))
     PI=np.arange(-1*data.shape[0], data.shape[0])
     time_resolution=time_vec[1]-time_vec[0]
     if millisec:
@@ -497,4 +499,4 @@ class pulse_interval:
     if plot_type=='Both' or plot_type=='PI':
       ax2.plot(self.PI, self.result)
       ax2.set_xlabel('Lagged time (ms)')
-      ax2.set_ylabel('Correlation coefficient')
+      ax2.set_ylabel('Correlation score')
