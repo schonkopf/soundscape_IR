@@ -74,7 +74,7 @@ class lts_viewer:
           self.Result_mean=self.Result_mean[temp,:]
           self.Result_diff=self.Result_diff[temp,:]
   
-  def collect_folder(self, path, f_range=[], time_sort=1):
+  def collect_folder(self, path='.', f_range=[], time_sort=1):
       items = os.listdir(path)
       for names in items:
         if names.endswith(".mat"):
