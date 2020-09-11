@@ -463,7 +463,7 @@ class pulse_interval:
       input=np.percentile(data[:,1:], energy_percentile, axis=1)
       time_vec=data[:,0]
     elif len(data.shape)==1:
-      input=np.power(data,2)
+      input=10*np.log10(np.power(data,2))
       time_vec=np.arange(len(data))/sf
     self.autocorrelation(input, time_vec, interval_range, plot_type)
 
