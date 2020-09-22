@@ -459,6 +459,7 @@ class performance_evaluation:
 
 class pulse_interval:
   def __init__(self, data, sf=None, energy_percentile=50, interval_range=None, plot_type='Both'):
+    from scipy.signal import hilbert
     if len(data.shape)==2:
       input=np.percentile(data[:,1:], energy_percentile, axis=1)
       time_vec=data[:,0]
