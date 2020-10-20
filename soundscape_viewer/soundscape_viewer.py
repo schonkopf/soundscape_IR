@@ -141,7 +141,7 @@ class lts_viewer:
     
     return cbar1, cbar2, cbar3;
 
-  def input_selection(self, var_name='median', begin_date=[], end_date=[], f_range=[], prewhiten_percent=0, threshold=0):
+  def input_selection(self, var_name='median', begin_date=[], end_date=[], f_range=[], prewhiten_percent=0, threshold=0, annotation=None, padding=0, annotation_target=None):
     if var_name=='median':
       input_data=self.Result_median
     elif var_name=='mean':
@@ -154,55 +154,63 @@ class lts_viewer:
     
     # f_range: Hz
     if f_range:
-        f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
-        f_list=np.where(f_list==True)[0]
+      f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
+      f_list=np.where(f_list==True)[0]
     else:
-        f_list=np.arange(len(self.f))
+      f_list=np.arange(len(self.f))
     
     f=self.f[f_list]
     f_list=np.concatenate([np.array([0]), f_list+1])
-    
-    # format of begin_date: yyyymmdd or yyyymmdd_HHMMSS
-    if begin_date:
-      yy=int(begin_date[0:4])
-      mm=int(begin_date[4:6])
-      dd=int(begin_date[6:8])
-      frac=0
-      if len(begin_date)>8:
-        HH=int(begin_date[9:11])
-        MM=int(begin_date[11:13])
-        SS=int(begin_date[13:15])
-        frac=((SS/60+MM)/60+HH)/24
-      date=datetime.datetime(yy,mm,dd)
-      begin_time=date.toordinal()+366+frac
-      list=self.Result_median[:,0:1]>=begin_time
-      if end_date:
-            yy=int(end_date[0:4])
-            mm=int(end_date[4:6])
-            dd=int(end_date[6:8])
-            frac=0
-            if len(end_date)>8:
-              HH=int(end_date[9:11])
-              MM=int(end_date[11:13])
-              SS=int(end_date[13:15])
-              frac=((SS/60+MM)/60+HH)/24
-            date=datetime.datetime(yy,mm,dd)
-            end_time=date.toordinal()+366+frac
-      else:
-            end_time=begin_time+1
-      list=list*(self.Result_median[:,0:1]<end_time)
-      list=np.where(list==True)[0]
+
+    if annotation:
+      df = pd.read_csv(annotation,index_col=0) 
+      df = df[df['sound_type']==annotation_target]
+      list=np.empty([0,1], dtype='int')
+      for i in range(len(df)):
+        list=np.append(list,np.where((input_data[:,0]>=df.iloc[i,2]+693960-padding)*(input_data[:,0]<=df.iloc[i,3]+693960+padding)==True)[0])
+
     else:
-      list=np.arange(self.Result_median.shape[0])
+      # format of begin_date: yyyymmdd or yyyymmdd_HHMMSS
+      if begin_date:
+        yy=int(begin_date[0:4])
+        mm=int(begin_date[4:6])
+        dd=int(begin_date[6:8])
+        frac=0
+        if len(begin_date)>8:
+          HH=int(begin_date[9:11])
+          MM=int(begin_date[11:13])
+          SS=int(begin_date[13:15])
+          frac=((SS/60+MM)/60+HH)/24
+        date=datetime.datetime(yy,mm,dd)
+        begin_time=date.toordinal()+366+frac
+        list=self.Result_median[:,0:1]>=begin_time
+        if end_date:
+          yy=int(end_date[0:4])
+          mm=int(end_date[4:6])
+          dd=int(end_date[6:8])
+          frac=0
+          if len(end_date)>8:
+            HH=int(end_date[9:11])
+            MM=int(end_date[11:13])
+            SS=int(end_date[13:15])
+            frac=((SS/60+MM)/60+HH)/24
+          date=datetime.datetime(yy,mm,dd)
+          end_time=date.toordinal()+366+frac
+        else:
+          end_time=begin_time+1
+        list=list*(self.Result_median[:,0:1]<end_time)
+        list=np.where(list==True)[0]
+      else:
+        list=np.arange(self.Result_median.shape[0])
     input_data=input_data[:,f_list]
     input_data=input_data[list,:]
     
     if len(input_data)>1:
       time_vec=input_data[:,0]
       if prewhiten_percent>0:
-          input_data=matrix_operation.prewhiten(input_data, prewhiten_percent, 0)
-          input_data[input_data<threshold]=threshold
-          input_data[:,0]=time_vec
+        input_data=matrix_operation.prewhiten(input_data, prewhiten_percent, 0)
+        input_data[input_data<threshold]=threshold
+        input_data[:,0]=time_vec
       return input_data, f;
     
 class data_organize:
