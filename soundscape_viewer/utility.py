@@ -391,6 +391,8 @@ class spectrogram_detection:
 
       if smooth>0:
         level = gaussian_filter(data, smooth)>threshold
+      elif smooth==0:
+        level = data>
       level=level.astype(int).sum(axis = 1)>frequency_count
       begin=time_vec[np.where(np.diff(level.astype(int),1)==1)[0]]
       ending=time_vec[np.where(np.diff(level.astype(int),1)==-1)[0]+1]
