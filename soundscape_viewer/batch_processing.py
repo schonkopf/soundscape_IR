@@ -127,7 +127,7 @@ class batch_processing:
       else:
         path=self.link
 
-      print('Processing file no. '+str(file+1)+' :'+temp['title']+', in total: '+str(len(self.audioname))+' files')
+      print('Processing file no. '+str(file+1)+' :'+self.audioname[file]+', in total: '+str(len(self.audioname))+' files')
       if self.Raven_selections:
         audio = audio_visualization(self.audioname[file], path, FFT_size = self.fft_size, time_resolution=self.time_resolution, window_overlap=self.window_overlap, f_range = self.f_range, 
                                     environment=self.environment, plot_type=None, prewhiten_percent=self.prewhiten_percent, annotation = temp2['title'], padding = self.annotation_padding, mel_comp=self.mel_comp)
