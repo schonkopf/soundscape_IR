@@ -118,7 +118,7 @@ class audio_visualization:
               cbar.set_label('PSD')
             
           else:
-            x, _ = librosa.load(filename, sr=sf, offset=offset_read, duration=duration_read)
+            x, _ = librosa.load(path+'/'+filename, sr=sf, offset=offset_read, duration=duration_read)
             self.x=x-np.mean(x)
             self.run(x, sf, offset_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp)
 
