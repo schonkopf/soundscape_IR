@@ -222,19 +222,18 @@ class lts_maker:
           read_interval[0]=self.skip_duration*sf
         if read_interval[1]>len(x):
           read_interval[1]=len(x)
-        
-        f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=self.FFT_size, 
-                                       noverlap=self.overlap, nfft=self.FFT_size, return_onesided=True, mode='psd')
-        P = P/np.power(self.pref,2)
-                
-        if Result_median.size == 0:
-          Result_median=np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.median(P,axis=1))-self.sen))
-          Result_mean=np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.mean(P,axis=1))-self.sen))
-        else:
-          Result_median=np.vstack((np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),
-                                              10*np.log10(np.median(P,axis=1))-self.sen)), Result_median))
-          Result_mean=np.vstack((np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.mean(P,axis=1))-self.sen)), Result_mean))
-      
+        if read_interval[1]-read_interval[0]>(0.5*self.time_resolution*sf):
+          f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=self.FFT_size, 
+                                         noverlap=self.overlap, nfft=self.FFT_size, return_onesided=True, mode='psd')
+          P = P/np.power(self.pref,2)
+          if Result_median.size == 0:
+            Result_median=np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.median(P,axis=1))-self.sen))
+            Result_mean=np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.mean(P,axis=1))-self.sen))
+          else:
+            Result_median=np.vstack((np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),
+                                                10*np.log10(np.median(P,axis=1))-self.sen)), Result_median))
+            Result_mean=np.vstack((np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.mean(P,axis=1))-self.sen)), Result_mean))
+
       if self.cloud>=1:
         os.remove(self.audioname[file])
     
