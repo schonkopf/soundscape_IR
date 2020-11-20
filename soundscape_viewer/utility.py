@@ -87,9 +87,11 @@ class audio_visualization:
           # load audio data  
           if annotation:
             df = pd.read_table(annotation,index_col=0) 
+            idx_st = np.where(df.columns.values == 'Begin Time (s)')[0][0]
+            idx_et = np.where(df.columns.values == 'End Time (s)')[0][0]
             for i in range(len(df)):
-              x, _ = librosa.load(filename, sr=sf, offset=df.iloc[i,2]-padding, duration=df.iloc[i,3]-df.iloc[i,2]+padding*2)
-              self.run(x, sf, df.iloc[i,2]-padding, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, None, vmin, vmax, prewhiten_percent, mel_comp)
+              x, _ = librosa.load(filename, sr=sf, offset=df.iloc[i,idx_st]-padding, duration=df.iloc[i,idx_et]-df.iloc[i,idx_st]+padding*2)
+              self.run(x, sf, df.iloc[i,idx_st]-padding, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, None, vmin, vmax, prewhiten_percent, mel_comp)
               if i==0:
                 spec = np.array(self.data)
                 time_notation = (i+1)*np.ones((spec.shape[0],1),dtype = int)
