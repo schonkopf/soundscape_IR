@@ -132,8 +132,7 @@ class pcnmf:
     return data
 
   def pcnmf_output(self, data, time_vec, baseline=0):
-    data=data+baseline
-    self.original_level = 10*np.log10((10**(data.T[:,1:]/10)).sum(axis=1))
+    self.original_level = 10*np.log10((10**((data+baseline).T[:,1:]/10)).sum(axis=1))
     separation=np.zeros(self.source_num, dtype=np.object)
     relative_level=np.zeros(self.source_num, dtype=np.object)
     matrix_shape=data.shape
