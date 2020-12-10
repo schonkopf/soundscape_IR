@@ -512,7 +512,7 @@ class tonal_detection:
     self.temporal_prewhiten=temporal_prewhiten
     self.spectral_prewhiten=spectral_prewhiten
   
-  def local_max(self, input, threshold=None):
+  def local_max(self, input, f, threshold=None):
     # Do vertical and horizontal prewhitening
     temp0=input[:,1:]
     if self.temporal_prewhiten:
@@ -542,7 +542,7 @@ class tonal_detection:
       rc=np.nonzero(temp>threshold)
       amp=temp.flatten()
       amp=amp[np.where((amp>threshold))[0]]
-      detection=pd.DataFrame(np.hstack((input[rc[0],0:1], clip.f[rc[1]][:,None], amp[:,None])), columns = ['Time','Frequency','Strength']) 
+      detection=pd.DataFrame(np.hstack((input[rc[0],0:1], f[rc[1]][:,None], amp[:,None])), columns = ['Time','Frequency','Strength']) 
     else:
       detection=np.array([])
 
