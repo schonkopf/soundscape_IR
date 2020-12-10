@@ -512,7 +512,7 @@ class tonal_detection:
     self.temporal_prewhiten=temporal_prewhiten
     self.spectral_prewhiten=spectral_prewhiten
   
-  def local_max(self, input, f, threshold=None):
+  def local_max(self, input, f, threshold=None, smooth=2):
     # Do vertical and horizontal prewhitening
     temp0=input[:,1:]
     if self.temporal_prewhiten:
@@ -529,13 +529,7 @@ class tonal_detection:
 
     #Smooth the spectrogram
     from scipy.ndimage import gaussian_filter
-    temp=gaussian_filter(temp, sigma=2)
-      
-    #normalize the energy 
-    temp=matrix_operation.frame_normalization(temp, axis=1, type='min-max')
-    #temp=frame_normalization(temp, axis=1) # It may still be better to normalize the energy of each frame 
-    temp[np.isnan(temp)]=0
-    output=np.hstack((input[:,0:1], temp))
+    temp=gaussian_filter(temp, sigma=smooth)
 
     # produce detection result
     if threshold:
@@ -543,7 +537,13 @@ class tonal_detection:
       amp=temp.flatten()
       amp=amp[np.where((amp>threshold))[0]]
       detection=pd.DataFrame(np.hstack((input[rc[0],0:1], f[rc[1]][:,None], amp[:,None])), columns = ['Time','Frequency','Strength']) 
+      temp[temp<threshold]=threshold
     else:
       detection=np.array([])
+      
+    #normalize the energy 
+    temp=matrix_operation.frame_normalization(temp, axis=1, type='min-max')
+    temp[np.isnan(temp)]=0
+    output=np.hstack((input[:,0:1], temp))
 
     return output, detection
