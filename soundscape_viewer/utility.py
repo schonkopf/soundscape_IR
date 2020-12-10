@@ -505,3 +505,45 @@ class pulse_interval:
       ax2.plot(self.PI, self.result)
       ax2.set_xlabel('Lagged time (ms)')
       ax2.set_ylabel('Correlation score')
+    
+class tonal_detection:
+  def __init__(self, tonal_threshold=12, temporal_prewhiten=50, spectral_prewhiten=50):
+    self.tonal_threshold=tonal_threshold
+    self.temporal_prewhiten=temporal_prewhiten
+    self.spectral_prewhiten=spectral_prewhiten
+  
+  def local_max(self, input, threshold=None):
+    # Do vertical and horizontal prewhitening
+    temp0=input[:,1:]
+    if self.temporal_prewhiten:
+      temp0=matrix_operation.prewhiten(temp0, prewhiten_percent=self.temporal_prewhiten, axis=0)
+    if self.spectral_prewhiten:
+      temp0=matrix_operation.prewhiten(temp0, prewhiten_percent=self.spectral_prewhiten, axis=1)
+
+    # Applying local-max detector to extract whistle contours
+    temp=(-1*np.diff(temp0,n=2,axis=1))>self.tonal_threshold
+    temp=np.hstack((np.zeros([temp.shape[0],1]),temp))
+    temp=np.hstack((temp,np.zeros([temp.shape[0],1])))
+    temp=temp*temp0
+    temp[temp<0]=0
+
+    #Smooth the spectrogram
+    from scipy.ndimage import gaussian_filter
+    temp=gaussian_filter(temp, sigma=2)
+      
+    #normalize the energy 
+    temp=matrix_operation.frame_normalization(temp, axis=1, type='min-max')
+    #temp=frame_normalization(temp, axis=1) # It may still be better to normalize the energy of each frame 
+    temp[np.isnan(temp)]=0
+    output=np.hstack((input[:,0:1], temp))
+
+    # produce detection result
+    if threshold:
+      rc=np.nonzero(temp>threshold)
+      amp=temp.flatten()
+      amp=amp[np.where((amp>threshold))[0]]
+      detection=pd.DataFrame(np.hstack((test[rc[0],0:1], clip.f[rc[1]][:,None], amp[:,None])), columns = ['Time','Frequency','Strength']) 
+    else:
+      detection=np.array([])
+
+    return output, detection
