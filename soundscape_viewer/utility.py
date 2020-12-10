@@ -542,7 +542,7 @@ class tonal_detection:
       rc=np.nonzero(temp>threshold)
       amp=temp.flatten()
       amp=amp[np.where((amp>threshold))[0]]
-      detection=pd.DataFrame(np.hstack((test[rc[0],0:1], clip.f[rc[1]][:,None], amp[:,None])), columns = ['Time','Frequency','Strength']) 
+      detection=pd.DataFrame(np.hstack((input[rc[0],0:1], clip.f[rc[1]][:,None], amp[:,None])), columns = ['Time','Frequency','Strength']) 
     else:
       detection=np.array([])
 
