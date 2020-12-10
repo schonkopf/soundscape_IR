@@ -513,7 +513,7 @@ class tonal_detection:
     self.spectral_prewhiten=spectral_prewhiten
   
   def local_max(self, input, f, threshold=None, smooth=2):
-    #Smooth the spectrogram
+    # Smooth the spectrogram
     from scipy.ndimage import gaussian_filter
     temp0=gaussian_filter(input[:,1:], sigma=smooth)
 
@@ -531,10 +531,10 @@ class tonal_detection:
     temp2=temp*temp0
     temp2[temp2<0]=0
 
-    #Smooth the spectrogram
+    # Smooth the extracted fragments
     temp2=gaussian_filter(temp2, sigma=smooth)
 
-    # produce detection result
+    # Generate detection result (need to apply an occupancy filter)
     if threshold:
       temp3=temp*temp0
       rc=np.nonzero((temp3)>threshold)
@@ -545,7 +545,7 @@ class tonal_detection:
     else:
       detection=np.array([])
       
-    #normalize the energy 
+    # Normalize the energy scale
     temp2=matrix_operation.frame_normalization(temp2, axis=1, type='min-max')
     temp2[np.isnan(temp)]=0
     output=np.hstack((input[:,0:1], temp2))
