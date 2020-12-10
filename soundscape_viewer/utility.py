@@ -513,17 +513,18 @@ class tonal_detection:
     self.spectral_prewhiten=spectral_prewhiten
   
   def local_max(self, input, f, threshold=None, smooth=2):
-    # Smooth the spectrogram
-    from scipy.ndimage import gaussian_filter
-    temp0=gaussian_filter(input[:,1:], sigma=smooth)
-
     # Do vertical and horizontal prewhitening
     temp0=input[:,1:]
-    if self.temporal_prewhiten:
-      temp0=matrix_operation.prewhiten(temp0, prewhiten_percent=self.temporal_prewhiten, axis=0)
     if self.spectral_prewhiten:
       temp0=matrix_operation.prewhiten(temp0, prewhiten_percent=self.spectral_prewhiten, axis=1)
+    if self.temporal_prewhiten:
+      temp0=matrix_operation.prewhiten(temp0, prewhiten_percent=self.temporal_prewhiten, axis=0)
+    temp0[temp0<0]=0
 
+    # Smooth the spectrogram
+    from scipy.ndimage import gaussian_filter
+    temp0=gaussian_filter(temp0, sigma=smooth)
+    
     # Applying local-max detector to extract whistle contours
     temp=(-1*np.diff(temp0,n=2,axis=1))>self.tonal_threshold
     temp=np.hstack((np.zeros([temp.shape[0],1]),temp))
@@ -531,10 +532,10 @@ class tonal_detection:
     temp2=temp*temp0
     temp2[temp2<0]=0
 
-    # Smooth the extracted fragments
+    # Smooth the contour fragments
     temp2=gaussian_filter(temp2, sigma=smooth)
 
-    # Generate detection result (need to apply an occupancy filter)
+    # Produce detection result
     if threshold:
       temp3=temp*temp0
       rc=np.nonzero((temp3)>threshold)
@@ -545,7 +546,7 @@ class tonal_detection:
     else:
       detection=np.array([])
       
-    # Normalize the energy scale
+    # Normalize energy variations 
     temp2=matrix_operation.frame_normalization(temp2, axis=1, type='min-max')
     temp2[np.isnan(temp)]=0
     output=np.hstack((input[:,0:1], temp2))
