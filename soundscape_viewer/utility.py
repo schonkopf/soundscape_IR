@@ -352,6 +352,10 @@ class matrix_operation:
     
     def prewhiten(input_data, prewhiten_percent, axis):
         import numpy.matlib
+        list=np.where(np.abs(input_data)==float("inf"))[0]
+        input_data[list]=float("nan")
+        input_data[list]=np.nanmin(input_data)
+        
         ambient = np.percentile(input_data, prewhiten_percent, axis=axis)
         if axis==0:
             input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1))
