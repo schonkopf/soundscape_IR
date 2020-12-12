@@ -32,9 +32,20 @@ class gdrive_handle:
         upload_.Upload()
         print('Successifully upload to Google drive')
     
-    def list_query(self, file_extension):
+    def list_query(self, file_extension, subfolder=False):
         location_cmd="title contains '"+file_extension+"' and '"+self.folder_id+"' in parents and trashed=false"
         self.file_list = self.Gdrive.ListFile({'q': location_cmd}).GetList()
+        if subfolder:
+          self.list_subfolder(file_extension)
+
+    def list_subfolder(self, file_extension):
+      self.folder_list = self.Gdrive.ListFile({"q": "mimeType='application/vnd.google-apps.folder' and '"+self.folder_id+"' in parents and trashed=false"}).GetList()
+      if self.folder_list!=[]:
+        for folder in self.folder_list:
+          location_cmd="title contains '"+file_extension+"' and '"+folder['id']+"' in parents and trashed=false"
+          subfolder_list=self.Gdrive.ListFile({'q': location_cmd}).GetList()
+          if subfolder_list!=[]:
+            self.file_list.extend(subfolder_list)
         
     def list_display(self):
         n=0
