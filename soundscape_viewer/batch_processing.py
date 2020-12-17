@@ -155,7 +155,7 @@ class batch_processing:
           self.time_notation=time_notation
       else:
         audio = audio_visualization(self.audioname[file], path, FFT_size = self.fft_size, time_resolution=self.time_resolution, window_overlap=self.window_overlap, f_range = self.f_range,
-                                  environment=self.environment, plot_type=None, prewhiten_percent=self.prewhiten_percent)
+                                  environment=self.environment, plot_type=None, prewhiten_percent=self.prewhiten_percent, mel_comp=self.mel_comp)
       
       if self.run_separation:
         model = copy.deepcopy(model_backup)
