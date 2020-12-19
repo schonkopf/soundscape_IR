@@ -228,7 +228,7 @@ class audio_visualization:
 
     def convert_audio(self, magnitude_spec, snr_factor=1):
         temp=np.multiply(10**(magnitude_spec[:,1:].T*snr_factor/10), np.exp(1j*self.phase))
-        _, self.xrec = signal.istft(temp, fs=self.sf, nperseg=self.FFT_size, noverlap=int(self.overlap*self.FFT_size))
+        _, self.xrec = scipy.signal.istft(temp, fs=self.sf, nperseg=self.FFT_size, noverlap=int(self.overlap*self.FFT_size))
         
 class matrix_operation:
     def __init__(self, header=[]):
