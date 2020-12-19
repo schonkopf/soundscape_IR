@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import audioread
 import librosa
+import scipy.signal
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import os
@@ -139,8 +140,6 @@ class audio_visualization:
 
             
     def run(self, x, sf, offset_read=0, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0):
-        import scipy.signal
-        
         if environment=='wat':
           P_ref=1
         elif environment=='air':
