@@ -94,6 +94,8 @@ class audio_visualization:
           with audioread.audio_open(path+'/'+filename) as temp:
               sf=temp.samplerate
           self.sf=sf
+          self.FFT_size=FFT_size
+          self.overlap=window_overlap
 
           # load audio data  
           if annotation:
@@ -224,6 +226,10 @@ class audio_visualization:
         self.f=f
         if not time_resolution:
           self.phase=np.angle(P)
+
+    def convert_audio(self, magnitude_spec, snr_factor=1):
+        temp=np.multiply(10**(magnitude_spec[:,1:].T*snr_factor/10), np.exp(1j*self.phase))
+        _, self.xrec = signal.istft(temp, fs=self.sf, nperseg=self.FFT_size, noverlap=int(self.overlap*self.FFT_size))
         
 class matrix_operation:
     def __init__(self, header=[]):
