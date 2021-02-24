@@ -269,6 +269,8 @@ class matrix_operation:
             else:
                 save_result[np.arange(i,i+np.diff(split_point[:,run])+1),1]=output[np.arange(split_point[0,run], split_point[1,run]+1)]
         
+        if np.sum(save_result[-1,1:])==0:
+            save_result=np.delete(save_result, -1, 0)
         return save_result
 
     def spectral_variation(self, input_data, f, percentile=[], hour_selection=[], month_selection=[]):
