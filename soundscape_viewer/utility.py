@@ -190,7 +190,7 @@ class audio_visualization:
           f = librosa.core.mel_frequencies(n_mels=mel_comp)
 
         if prewhiten_percent>0:
-          data=matrix_operation.prewhiten(data, prewhiten_percent, 1)
+          data, self.ambient=matrix_operation.prewhiten(data, prewhiten_percent, 1)
           data[data<0]=0
             
         # f_range: Hz
@@ -379,7 +379,7 @@ class matrix_operation:
             input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1))
         elif axis==1:
             input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1).T)
-        return input_data
+        return input_data, ambient;
     
     def frame_normalization(input, axis=0, type='min-max'):
         if axis==0:
