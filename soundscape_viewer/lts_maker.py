@@ -107,6 +107,7 @@ class lts_maker:
         self.yy_pos = np.array([dateformat.find('yy')+idx, dateformat.find('yy')+2+idx, year_initial])
     else:
         self.yy_pos = np.array([dateformat.find('yyyy')+idx, dateformat.find('yyyy')+4+idx, 0])
+    self.year_initial = year_initial
 
     self.mm_pos = np.array([dateformat.find('mm')+idx, dateformat.find('mm')+2+idx])
     self.dd_pos = np.array([dateformat.find('dd')+idx, dateformat.find('dd')+2+idx])
