@@ -190,7 +190,7 @@ class audio_visualization:
           f = librosa.core.mel_frequencies(n_mels=mel_comp)
 
         if prewhiten_percent>0:
-          data, self.ambient=matrix_operation.prewhiten(data, prewhiten_percent, 1)
+          data, ambient=matrix_operation.prewhiten(data, prewhiten_percent, 1)
           data[data<0]=0
             
         # f_range: Hz
@@ -202,6 +202,7 @@ class audio_visualization:
             
         f=f[f_list]
         data=data[f_list,:]
+        ambient=ambient[f_list]
         P=P[f_list,:]
         
         # plot the spectrogram
@@ -222,6 +223,7 @@ class audio_visualization:
           cbar.set_label('PSD')
 
         self.data=np.hstack((t[:,None],data.T))
+        self.ambient=ambient
         self.f=f
         if not time_resolution:
           self.phase=np.angle(P)
