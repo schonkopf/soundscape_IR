@@ -5,6 +5,7 @@ Author: Tzu-Hao Harry Lin (schonkopf@gmail.com)
 import numpy as np
 import pandas as pd
 import os
+import datetime
 from scipy.io import savemat
 from .utility import save_parameters
 from .utility import gdrive_handle
@@ -161,16 +162,53 @@ class lts_maker:
       n=n+1
     print('Identified ', len(self.audioname), 'files')
     
-  def run(self, save_filename='LTS.mat', folder_id=[], file_begin=0, num_file=[]):
+  def get_file_time(self, infilename):
+    yy = int(infilename[self.yy_pos[0]:self.yy_pos[1]])
+    if self.year_initial>0:
+      yy = yy+self.yy_pos[2]
+    mm = int(infilename[self.mm_pos[0]:self.mm_pos[1]])
+    dd = int(infilename[self.dd_pos[0]:self.dd_pos[1]])
+    HH = int(infilename[self.HH_pos[0]:self.HH_pos[1]])
+    MM = int(infilename[self.MM_pos[0]:self.MM_pos[1]])
+    SS = int(infilename[self.SS_pos[0]:self.SS_pos[1]])
+    date=datetime.datetime(yy,mm,dd)
+    self.time_vec=date.toordinal()*24*3600+HH*3600+MM*60+SS+366*24*3600 
+
+  def compress_spectrogram(self, spec_data, spec_time, Result_median, Result_mean, time_resolution=[], linear_scale=True):
+    if time_resolution:
+      read_interval=np.array([0, time_resolution])
+    else:
+      read_interval=np.array([0, spec_time[-1]])
+    
+    run=0
+    while read_interval[0]<spec_time[-1]:
+      read_list=np.where((spec_time>read_interval[0])*(spec_time<=read_interval[1])==True)[0]
+      if linear_scale:
+        temp_median=10*np.log10(np.median(spec_data[read_list,:],axis=0))-self.sen
+        temp_mean=10*np.log10(np.mean(spec_data[read_list,:],axis=0))-self.sen
+      else:
+        temp_median=np.median(spec_data[read_list,:],axis=0)
+        temp_mean=np.mean(spec_data[read_list,:],axis=0)
+
+      if Result_median.size == 0:
+        Result_median=np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_median))
+        Result_mean=np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_mean))
+      else:
+        Result_median=np.vstack((np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_median)), Result_median))
+        Result_mean=np.vstack((np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_mean)), Result_mean))
+      run=+1
+      read_interval=read_interval+time_resolution
+    return Result_median, Result_mean
+    
+  def run(self, save_filename='LTS.mat', folder_id=[], file_begin=0, num_file=[], duration_read=[]):
     import audioread
     import librosa
     import scipy.signal
-    import datetime
     import sys
     import urllib.request
     
-    Result_median=np.array([]); 
-    Result_mean=np.array([]); 
+    Result_median=np.array([])
+    Result_mean=np.array([])
     
     if not num_file:
       num_file=len(self.audioname)
@@ -183,18 +221,9 @@ class lts_maker:
       print('Total ', len(self.audioname), ' files, now analyzing file #', file, ': ', self.audioname[file], flush=True, end='')
       
       # Generate MATLAB time format
-      infilename=self.audioname[file]
-      yy = int(infilename[self.yy_pos[0]:self.yy_pos[1]])
-      if self.yy_pos.size == 3:
-          yy = yy+self.yy_pos[2]
-      mm = int(infilename[self.mm_pos[0]:self.mm_pos[1]])
-      dd = int(infilename[self.dd_pos[0]:self.dd_pos[1]])
-      HH = int(infilename[self.HH_pos[0]:self.HH_pos[1]])
-      MM = int(infilename[self.MM_pos[0]:self.MM_pos[1]])
-      SS = int(infilename[self.SS_pos[0]:self.SS_pos[1]])
-      date=datetime.datetime(yy,mm,dd)
-      time_vec=date.toordinal()+HH/24+MM/(24*60)+SS/(24*3600)+366 
+      self.get_file_time(self.audioname[file])
 
+      # Download audio file
       if self.cloud==1:
         urllib.request.urlretrieve(self.link[file], self.audioname[file])
         path='.'
@@ -204,20 +233,21 @@ class lts_maker:
         path='.'
       else:
         path=self.link
-        
+
+      # Load audio file
       if file==file_begin:
         with audioread.audio_open(path+'/'+self.audioname[file]) as temp:
           sf=temp.samplerate
       x, sf = librosa.load(path+'/'+self.audioname[file], sr=sf)
-      
-      if self.time_resolution:
-        total_segment=np.ceil(len(x)/sf/self.time_resolution)
+
+      if duration_read:
+        total_segment=int(np.ceil(len(x)/sf/duration_read))
       else:
         total_segment=1
-        self.time_resolution=np.ceil(len(x)/sf)
-
-      for segment_run in range(int(total_segment)):
-        read_interval=[np.floor(self.time_resolution*segment_run*sf), np.ceil(self.time_resolution*(segment_run+1)*sf)]
+        duration_read=len(x)/sf
+      
+      for segment_run in range(total_segment):
+        read_interval=[np.floor(duration_read*segment_run*sf), np.ceil(duration_read*(segment_run+1)*sf)]
         if segment_run==0:
           read_interval[0]=self.skip_duration*sf
         if read_interval[1]>len(x):
@@ -226,13 +256,8 @@ class lts_maker:
           f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=self.FFT_size, 
                                          noverlap=self.overlap, nfft=self.FFT_size, return_onesided=True, mode='psd')
           P = P/np.power(self.pref,2)
-          if Result_median.size == 0:
-            Result_median=np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.median(P,axis=1))-self.sen))
-            Result_mean=np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.mean(P,axis=1))-self.sen))
-          else:
-            Result_median=np.vstack((np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),
-                                                10*np.log10(np.median(P,axis=1))-self.sen)), Result_median))
-            Result_mean=np.vstack((np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.mean(P,axis=1))-self.sen)), Result_mean))
+          self.time_vec=self.time_vec+duration_read
+          Result_median, Result_mean=self.compress_spectrogram(P.T, t, Result_median, Result_mean, self.time_resolution, linear_scale=True)
 
       if self.cloud>=1:
         os.remove(self.audioname[file])
