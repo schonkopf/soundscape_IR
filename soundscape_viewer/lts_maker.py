@@ -86,7 +86,7 @@ class lts_maker:
     self.skip_duration=initial_skip
     self.time_resolution=time_resolution
  
-  def filename_check(self, dateformat='yyyymmdd_HHMMSS', initial=[], year_initial=2000):
+  def filename_check(self, dateformat='yyyymmdd_HHMMSS', initial=[], year_initial=2000, filename=[]):
     """
     Time stamps on the file name
     For example: TW_LHC01_150102-001530.wav
@@ -99,7 +99,8 @@ class lts_maker:
     >>> dateformat='yyyymmdd-HHMMSS'
     >>> year_initial=0
     """
-    filename=self.audioname[0]
+    if not filename:
+      filename=self.audioname[0]
     idx=len(initial)
     
     if dateformat.find('yyyy')==-1:
