@@ -238,13 +238,22 @@ class data_organize:
     self.result_header=np.delete(self.result_header, col)
     print('Columns in the spreadsheet: ', self.result_header)
     
-  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6, empty_hr_remove=False, empty_day_remove=False):
-    hr=np.unique(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))
-    no_sample=len(self.final_result[:,0])-np.remainder(len(self.final_result[:,0]), len(hr))
-    day=np.unique(np.floor(self.final_result[0:no_sample,0]))
+  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6, empty_hr_remove=False, empty_day_remove=False, reduce_resolution=1, display_cluster=0):
+    hr_boundary=[np.min(24*(self.final_result[:,0]-np.floor(self.final_result[:,0]))), np.max(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))]
+    if display_cluster==0:
+      input_data=self.final_result[:,col]
+      input_data[input_data==0]=np.nan
+    else:
+      input_data=self.final_result[:,col]==display_cluster
+      input_data[self.final_result[:,col]==0]=np.nan
+    input_data, time_vec=data_organize.reduce_time_resolution(input_data, self.final_result[:,0:1], reduce_resolution)
+    
+    hr=np.unique(24*(time_vec-np.floor(time_vec)))
+    no_sample=len(time_vec)-np.remainder(len(time_vec), len(hr))
+    day=np.unique(np.floor(time_vec[0:no_sample]))
     python_dt=day+693960-366
 
-    plot_matrix=self.final_result[:,col].reshape((len(day), len(hr))).T
+    plot_matrix=input_data.reshape((len(day), len(hr))).T
     if empty_hr_remove:
       list=np.where(np.sum(plot_matrix, axis=1)>0)[0]
       plot_matrix=plot_matrix[list, :]
@@ -256,15 +265,21 @@ class data_organize:
 
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     im = plt.imshow(plot_matrix, vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
-                    extent=[python_dt[0], python_dt[-1], np.min(hr), np.max(hr)], interpolation='none')
+                    extent=[python_dt[0], python_dt[-1], np.min(hr_boundary), np.max(hr_boundary)], interpolation='none')
     ax.xaxis_date()
     ax.set_title(self.result_header[col])
     plt.ylabel('Hour')
     plt.xlabel('Day')
     cbar1 = plt.colorbar(im)
-    
+
     plot_matrix=np.hstack((day[:,None]+693960, plot_matrix.T))
     return plot_matrix, hr
+
+  def reduce_time_resolution(input_data, time_vec, reduce_resolution):
+    if reduce_resolution>1:
+      input_data=np.nanmean(input_data.reshape((int(len(input_data)/reduce_resolution), -1)), axis=1)
+      time_vec=np.mean(time_vec.reshape((len(input_data), -1)), axis=1)
+    return input_data, time_vec
     
   def save_csv(self, filename='Soundscape_analysis.csv',folder_id=[]):
     df = pd.DataFrame(self.final_result, columns = self.result_header) 
