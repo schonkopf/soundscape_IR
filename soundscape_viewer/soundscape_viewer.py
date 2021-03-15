@@ -219,38 +219,8 @@ class data_organize:
     self.result_header=np.array([])
     print('A new spreadsheet has been created.')
       
-  def time_fill(self, time_vec, data, header, time_resolution=None):
-    # fill the time series gap
-    temp = np.argsort(time_vec)
-    time_vec=time_vec[temp]
-    if time_resolution==None:
-      time_resolution=time_vec[1]-time_vec[0]
-    
-    if data.ndim>1:
-        output=data[temp,:]
-    else:
-        output=data[temp]
-    resolution=np.round(time_resolution*24*3600)
-    n_time_vec=np.arange(np.floor(np.min(time_vec))*24*3600, 
-                         np.ceil(np.max(time_vec))*24*3600,resolution)/24/3600
-
-    if data.ndim>1:
-        save_result=np.zeros((n_time_vec.size, data.shape[1]+1))
-    else:
-        save_result=np.zeros((n_time_vec.size, 2))
-    
-    save_result[:,0]=n_time_vec-693960
-    segment_list=np.round(np.diff(time_vec*24*3600)/resolution)
-    split_point=np.vstack((np.concatenate(([0],np.where(segment_list!=1)[0]+1)),
-                           np.concatenate((np.where(segment_list!=1)[0],[time_vec.size-1]))))
-
-    for run in np.arange(split_point.shape[1]):
-      i=np.argmin(np.abs(n_time_vec-time_vec[split_point[0,run]]))
-      if data.ndim>1:
-            save_result[np.arange(i,i+np.diff(split_point[:,run])+1),1:]=output[np.arange(split_point[0,run], split_point[1,run]+1),:]
-      else:
-            save_result[np.arange(i,i+np.diff(split_point[:,run])+1),1]=output[np.arange(split_point[0,run], split_point[1,run]+1)]
-        
+  def time_fill(self, time_vec, data, header):
+    save_result=matrix_operation().gap_fill(time_vec, data, tail=True)
     
     if len(self.final_result)==0:
       self.final_result=save_result
@@ -265,15 +235,24 @@ class data_organize:
     self.result_header=np.delete(self.result_header, col)
     print('Columns in the spreadsheet: ', self.result_header)
     
-  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6):
+  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6, empty_hr_remove=False, empty_day_remove=False):
     hr=np.unique(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))
     no_sample=len(self.final_result[:,0])-np.remainder(len(self.final_result[:,0]), len(hr))
     day=np.unique(np.floor(self.final_result[0:no_sample,0]))
     python_dt=day+693960-366
 
+    plot_matrix=self.final_result[:,col].reshape((len(day), len(hr))).T
+    if empty_hr_remove:
+      list=np.where(np.sum(plot_matrix, axis=1)>0)[0]
+      plot_matrix=plot_matrix[list, :]
+      hr=hr[list]
+    if empty_day_remove:
+      list=np.where(np.sum(plot_matrix, axis=0)>0)[0]
+      plot_matrix=plot_matrix[:, list]
+      day=day[list]
+
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-    im = plt.imshow(self.final_result[:,col].reshape((len(day), len(hr))).T,
-                    vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
+    im = plt.imshow(plot_matrix, vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
                     extent=[python_dt[0], python_dt[-1], np.min(hr), np.max(hr)], interpolation='none')
     ax.xaxis_date()
     ax.set_title(self.result_header[col])
