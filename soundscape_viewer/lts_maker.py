@@ -259,6 +259,9 @@ class lts_maker:
       else:
         total_segment=1
         duration_read=len(x)/sf
+        
+      if not self.time_resolution:
+        self.time_resolution=duration_read
       
       for segment_run in range(total_segment):
         read_interval=[np.floor(duration_read*segment_run*sf), np.ceil(duration_read*(segment_run+1)*sf)]
@@ -266,7 +269,7 @@ class lts_maker:
           read_interval[0]=self.skip_duration*sf
         if read_interval[1]>len(x):
           read_interval[1]=len(x)
-        if read_interval[1]-read_interval[0]>(0.5*self.time_resolution*sf):
+        if (read_interval[1]-read_interval[0])>(0.5*self.time_resolution*sf):
           self.f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=self.FFT_size, 
                                          noverlap=self.overlap, nfft=self.FFT_size, return_onesided=True, mode='psd')
           P = P/np.power(self.pref,2)
