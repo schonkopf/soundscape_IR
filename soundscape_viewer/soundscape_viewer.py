@@ -262,7 +262,9 @@ class data_organize:
     plt.ylabel('Hour')
     plt.xlabel('Day')
     cbar1 = plt.colorbar(im)
-    return cbar1
+    
+    plot_matrix=np.hstack((day[:,None], plot_matrix.T))
+    return plot_matrix, hr
     
   def save_csv(self, filename='Soundscape_analysis.csv',folder_id=[]):
     df = pd.DataFrame(self.final_result, columns = self.result_header) 
