@@ -542,9 +542,9 @@ class tonal_detection:
     # Do vertical and horizontal prewhitening
     temp0=input[:,1:]
     if self.spectral_prewhiten:
-      temp0=matrix_operation.prewhiten(temp0, prewhiten_percent=self.spectral_prewhiten, axis=1)
+      temp0, _=matrix_operation.prewhiten(temp0, prewhiten_percent=self.spectral_prewhiten, axis=1)
     if self.temporal_prewhiten:
-      temp0=matrix_operation.prewhiten(temp0, prewhiten_percent=self.temporal_prewhiten, axis=0)
+      temp0, _=matrix_operation.prewhiten(temp0, prewhiten_percent=self.temporal_prewhiten, axis=0)
     temp0[temp0<0]=0
 
     # Smooth the spectrogram
