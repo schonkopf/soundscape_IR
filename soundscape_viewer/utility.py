@@ -192,6 +192,8 @@ class audio_visualization:
         if prewhiten_percent>0:
           data, ambient=matrix_operation.prewhiten(data, prewhiten_percent, 1)
           data[data<0]=0
+        else:
+          ambient=data[:,0:1]*0
             
         # f_range: Hz
         if f_range:
