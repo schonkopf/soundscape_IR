@@ -94,9 +94,10 @@ class lts_viewer:
       self.assemble(data, time_sort, f_range)
       os.remove(infilename)
       
-  def plot_lts(self, fig_width=12, fig_height=18):
+  def plot_lts(self, fig_width=12, fig_height=18, gap_fill=True):
     temp,f=self.input_selection(var_name='median')
-    temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
+    if gap_fill:
+      temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
     fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, figsize=(fig_width, fig_height))
@@ -111,7 +112,8 @@ class lts_viewer:
     cbar1.set_label('PSD')
 
     temp,f=self.input_selection(var_name='mean')
-    temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
+    if gap_fill:
+      temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
     im2 = ax2.imshow(temp.T, vmin=np.min(temp[:,1:]), vmax=np.max(temp[:,1:]),
@@ -125,7 +127,8 @@ class lts_viewer:
     cbar2.set_label('PSD')
 
     temp,f=self.input_selection(var_name='diff')
-    temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
+    if gap_fill:
+      temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
     im3 = ax3.imshow(temp.T, vmin=np.min(temp[:,1:]), vmax=np.max(temp[:,1:]),
