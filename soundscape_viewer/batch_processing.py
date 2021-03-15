@@ -100,7 +100,7 @@ class batch_processing:
     self.folder_id = folder_id
     self.run_detection=True
   
-  def lts_maker(self, source=1, time_resolution=[], dateformat='yyyymmdd_HHMMSS', initial=[], year_initial=2000, filename='Separation_LTS.mat', folder_id=[]):
+  def params_lts_maker(self, source=1, time_resolution=[], dateformat='yyyymmdd_HHMMSS', initial=[], year_initial=2000, filename='Separation_LTS.mat', folder_id=[]):
     self.run_lts=True
     self.lts_time_resolution=time_resolution
     self.dateformat=dateformat
@@ -189,7 +189,7 @@ class batch_processing:
             lts.link=[]
           lts.get_file_time(self.audioname[file])
           ambient=np.matlib.repmat(audio.ambient,model.separation[0].shape[0],1)
-          lts.Result_median, lts.Result_mean = lts.compress_spectrogram(10**((model.separation[self.lts_source-1][:,1:]+ambient)/10), model.separation[self.lts_source-1][:,0], lts.Result_median, lts.Result_mean, self.lts_time_resolution, linear_scale=True)
+          lts.Result_median, lts.Result_mean = lts.compress_spectrogram(10**(model.separation[self.lts_source-1][:,1:]/10), model.separation[self.lts_source-1][:,0], lts.Result_median, lts.Result_mean, self.lts_time_resolution, linear_scale=True)
 
         if self.run_detection:
           for n in range(0, len(self.source)):
