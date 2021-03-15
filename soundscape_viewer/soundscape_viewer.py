@@ -208,7 +208,7 @@ class lts_viewer:
     if len(input_data)>1:
       time_vec=input_data[:,0]
       if prewhiten_percent>0:
-        input_data=matrix_operation.prewhiten(input_data, prewhiten_percent, 0)
+        input_data, ambient=matrix_operation.prewhiten(input_data, prewhiten_percent, 0)
         input_data[input_data<threshold]=threshold
         input_data[:,0]=time_vec
       return input_data, f;
