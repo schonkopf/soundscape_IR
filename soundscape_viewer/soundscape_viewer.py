@@ -263,7 +263,7 @@ class data_organize:
     plt.xlabel('Day')
     cbar1 = plt.colorbar(im)
     
-    plot_matrix=np.hstack((day[:,None], plot_matrix.T))
+    plot_matrix=np.hstack((day[:,None]+693960, plot_matrix.T))
     return plot_matrix, hr
     
   def save_csv(self, filename='Soundscape_analysis.csv',folder_id=[]):
