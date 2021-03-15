@@ -202,6 +202,18 @@ class lts_maker:
       read_interval=read_interval+time_resolution
     return Result_median, Result_mean
     
+  def save_lts(self, save_filename, folder_id=[]):
+    Result=save_parameters()
+    Parameters=save_parameters()
+    Result.LTS_Result(self.Result_median, self.Result_mean, self.f, self.link)
+    Parameters.LTS_Parameters(self.FFT_size, self.overlap, self.sen, self.sf, self.channel)
+    savemat(save_filename, {'Result':Result,'Parameters':Parameters})
+    print('Successifully save to '+save_filename)
+    
+    if folder_id:
+      Gdrive=gdrive_handle(folder_id)
+      Gdrive.upload(save_filename)
+    
   def run(self, save_filename='LTS.mat', folder_id=[], file_begin=0, num_file=[], duration_read=[]):
     import audioread
     import librosa
@@ -240,7 +252,7 @@ class lts_maker:
       if file==file_begin:
         with audioread.audio_open(path+'/'+self.audioname[file]) as temp:
           sf=temp.samplerate
-      x, sf = librosa.load(path+'/'+self.audioname[file], sr=sf)
+      x, self.sf = librosa.load(path+'/'+self.audioname[file], sr=sf)
 
       if duration_read:
         total_segment=int(np.ceil(len(x)/sf/duration_read))
@@ -255,7 +267,7 @@ class lts_maker:
         if read_interval[1]>len(x):
           read_interval[1]=len(x)
         if read_interval[1]-read_interval[0]>(0.5*self.time_resolution*sf):
-          f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=self.FFT_size, 
+          self.f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=self.FFT_size, 
                                          noverlap=self.overlap, nfft=self.FFT_size, return_onesided=True, mode='psd')
           P = P/np.power(self.pref,2)
           self.time_vec=self.time_vec+duration_read
@@ -265,13 +277,6 @@ class lts_maker:
         os.remove(self.audioname[file])
     
     temp = np.argsort(Result_median[:,0])
-    Result=save_parameters()
-    Parameters=save_parameters()
-    Result.LTS_Result(Result_median[temp,:], Result_mean[temp,:], f, self.link)
-    Parameters.LTS_Parameters(self.FFT_size, self.overlap, self.sen, sf, self.channel)
-    scipy.io.savemat(save_filename, {'Result':Result,'Parameters':Parameters})
-    print('Successifully save to '+save_filename)
-    
-    if folder_id:
-      Gdrive=gdrive_handle(folder_id)
-      Gdrive.upload(save_filename)
+    self.Result_median=Result_median[temp,:]
+    self.Result_mean=Result_mean[temp,:]
+    self.save_lts(save_filename, folder_id)
