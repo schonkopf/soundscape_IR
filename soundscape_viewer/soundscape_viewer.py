@@ -46,33 +46,38 @@ class lts_viewer:
       self.Result_diff=np.array([])
       
   def assemble(self, data, time_sort=1, f_range=[]):
-      f = data['Result']['f'].item()[0]
+      self.f = np.array(data['Result']['f'].item()[0])
+      self.PI = np.array(data['Result']['PI'].item()[0])
       if f_range:
-          f_list=(f>=min(f_range))*(f<=max(f_range))
+          f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
           f_list=np.where(f_list==True)[0]
       else:
-          f_list=np.arange(len(f))
-      f=f[f_list]
+          f_list=np.arange(len(self.f))
+      self.f=self.f[f_list]
       f_list=np.concatenate([np.array([0]), f_list+1])
       Result_median = data['Result']['LTS_median'].item()[:,f_list]
       Result_mean = data['Result']['LTS_mean'].item()[:,f_list]
+      Result_PI = data['Result']['Result_PI'].item()
 
       if self.Result_median.size == 0:
-          self.f = np.array(f)
           self.Result_median = np.array(Result_median)
           self.Result_mean = np.array(Result_mean)
           self.Result_diff = self.Result_mean-self.Result_median
           self.Result_diff[:,0] = self.Result_mean[:,0]
+          self.Result_PI = np.array(Result_PI)
       else:
           self.Result_median = np.vstack((Result_median, self.Result_median))
           self.Result_mean = np.vstack((Result_mean, self.Result_mean))
           self.Result_diff = self.Result_mean-self.Result_median
           self.Result_diff[:,0] = self.Result_mean[:,0]
+          self.Result_PI = np.vstack((Result_PI, self.Result_PI))
+
       if time_sort == 1:
           temp = np.argsort(self.Result_mean[:,0])
           self.Result_median=self.Result_median[temp,:]
           self.Result_mean=self.Result_mean[temp,:]
           self.Result_diff=self.Result_diff[temp,:]
+          self.Result_PI=self.Result_PI[temp,:]
   
   def collect_folder(self, path='.', f_range=[], time_sort=1):
       items = os.listdir(path)
@@ -150,20 +155,21 @@ class lts_viewer:
     elif var_name=='mean':
       input_data=self.Result_mean
     elif var_name=='diff':
-      input_data=self.Result_diff     
-    else:
-      input_data=0
-      print('Unknown input, please choose: median, mean, diff.')
+      input_data=self.Result_diff
     
-    # f_range: Hz
-    if f_range:
-      f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
-      f_list=np.where(f_list==True)[0]
+    if var_name=='PI':
+      input_data=self.Result_PI  
+      f=self.PI
     else:
-      f_list=np.arange(len(self.f))
-    
-    f=self.f[f_list]
-    f_list=np.concatenate([np.array([0]), f_list+1])
+      # f_range: Hz
+      if f_range:
+        f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
+        f_list=np.where(f_list==True)[0]
+        f=self.f[f_list]
+        f_list=np.concatenate([np.array([0]), f_list+1])
+        input_data=input_data[:,f_list]
+      else:
+        f=self.f
 
     if annotation:
       df = pd.read_csv(annotation,index_col=0) 
@@ -205,7 +211,6 @@ class lts_viewer:
         list=np.where(list==True)[0]
       else:
         list=np.arange(self.Result_median.shape[0])
-    input_data=input_data[:,f_list]
     input_data=input_data[list,:]
     
     if len(input_data)>1:
