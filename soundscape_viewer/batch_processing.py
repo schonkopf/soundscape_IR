@@ -188,7 +188,6 @@ class batch_processing:
             lts.sf=audio.sf
             lts.link=[]
           lts.get_file_time(self.audioname[file])
-          ambient=np.matlib.repmat(audio.ambient,model.separation[0].shape[0],1)
           lts.Result_median, lts.Result_mean = lts.compress_spectrogram(10**(model.separation[self.lts_source-1][:,1:]/10), model.separation[self.lts_source-1][:,0], lts.Result_median, lts.Result_mean, self.lts_time_resolution, linear_scale=True)
 
         if self.run_detection:
