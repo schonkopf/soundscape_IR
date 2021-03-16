@@ -490,20 +490,20 @@ class performance_evaluation:
       plt.show()
 
 class pulse_interval:
-  def __init__(self, data, sf=None, energy_percentile=50, interval_range=None, plot_type='Both'):
+  def __init__(self, data, sf=None, energy_percentile=50, interval_range=None, plot_type='Both', standardization=True):
     from scipy.signal import hilbert
     if len(data.shape)==2:
-      input=np.percentile(data[:,1:], energy_percentile, axis=1)
       time_vec=data[:,0]
+      data=np.percentile(data[:,1:], energy_percentile, axis=1)
     elif len(data.shape)==1:
       data=data/np.max(np.abs(data))
       #input=np.power(data,2)
       input=np.abs(hilbert(data))
       time_vec=np.arange(len(data))/sf
     self.data=data
-    self.autocorrelation(input, time_vec, interval_range, plot_type)
+    self.autocorrelation(data, time_vec, interval_range, plot_type, millisec=True, standardization=standardization)
 
-  def autocorrelation(self, data, time_vec, interval_range=None, plot_type='Both', millisec=True):
+  def autocorrelation(self, data, time_vec, interval_range=None, plot_type='Both', millisec=True, standardization=True):
     if plot_type=='Both':
         fig, (ax1, ax2) = plt.subplots(nrows=2,figsize=(14, 12))
     elif plot_type=='Time':
@@ -518,7 +518,8 @@ class pulse_interval:
       ax1.set_ylabel('Amplitude')
 
     data=data-np.median(data)
-    data=data/np.max(np.abs(data))
+    if standardization==True:
+      data=data/np.max(np.abs(data))
     PI=np.arange(-1*data.shape[0], data.shape[0])
     time_resolution=time_vec[1]-time_vec[0]
     if millisec:
