@@ -273,7 +273,7 @@ class lts_maker:
           self.f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=self.FFT_size, 
                                          noverlap=self.overlap, nfft=self.FFT_size, return_onesided=True, mode='psd')
           P = P/np.power(self.pref,2)
-          self.time_vec=self.time_vec+duration_read
+          self.time_vec=self.time_vec+duration_read*segment_run
           Result_median, Result_mean=self.compress_spectrogram(P.T, t, Result_median, Result_mean, self.time_resolution, linear_scale=True)
 
       if self.cloud>=1:
