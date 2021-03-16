@@ -176,36 +176,45 @@ class lts_maker:
     date=datetime.datetime(yy,mm,dd)
     self.time_vec=date.toordinal()*24*3600+HH*3600+MM*60+SS+366*24*3600 
 
-  def compress_spectrogram(self, spec_data, spec_time, Result_median, Result_mean, time_resolution=[], linear_scale=True):
+  def compress_spectrogram(self, spec_data, spec_time, time_resolution=[], linear_scale=True, interval_range=0, energy_percentile=0):
     if time_resolution:
       read_interval=np.array([0, time_resolution])
     else:
       read_interval=np.array([0, spec_time[-1]])
     
     run=0
-    while read_interval[0]<spec_time[-1]:
+    while read_interval[0]<spec_time[-1]-0.5*time_resolution:
       read_list=np.where((spec_time>read_interval[0])*(spec_time<=read_interval[1])==True)[0]
+      if len(interval_range)>0:
+        temp=np.hstack((spec_time[read_list,None], spec_data[read_list,:]))
+        pulse_analysis_result=pulse_interval(temp, energy_percentile=energy_percentile, interval_range=interval_range, plot_type=None, standardization=False)
+        temp_PI=pulse_analysis_result.result
+
       if linear_scale:
         temp_median=10*np.log10(np.median(spec_data[read_list,:],axis=0))-self.sen
         temp_mean=10*np.log10(np.mean(spec_data[read_list,:],axis=0))-self.sen
       else:
         temp_median=np.median(spec_data[read_list,:],axis=0)
         temp_mean=np.mean(spec_data[read_list,:],axis=0)
-
-      if Result_median.size == 0:
-        Result_median=np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_median))
-        Result_mean=np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_mean))
+      
+      if self.Result_median.size == 0:
+        self.Result_median=np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_median))
+        self.Result_mean=np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_mean))
+        if len(interval_range)>0:
+          self.Result_PI=np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_PI))
       else:
-        Result_median=np.vstack((np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_median)), Result_median))
-        Result_mean=np.vstack((np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_mean)), Result_mean))
+        self.Result_median=np.vstack((np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_median)), self.Result_median))
+        self.Result_mean=np.vstack((np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_mean)), self.Result_mean))
+        if len(interval_range)>0:
+          self.Result_PI=np.vstack((np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_PI)), self.Result_PI))
       run=+1
       read_interval=read_interval+time_resolution
-    return Result_median, Result_mean
+      self.PI=pulse_analysis_result.PI
     
   def save_lts(self, save_filename, folder_id=[]):
     Result=save_parameters()
     Parameters=save_parameters()
-    Result.LTS_Result(self.Result_median, self.Result_mean, self.f, self.link)
+    Result.LTS_Result(self.Result_median, self.Result_mean, self.f, self.link, self.PI, self.Result_PI)
     Parameters.LTS_Parameters(self.FFT_size, self.overlap, self.sen, self.sf, self.channel)
     savemat(save_filename, {'Result':Result,'Parameters':Parameters})
     print('Successifully save to '+save_filename)
@@ -220,9 +229,6 @@ class lts_maker:
     import scipy.signal
     import sys
     import urllib.request
-    
-    Result_median=np.array([])
-    Result_mean=np.array([])
     
     if not num_file:
       num_file=len(self.audioname)
@@ -274,12 +280,13 @@ class lts_maker:
                                          noverlap=self.overlap, nfft=self.FFT_size, return_onesided=True, mode='psd')
           P = P/np.power(self.pref,2)
           self.time_vec=self.time_vec+duration_read*segment_run
-          Result_median, Result_mean=self.compress_spectrogram(P.T, t, Result_median, Result_mean, self.time_resolution, linear_scale=True)
+          self.compress_spectrogram(P.T, t, self.time_resolution, linear_scale=True)
 
       if self.cloud>=1:
         os.remove(self.audioname[file])
     
-    temp = np.argsort(Result_median[:,0])
-    self.Result_median=Result_median[temp,:]
-    self.Result_mean=Result_mean[temp,:]
+    temp = np.argsort(self.Result_median[:,0])
+    self.Result_median=self.Result_median[temp,:]
+    self.Result_mean=self.Result_mean[temp,:]
+    self.Result_PI=self.Result_PI[temp,:]
     self.save_lts(save_filename, folder_id)
