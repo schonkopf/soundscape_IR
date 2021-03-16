@@ -9,6 +9,7 @@ import datetime
 from scipy.io import savemat
 from .utility import save_parameters
 from .utility import gdrive_handle
+from .utility import pulse_interval
 
 class lts_maker:
   """
