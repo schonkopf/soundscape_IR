@@ -72,13 +72,13 @@ class save_parameters:
         self.time_frame=feature_length
         self.basis_num=basis_num
 
-    def LTS_Result(self, LTS_median, LTS_mean, f, link=[], PI=[], PI_result=[]):
+    def LTS_Result(self, LTS_median, LTS_mean, f, link=[], PI=[], Result_PI=[]):
         self.LTS_median = LTS_median
         self.LTS_mean = LTS_mean
         self.f = f
         self.link = link
         self.PI = PI
-        self.PI_result = PI_result
+        self.Result_PI = Result_PI
 
     def LTS_Parameters(self, FFT_size, overlap, sensitivity, sampling_freq, channel):
         self.FFT_size=FFT_size
