@@ -110,10 +110,13 @@ class batch_processing:
     self.lts_filename=filename
     self.lts_folder_id=folder_id
 
-  def params_pulse_interval(self, energy_percentile=50, interval_range=[1, 1000]):
+  def params_pulse_interval(self, energy_percentile=50, interval_range=[1, 1000], LTS_combine=False):
     self.energy_percentile=energy_percentile
     self.interval_range=interval_range
-    self.run_pulse_analysis=True
+    if LTS_combine:
+      self.run_pulse_analysis=False
+    else:
+      self.run_pulse_analysis=True
   
   def run(self, start=0, num_file=None):
     from soundscape_IR.soundscape_viewer import lts_maker
@@ -182,13 +185,11 @@ class batch_processing:
           if file==self.start:
             lts = lts_maker(time_resolution=self.lts_time_resolution)
             lts.filename_check(self.dateformat, self.initial, self.year_initial, self.audioname[file])
-            lts.Result_median=np.array([])
-            lts.Result_mean=np.array([])
             lts.f=audio.f
             lts.sf=audio.sf
             lts.link=[]
           lts.get_file_time(self.audioname[file])
-          lts.Result_median, lts.Result_mean = lts.compress_spectrogram(10**(model.separation[self.lts_source-1][:,1:]/10), model.separation[self.lts_source-1][:,0], lts.Result_median, lts.Result_mean, self.lts_time_resolution, linear_scale=True)
+          lts.compress_spectrogram(10**(model.separation[self.lts_source-1][:,1:]/10), model.separation[self.lts_source-1][:,0], self.lts_time_resolution, linear_scale=True, interval_range=self.interval_range, energy_percentile=self.energy_percentile)
 
         if self.run_detection:
           for n in range(0, len(self.source)):
@@ -202,9 +203,9 @@ class batch_processing:
 
       if self.run_pulse_analysis:
         if self.run_separation:
-          pulse_analysis_result=pulse_interval(model.separation[self.source-1], self.energy_percentile, self.interval_range, plot_type= None)
+          pulse_analysis_result=pulse_interval(model.separation[self.source-1], energy_percentile=self.energy_percentile, interval_range=self.interval_range, plot_type=None)
         else:
-          pulse_analysis_result=pulse_interval(audio.data, self.energy_percentile, self.interval_range, plot_type= None)
+          pulse_analysis_result=pulse_interval(audio.data, energy_percentile=self.energy_percentile, interval_range=self.interval_range, plot_type=None)
         if file==0:
           self.result=pulse_analysis_result.result[None]
           self.PI=pulse_analysis_result.PI
