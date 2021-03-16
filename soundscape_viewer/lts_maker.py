@@ -86,6 +86,9 @@ class lts_maker:
     self.overlap=int(window_overlap*FFT_size)
     self.skip_duration=initial_skip
     self.time_resolution=time_resolution
+    self.Result_median=np.array([])
+    self.Result_mean=np.array([])
+    self.IPI_result=np.array([])
  
   def filename_check(self, dateformat='yyyymmdd_HHMMSS', initial=[], year_initial=2000, filename=[]):
     """
