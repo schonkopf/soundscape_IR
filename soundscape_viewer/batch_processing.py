@@ -119,10 +119,10 @@ class batch_processing:
       self.run_pulse_analysis=True
   
   def run(self, start=0, num_file=None):
-    from soundscape_IR.soundscape_viewer import lts_maker
-    from soundscape_IR.soundscape_viewer.utility import audio_visualization
-    from soundscape_IR.soundscape_viewer.utility import spectrogram_detection
-    from soundscape_IR.soundscape_viewer.utility import pulse_interval
+    from .lts_maker import lts_maker
+    from .utility import audio_visualization
+    from .utility import spectrogram_detection
+    from .utility import pulse_interval
 
     import copy
     import os
