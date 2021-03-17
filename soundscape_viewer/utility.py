@@ -523,7 +523,7 @@ class pulse_interval:
     PI=np.arange(-1*data.shape[0], data.shape[0])
     time_resolution=time_vec[1]-time_vec[0]
     if millisec:
-      PI=1000*PI*time_resolution
+      PI=np.round(100000*PI*time_resolution)/100
 
     PI_list=(PI>=min(interval_range))*(PI<=max(interval_range))
     PI_list=np.where(PI_list)[0]
