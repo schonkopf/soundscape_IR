@@ -44,10 +44,16 @@ class lts_viewer:
       self.Result_median=np.array([])
       self.Result_mean=np.array([])
       self.Result_diff=np.array([])
+      self.Result_PI=np.array([])
       
   def assemble(self, data, time_sort=1, f_range=[]):
+      if any('PI' in s for s in data['Result'].dtype.names):
+        self.PI = np.array(data['Result']['PI'].item()[0])
+        Result_PI = data['Result']['Result_PI'].item()
+      else:
+        Result_PI = np.array([])
+
       self.f = np.array(data['Result']['f'].item()[0])
-      self.PI = np.array(data['Result']['PI'].item()[0])
       if f_range:
           f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
           f_list=np.where(f_list==True)[0]
@@ -57,8 +63,7 @@ class lts_viewer:
       f_list=np.concatenate([np.array([0]), f_list+1])
       Result_median = data['Result']['LTS_median'].item()[:,f_list]
       Result_mean = data['Result']['LTS_mean'].item()[:,f_list]
-      Result_PI = data['Result']['Result_PI'].item()
-
+      
       if self.Result_median.size == 0:
           self.Result_median = np.array(Result_median)
           self.Result_mean = np.array(Result_mean)
@@ -77,7 +82,8 @@ class lts_viewer:
           self.Result_median=self.Result_median[temp,:]
           self.Result_mean=self.Result_mean[temp,:]
           self.Result_diff=self.Result_diff[temp,:]
-          self.Result_PI=self.Result_PI[temp,:]
+          if self.Result_PI.shape[0]>0:
+            self.Result_PI=self.Result_PI[temp,:]
   
   def collect_folder(self, path='.', f_range=[], time_sort=1):
       items = os.listdir(path)
