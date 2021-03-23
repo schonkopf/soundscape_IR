@@ -93,9 +93,9 @@ class lts_viewer:
           data = loadmat(path+'/'+names)
           self.assemble(data, time_sort, f_range)
         
-  def collect_Gdrive(self, folder_id, f_range=[], time_sort=1):
+  def collect_Gdrive(self, folder_id, f_range=[], time_sort=1, file_extension = '.mat'):
     Gdrive=gdrive_handle(folder_id)
-    Gdrive.list_query(file_extension='.mat')
+    Gdrive.list_query(file_extension)
     
     for file in Gdrive.file_list:
       print('Loading file: %s' % (file['title']))
