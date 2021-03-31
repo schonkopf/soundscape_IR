@@ -46,7 +46,7 @@ class batch_processing:
     print('Identified ', len(audioname), 'files')
     return Gdrive, link, audioname
 
-  def params_spectrogram(self, fft_size=512, environment='wav', time_resolution=None, window_overlap=0, f_range=[], prewhiten_percent=0, padding=0, folder_combine=False, mel_comp=0, sensitivity=0):
+  def params_spectrogram(self, fft_size=512, environment='wat', time_resolution=None, window_overlap=0, f_range=[], prewhiten_percent=0, padding=0, folder_combine=False, mel_comp=0, sensitivity=0):
     self.fft_size = fft_size 
     self.time_resolution = time_resolution
     self.window_overlap = window_overlap
