@@ -11,7 +11,6 @@ class batch_processing:
       if import_Raven_selections:
         self.Gdrive_selections, _, _=self.collect_Gdrive(folder_id, '.txt')
     self.Raven_selections=filename_add
-    self.run_lts=False
 
   def collect_folder(self, path, file_extension='.wav'):
     import os
@@ -60,6 +59,7 @@ class batch_processing:
     self.annotation_padding=padding
     self.mel_comp=mel_comp
     self.sensitivity=sensitivity
+    self.run_lts=False
 
   def params_separation(self, model, iter=50, adaptive_alpha=0, additional_basis=0):
     self.model = model
