@@ -11,6 +11,7 @@ class batch_processing:
       if import_Raven_selections:
         self.Gdrive_selections, _, _=self.collect_Gdrive(folder_id, '.txt')
     self.Raven_selections=filename_add
+    self.run_lts=False
 
   def collect_folder(self, path, file_extension='.wav'):
     import os
