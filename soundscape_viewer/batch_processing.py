@@ -54,7 +54,7 @@ class batch_processing:
     self.environment = environment
     self.run_separation=False
     self.run_detection=False
-    self.run_pulse_analysis=False  
+    self.run_pulse_analysis=False
     self.folder_combine=folder_combine
     self.annotation_padding=padding
     self.mel_comp=mel_comp
