@@ -132,7 +132,7 @@ class pcnmf:
     return data
 
   def pcnmf_output(self, data, time_vec, baseline=0):
-    self.original_level = 10*np.log10((10**(data.T[:,1:]/10)).sum(axis=1))
+    self.original_level = 10*np.log10((10**((data+baseline).T[:,1:]/10)).sum(axis=1))
     separation=np.zeros(self.source_num, dtype=np.object)
     relative_level=np.zeros(self.source_num, dtype=np.object)
     matrix_shape=data.shape
@@ -444,10 +444,7 @@ class supervised_nmf:
       self.source_num=self.source_num+1
       self.basis_num=self.basis_num+additional_basis
       adaptive_alpha = np.append(adaptive_alpha, 1)
-      print("A new source has been added.")
     
-    
-    print('Running supervised NMF')
     # supervised NMF
     W, H = NMF_init(data, self.basis_num, init='random')
     W[:, 0:self.basis_num-additional_basis] = self.W
@@ -457,7 +454,6 @@ class supervised_nmf:
     Ht = check_array(H.T, order='C')
     X = check_array(data, accept_sparse='csr')
     
-    print('Learning temporal activitations...')
     W = np.array(W)
     for run in range(iter):
       prev_W = np.array(W)
@@ -476,7 +472,6 @@ class supervised_nmf:
     self.W=W
     self.H=Ht.T
     self.nmf_output(input_data, self.time_vec, baseline)
-    print('Done')
 
   def save_model(self, filename='NMF_model.mat', folder_id=[]):
     #import save_parameters

@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import audioread
 import librosa
+import scipy.signal
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import os
@@ -32,9 +33,20 @@ class gdrive_handle:
         upload_.Upload()
         print('Successifully upload to Google drive')
     
-    def list_query(self, file_extension):
+    def list_query(self, file_extension, subfolder=False):
         location_cmd="title contains '"+file_extension+"' and '"+self.folder_id+"' in parents and trashed=false"
         self.file_list = self.Gdrive.ListFile({'q': location_cmd}).GetList()
+        if subfolder:
+          self.list_subfolder(file_extension)
+
+    def list_subfolder(self, file_extension):
+      self.folder_list = self.Gdrive.ListFile({"q": "mimeType='application/vnd.google-apps.folder' and '"+self.folder_id+"' in parents and trashed=false"}).GetList()
+      if self.folder_list!=[]:
+        for folder in self.folder_list:
+          location_cmd="title contains '"+file_extension+"' and '"+folder['id']+"' in parents and trashed=false"
+          subfolder_list=self.Gdrive.ListFile({'q': location_cmd}).GetList()
+          if subfolder_list!=[]:
+            self.file_list.extend(subfolder_list)
         
     def list_display(self):
         n=0
@@ -60,11 +72,13 @@ class save_parameters:
         self.time_frame=feature_length
         self.basis_num=basis_num
 
-    def LTS_Result(self, LTS_median, LTS_mean, f, link):
+    def LTS_Result(self, LTS_median, LTS_mean, f, link=[], PI=[], Result_PI=[]):
         self.LTS_median = LTS_median
         self.LTS_mean = LTS_mean
         self.f = f
         self.link = link
+        self.PI = PI
+        self.Result_PI = Result_PI
 
     def LTS_Parameters(self, FFT_size, overlap, sensitivity, sampling_freq, channel):
         self.FFT_size=FFT_size
@@ -83,6 +97,8 @@ class audio_visualization:
           with audioread.audio_open(path+'/'+filename) as temp:
               sf=temp.samplerate
           self.sf=sf
+          self.FFT_size=FFT_size
+          self.overlap=window_overlap
 
           # load audio data  
           if annotation:
@@ -126,8 +142,6 @@ class audio_visualization:
 
             
     def run(self, x, sf, offset_read=0, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0):
-        import scipy.signal
-        
         if environment=='wat':
           P_ref=1
         elif environment=='air':
@@ -178,8 +192,10 @@ class audio_visualization:
           f = librosa.core.mel_frequencies(n_mels=mel_comp)
 
         if prewhiten_percent>0:
-          data=matrix_operation.prewhiten(data, prewhiten_percent, 1)
+          data, ambient=matrix_operation.prewhiten(data, prewhiten_percent, 1)
           data[data<0]=0
+        else:
+          ambient=data[:,0:1]*0
             
         # f_range: Hz
         if f_range:
@@ -190,6 +206,7 @@ class audio_visualization:
             
         f=f[f_list]
         data=data[f_list,:]
+        ambient=ambient[f_list]
         P=P[f_list,:]
         
         # plot the spectrogram
@@ -210,9 +227,14 @@ class audio_visualization:
           cbar.set_label('PSD')
 
         self.data=np.hstack((t[:,None],data.T))
+        self.ambient=ambient
         self.f=f
         if not time_resolution:
           self.phase=np.angle(P)
+
+    def convert_audio(self, magnitude_spec, snr_factor=1):
+        temp=np.multiply(10**(magnitude_spec[:,1:].T*snr_factor/10), np.exp(1j*self.phase))
+        _, self.xrec = scipy.signal.istft(temp, fs=self.sf, nperseg=self.FFT_size, noverlap=int(self.overlap*self.FFT_size))
         
 class matrix_operation:
     def __init__(self, header=[]):
@@ -253,6 +275,8 @@ class matrix_operation:
             else:
                 save_result[np.arange(i,i+np.diff(split_point[:,run])+1),1]=output[np.arange(split_point[0,run], split_point[1,run]+1)]
         
+        if np.sum(save_result[-1,1:])==0:
+            save_result=np.delete(save_result, -1, 0)
         return save_result
 
     def spectral_variation(self, input_data, f, percentile=[], hour_selection=[], month_selection=[]):
@@ -352,12 +376,16 @@ class matrix_operation:
     
     def prewhiten(input_data, prewhiten_percent, axis):
         import numpy.matlib
+        list=np.where(np.abs(input_data)==float("inf"))[0]
+        input_data[list]=float("nan")
+        input_data[list]=np.nanmin(input_data)
+        
         ambient = np.percentile(input_data, prewhiten_percent, axis=axis)
         if axis==0:
             input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1))
         elif axis==1:
             input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1).T)
-        return input_data
+        return input_data, ambient;
     
     def frame_normalization(input, axis=0, type='min-max'):
         if axis==0:
@@ -462,20 +490,20 @@ class performance_evaluation:
       plt.show()
 
 class pulse_interval:
-  def __init__(self, data, sf=None, energy_percentile=50, interval_range=None, plot_type='Both'):
+  def __init__(self, data, sf=None, energy_percentile=50, interval_range=None, plot_type='Both', standardization=True):
     from scipy.signal import hilbert
     if len(data.shape)==2:
-      input=np.percentile(data[:,1:], energy_percentile, axis=1)
       time_vec=data[:,0]
+      data=np.percentile(data[:,1:], energy_percentile, axis=1)
     elif len(data.shape)==1:
       data=data/np.max(np.abs(data))
       #input=np.power(data,2)
       input=np.abs(hilbert(data))
       time_vec=np.arange(len(data))/sf
     self.data=data
-    self.autocorrelation(input, time_vec, interval_range, plot_type)
+    self.autocorrelation(data, time_vec, interval_range, plot_type, millisec=True, standardization=standardization)
 
-  def autocorrelation(self, data, time_vec, interval_range=None, plot_type='Both', millisec=True):
+  def autocorrelation(self, data, time_vec, interval_range=None, plot_type='Both', millisec=True, standardization=True):
     if plot_type=='Both':
         fig, (ax1, ax2) = plt.subplots(nrows=2,figsize=(14, 12))
     elif plot_type=='Time':
@@ -490,11 +518,12 @@ class pulse_interval:
       ax1.set_ylabel('Amplitude')
 
     data=data-np.median(data)
-    data=data/np.max(np.abs(data))
+    if standardization==True:
+      data=data/np.max(np.abs(data))
     PI=np.arange(-1*data.shape[0], data.shape[0])
     time_resolution=time_vec[1]-time_vec[0]
     if millisec:
-      PI=1000*PI*time_resolution
+      PI=np.round(100000*PI*time_resolution)/100
 
     PI_list=(PI>=min(interval_range))*(PI<=max(interval_range))
     PI_list=np.where(PI_list)[0]
@@ -505,3 +534,50 @@ class pulse_interval:
       ax2.plot(self.PI, self.result)
       ax2.set_xlabel('Lagged time (ms)')
       ax2.set_ylabel('Correlation score')
+    
+class tonal_detection:
+  def __init__(self, tonal_threshold=6, temporal_prewhiten=50, spectral_prewhiten=50):
+    self.tonal_threshold=tonal_threshold
+    self.temporal_prewhiten=temporal_prewhiten
+    self.spectral_prewhiten=spectral_prewhiten
+  
+  def local_max(self, input, f, threshold=None, smooth=2):
+    # Do vertical and horizontal prewhitening
+    temp0=input[:,1:]
+    if self.spectral_prewhiten:
+      temp0, _=matrix_operation.prewhiten(temp0, prewhiten_percent=self.spectral_prewhiten, axis=1)
+    if self.temporal_prewhiten:
+      temp0, _=matrix_operation.prewhiten(temp0, prewhiten_percent=self.temporal_prewhiten, axis=0)
+    temp0[temp0<0]=0
+
+    # Smooth the spectrogram
+    from scipy.ndimage import gaussian_filter
+    temp0=gaussian_filter(temp0, sigma=smooth)
+    
+    # Applying local-max detector to extract whistle contours
+    temp=(-1*np.diff(temp0,n=2,axis=1))>self.tonal_threshold
+    temp=np.hstack((np.zeros([temp.shape[0],1]),temp))
+    temp=np.hstack((temp,np.zeros([temp.shape[0],1])))
+    temp2=temp*temp0
+    temp2[temp2<0]=0
+
+    # Smooth the contour fragments
+    temp2=gaussian_filter(temp2, sigma=smooth)
+
+    # Produce detection result
+    if threshold:
+      temp3=temp*temp0
+      rc=np.nonzero((temp3)>threshold)
+      amp=temp3.flatten()
+      amp=amp[np.where((amp>threshold))[0]]
+      detection=pd.DataFrame(np.hstack((input[rc[0],0:1], f[rc[1]][:,None], amp[:,None])), columns = ['Time','Frequency','Strength']) 
+      temp2[temp2<threshold]=threshold
+    else:
+      detection=np.array([])
+      
+    # Normalize energy variations 
+    temp2=matrix_operation.frame_normalization(temp2, axis=1, type='min-max')
+    temp2[np.isnan(temp)]=0
+    output=np.hstack((input[:,0:1], temp2))
+
+    return output, detection

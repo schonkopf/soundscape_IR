@@ -5,9 +5,11 @@ Author: Tzu-Hao Harry Lin (schonkopf@gmail.com)
 import numpy as np
 import pandas as pd
 import os
+import datetime
 from scipy.io import savemat
 from .utility import save_parameters
 from .utility import gdrive_handle
+from .utility import pulse_interval
 
 class lts_maker:
   """
@@ -84,8 +86,11 @@ class lts_maker:
     self.overlap=int(window_overlap*FFT_size)
     self.skip_duration=initial_skip
     self.time_resolution=time_resolution
+    self.Result_median=np.array([])
+    self.Result_mean=np.array([])
+    self.IPI_result=np.array([])
  
-  def filename_check(self, dateformat='yyyymmdd_HHMMSS', initial=[], year_initial=2000):
+  def filename_check(self, dateformat='yyyymmdd_HHMMSS', initial=[], year_initial=2000, filename=[]):
     """
     Time stamps on the file name
     For example: TW_LHC01_150102-001530.wav
@@ -98,13 +103,15 @@ class lts_maker:
     >>> dateformat='yyyymmdd-HHMMSS'
     >>> year_initial=0
     """
-    filename=self.audioname[0]
+    if not filename:
+      filename=self.audioname[0]
     idx=len(initial)
     
     if dateformat.find('yyyy')==-1:
         self.yy_pos = np.array([dateformat.find('yy')+idx, dateformat.find('yy')+2+idx, year_initial])
     else:
         self.yy_pos = np.array([dateformat.find('yyyy')+idx, dateformat.find('yyyy')+4+idx, 0])
+    self.year_initial = year_initial
 
     self.mm_pos = np.array([dateformat.find('mm')+idx, dateformat.find('mm')+2+idx])
     self.dd_pos = np.array([dateformat.find('dd')+idx, dateformat.find('dd')+2+idx])
@@ -147,9 +154,9 @@ class lts_maker:
     self.cloud=1
     print('Identified ', len(self.audioname), 'files')
     
-  def collect_Gdrive(self, folder_id, file_extension='.wav'):
+  def collect_Gdrive(self, folder_id, file_extension='.wav', subfolder=False):
     Gdrive=gdrive_handle(folder_id)
-    Gdrive.list_query(file_extension=file_extension)
+    Gdrive.list_query(file_extension=file_extension, subfolder=subfolder)
     self.cloud=2
     self.link=np.array([], dtype=np.object)
     self.audioname=np.array([], dtype=np.object)
@@ -161,16 +168,71 @@ class lts_maker:
       n=n+1
     print('Identified ', len(self.audioname), 'files')
     
-  def run(self, save_filename='LTS.mat', folder_id=[], file_begin=0, num_file=[]):
+  def get_file_time(self, infilename):
+    yy = int(infilename[self.yy_pos[0]:self.yy_pos[1]])
+    if self.year_initial>0:
+      yy = yy+self.yy_pos[2]
+    mm = int(infilename[self.mm_pos[0]:self.mm_pos[1]])
+    dd = int(infilename[self.dd_pos[0]:self.dd_pos[1]])
+    HH = int(infilename[self.HH_pos[0]:self.HH_pos[1]])
+    MM = int(infilename[self.MM_pos[0]:self.MM_pos[1]])
+    SS = int(infilename[self.SS_pos[0]:self.SS_pos[1]])
+    date=datetime.datetime(yy,mm,dd)
+    self.time_vec=date.toordinal()*24*3600+HH*3600+MM*60+SS+366*24*3600 
+
+  def compress_spectrogram(self, spec_data, spec_time, time_resolution=[], linear_scale=True, interval_range=0, energy_percentile=0):
+    if time_resolution:
+      read_interval=np.array([0, time_resolution])
+    else:
+      read_interval=np.array([0, spec_time[-1]])
+    
+    run=0
+    while read_interval[0]<spec_time[-1]-0.5*time_resolution:
+      read_list=np.where((spec_time>read_interval[0])*(spec_time<=read_interval[1])==True)[0]
+      if len(interval_range)>0:
+        temp=np.hstack((spec_time[read_list,None], spec_data[read_list,:]))
+        pulse_analysis_result=pulse_interval(temp, energy_percentile=energy_percentile, interval_range=interval_range, plot_type=None, standardization=False)
+        temp_PI=pulse_analysis_result.result
+
+      if linear_scale:
+        temp_median=10*np.log10(np.median(spec_data[read_list,:],axis=0))-self.sen
+        temp_mean=10*np.log10(np.mean(spec_data[read_list,:],axis=0))-self.sen
+      else:
+        temp_median=np.median(spec_data[read_list,:],axis=0)
+        temp_mean=np.mean(spec_data[read_list,:],axis=0)
+      
+      if self.Result_median.size == 0:
+        self.Result_median=np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_median))
+        self.Result_mean=np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_mean))
+        if len(interval_range)>0:
+          self.Result_PI=np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_PI))
+      else:
+        self.Result_median=np.vstack((np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_median)), self.Result_median))
+        self.Result_mean=np.vstack((np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_mean)), self.Result_mean))
+        if len(interval_range)>0:
+          self.Result_PI=np.vstack((np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_PI)), self.Result_PI))
+      run=+1
+      read_interval=read_interval+time_resolution
+      self.PI=pulse_analysis_result.PI
+    
+  def save_lts(self, save_filename, folder_id=[]):
+    Result=save_parameters()
+    Parameters=save_parameters()
+    Result.LTS_Result(self.Result_median, self.Result_mean, self.f, self.link, self.PI, self.Result_PI)
+    Parameters.LTS_Parameters(self.FFT_size, self.overlap, self.sen, self.sf, self.channel)
+    savemat(save_filename, {'Result':Result,'Parameters':Parameters})
+    print('Successifully save to '+save_filename)
+    
+    if folder_id:
+      Gdrive=gdrive_handle(folder_id)
+      Gdrive.upload(save_filename)
+    
+  def run(self, save_filename='LTS.mat', folder_id=[], file_begin=0, num_file=[], duration_read=[]):
     import audioread
     import librosa
     import scipy.signal
-    import datetime
     import sys
     import urllib.request
-    
-    Result_median=np.array([]); 
-    Result_mean=np.array([]); 
     
     if not num_file:
       num_file=len(self.audioname)
@@ -183,18 +245,9 @@ class lts_maker:
       print('Total ', len(self.audioname), ' files, now analyzing file #', file, ': ', self.audioname[file], flush=True, end='')
       
       # Generate MATLAB time format
-      infilename=self.audioname[file]
-      yy = int(infilename[self.yy_pos[0]:self.yy_pos[1]])
-      if self.yy_pos.size == 3:
-          yy = yy+self.yy_pos[2]
-      mm = int(infilename[self.mm_pos[0]:self.mm_pos[1]])
-      dd = int(infilename[self.dd_pos[0]:self.dd_pos[1]])
-      HH = int(infilename[self.HH_pos[0]:self.HH_pos[1]])
-      MM = int(infilename[self.MM_pos[0]:self.MM_pos[1]])
-      SS = int(infilename[self.SS_pos[0]:self.SS_pos[1]])
-      date=datetime.datetime(yy,mm,dd)
-      time_vec=date.toordinal()+HH/24+MM/(24*60)+SS/(24*3600)+366 
+      self.get_file_time(self.audioname[file])
 
+      # Download audio file
       if self.cloud==1:
         urllib.request.urlretrieve(self.link[file], self.audioname[file])
         path='.'
@@ -204,47 +257,40 @@ class lts_maker:
         path='.'
       else:
         path=self.link
-        
+
+      # Load audio file
       if file==file_begin:
         with audioread.audio_open(path+'/'+self.audioname[file]) as temp:
           sf=temp.samplerate
-      x, sf = librosa.load(path+'/'+self.audioname[file], sr=sf)
-      
-      if self.time_resolution:
-        total_segment=np.ceil(len(x)/sf/self.time_resolution)
+      x, self.sf = librosa.load(path+'/'+self.audioname[file], sr=sf)
+
+      if duration_read:
+        total_segment=int(np.ceil(len(x)/sf/duration_read))
       else:
         total_segment=1
-        self.time_resolution=np.ceil(len(x)/sf)
-
-      for segment_run in range(int(total_segment)):
-        read_interval=[np.floor(self.time_resolution*segment_run*sf), np.ceil(self.time_resolution*(segment_run+1)*sf)]
+        duration_read=len(x)/sf
+        
+      if not self.time_resolution:
+        self.time_resolution=duration_read
+      
+      for segment_run in range(total_segment):
+        read_interval=[np.floor(duration_read*segment_run*sf), np.ceil(duration_read*(segment_run+1)*sf)]
         if segment_run==0:
           read_interval[0]=self.skip_duration*sf
         if read_interval[1]>len(x):
           read_interval[1]=len(x)
-        if read_interval[1]-read_interval[0]>(0.5*self.time_resolution*sf):
-          f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=self.FFT_size, 
+        if (read_interval[1]-read_interval[0])>(0.5*self.time_resolution*sf):
+          self.f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=self.FFT_size, 
                                          noverlap=self.overlap, nfft=self.FFT_size, return_onesided=True, mode='psd')
           P = P/np.power(self.pref,2)
-          if Result_median.size == 0:
-            Result_median=np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.median(P,axis=1))-self.sen))
-            Result_mean=np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.mean(P,axis=1))-self.sen))
-          else:
-            Result_median=np.vstack((np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),
-                                                10*np.log10(np.median(P,axis=1))-self.sen)), Result_median))
-            Result_mean=np.vstack((np.hstack((np.array(time_vec+self.time_resolution*segment_run/24/3600),10*np.log10(np.mean(P,axis=1))-self.sen)), Result_mean))
+          self.time_vec=self.time_vec+duration_read*segment_run
+          self.compress_spectrogram(P.T, t, self.time_resolution, linear_scale=True)
 
       if self.cloud>=1:
         os.remove(self.audioname[file])
     
-    temp = np.argsort(Result_median[:,0])
-    Result=save_parameters()
-    Parameters=save_parameters()
-    Result.LTS_Result(Result_median[temp,:], Result_mean[temp,:], f, self.link)
-    Parameters.LTS_Parameters(self.FFT_size, self.overlap, self.sen, sf, self.channel)
-    scipy.io.savemat(save_filename, {'Result':Result,'Parameters':Parameters})
-    print('Successifully save to '+save_filename)
-    
-    if folder_id:
-      Gdrive=gdrive_handle(folder_id)
-      Gdrive.upload(save_filename)
+    temp = np.argsort(self.Result_median[:,0])
+    self.Result_median=self.Result_median[temp,:]
+    self.Result_mean=self.Result_mean[temp,:]
+    self.Result_PI=self.Result_PI[temp,:]
+    self.save_lts(save_filename, folder_id)

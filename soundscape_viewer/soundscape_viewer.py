@@ -44,35 +44,46 @@ class lts_viewer:
       self.Result_median=np.array([])
       self.Result_mean=np.array([])
       self.Result_diff=np.array([])
+      self.Result_PI=np.array([])
       
   def assemble(self, data, time_sort=1, f_range=[]):
-      f = data['Result']['f'].item()[0]
+      if any('PI' in s for s in data['Result'].dtype.names):
+        self.PI = np.array(data['Result']['PI'].item()[0])
+        Result_PI = data['Result']['Result_PI'].item()
+      else:
+        Result_PI = np.array([])
+
+      self.f = np.array(data['Result']['f'].item()[0])
       if f_range:
-          f_list=(f>=min(f_range))*(f<=max(f_range))
+          f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
           f_list=np.where(f_list==True)[0]
       else:
-          f_list=np.arange(len(f))
-      f=f[f_list]
+          f_list=np.arange(len(self.f))
+      self.f=self.f[f_list]
       f_list=np.concatenate([np.array([0]), f_list+1])
       Result_median = data['Result']['LTS_median'].item()[:,f_list]
       Result_mean = data['Result']['LTS_mean'].item()[:,f_list]
-
+      
       if self.Result_median.size == 0:
-          self.f = np.array(f)
           self.Result_median = np.array(Result_median)
           self.Result_mean = np.array(Result_mean)
           self.Result_diff = self.Result_mean-self.Result_median
           self.Result_diff[:,0] = self.Result_mean[:,0]
+          self.Result_PI = np.array(Result_PI)
       else:
           self.Result_median = np.vstack((Result_median, self.Result_median))
           self.Result_mean = np.vstack((Result_mean, self.Result_mean))
           self.Result_diff = self.Result_mean-self.Result_median
           self.Result_diff[:,0] = self.Result_mean[:,0]
+          self.Result_PI = np.vstack((Result_PI, self.Result_PI))
+
       if time_sort == 1:
           temp = np.argsort(self.Result_mean[:,0])
           self.Result_median=self.Result_median[temp,:]
           self.Result_mean=self.Result_mean[temp,:]
           self.Result_diff=self.Result_diff[temp,:]
+          if self.Result_PI.shape[0]>0:
+            self.Result_PI=self.Result_PI[temp,:]
   
   def collect_folder(self, path='.', f_range=[], time_sort=1):
       items = os.listdir(path)
@@ -94,9 +105,10 @@ class lts_viewer:
       self.assemble(data, time_sort, f_range)
       os.remove(infilename)
       
-  def plot_lts(self, fig_width=12, fig_height=18):
+  def plot_lts(self, fig_width=12, fig_height=18, gap_fill=True):
     temp,f=self.input_selection(var_name='median')
-    temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
+    if gap_fill:
+      temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
     fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, figsize=(fig_width, fig_height))
@@ -111,7 +123,8 @@ class lts_viewer:
     cbar1.set_label('PSD')
 
     temp,f=self.input_selection(var_name='mean')
-    temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
+    if gap_fill:
+      temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
     im2 = ax2.imshow(temp.T, vmin=np.min(temp[:,1:]), vmax=np.max(temp[:,1:]),
@@ -125,7 +138,8 @@ class lts_viewer:
     cbar2.set_label('PSD')
 
     temp,f=self.input_selection(var_name='diff')
-    temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
+    if gap_fill:
+      temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
     temp[:,0]=temp[:,0]+693960-366
     
     im3 = ax3.imshow(temp.T, vmin=np.min(temp[:,1:]), vmax=np.max(temp[:,1:]),
@@ -147,20 +161,21 @@ class lts_viewer:
     elif var_name=='mean':
       input_data=self.Result_mean
     elif var_name=='diff':
-      input_data=self.Result_diff     
-    else:
-      input_data=0
-      print('Unknown input, please choose: median, mean, diff.')
+      input_data=self.Result_diff
     
-    # f_range: Hz
-    if f_range:
-      f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
-      f_list=np.where(f_list==True)[0]
+    if var_name=='PI':
+      input_data=self.Result_PI  
+      f=self.PI
     else:
-      f_list=np.arange(len(self.f))
-    
-    f=self.f[f_list]
-    f_list=np.concatenate([np.array([0]), f_list+1])
+      # f_range: Hz
+      if f_range:
+        f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
+        f_list=np.where(f_list==True)[0]
+        f=self.f[f_list]
+        f_list=np.concatenate([np.array([0]), f_list+1])
+        input_data=input_data[:,f_list]
+      else:
+        f=self.f
 
     if annotation:
       df = pd.read_csv(annotation,index_col=0) 
@@ -202,13 +217,12 @@ class lts_viewer:
         list=np.where(list==True)[0]
       else:
         list=np.arange(self.Result_median.shape[0])
-    input_data=input_data[:,f_list]
     input_data=input_data[list,:]
     
     if len(input_data)>1:
       time_vec=input_data[:,0]
       if prewhiten_percent>0:
-        input_data=matrix_operation.prewhiten(input_data, prewhiten_percent, 0)
+        input_data, ambient=matrix_operation.prewhiten(input_data, prewhiten_percent, 0)
         input_data[input_data<threshold]=threshold
         input_data[:,0]=time_vec
       return input_data, f;
@@ -219,38 +233,8 @@ class data_organize:
     self.result_header=np.array([])
     print('A new spreadsheet has been created.')
       
-  def time_fill(self, time_vec, data, header, time_resolution=None):
-    # fill the time series gap
-    temp = np.argsort(time_vec)
-    time_vec=time_vec[temp]
-    if time_resolution==None:
-      time_resolution=time_vec[1]-time_vec[0]
-    
-    if data.ndim>1:
-        output=data[temp,:]
-    else:
-        output=data[temp]
-    resolution=np.round(time_resolution*24*3600)
-    n_time_vec=np.arange(np.floor(np.min(time_vec))*24*3600, 
-                         np.ceil(np.max(time_vec))*24*3600,resolution)/24/3600
-
-    if data.ndim>1:
-        save_result=np.zeros((n_time_vec.size, data.shape[1]+1))
-    else:
-        save_result=np.zeros((n_time_vec.size, 2))
-    
-    save_result[:,0]=n_time_vec-693960
-    segment_list=np.round(np.diff(time_vec*24*3600)/resolution)
-    split_point=np.vstack((np.concatenate(([0],np.where(segment_list!=1)[0]+1)),
-                           np.concatenate((np.where(segment_list!=1)[0],[time_vec.size-1]))))
-
-    for run in np.arange(split_point.shape[1]):
-      i=np.argmin(np.abs(n_time_vec-time_vec[split_point[0,run]]))
-      if data.ndim>1:
-            save_result[np.arange(i,i+np.diff(split_point[:,run])+1),1:]=output[np.arange(split_point[0,run], split_point[1,run]+1),:]
-      else:
-            save_result[np.arange(i,i+np.diff(split_point[:,run])+1),1]=output[np.arange(split_point[0,run], split_point[1,run]+1)]
-        
+  def time_fill(self, time_vec, data, header):
+    save_result=matrix_operation().gap_fill(time_vec, data, tail=True)
     
     if len(self.final_result)==0:
       self.final_result=save_result
@@ -265,22 +249,48 @@ class data_organize:
     self.result_header=np.delete(self.result_header, col)
     print('Columns in the spreadsheet: ', self.result_header)
     
-  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6):
-    hr=np.unique(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))
-    no_sample=len(self.final_result[:,0])-np.remainder(len(self.final_result[:,0]), len(hr))
-    day=np.unique(np.floor(self.final_result[0:no_sample,0]))
+  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6, empty_hr_remove=False, empty_day_remove=False, reduce_resolution=1, display_cluster=0):
+    hr_boundary=[np.min(24*(self.final_result[:,0]-np.floor(self.final_result[:,0]))), np.max(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))]
+    if display_cluster==0:
+      input_data=self.final_result[:,col]
+      input_data[input_data==0]=np.nan
+    else:
+      input_data=self.final_result[:,col]==display_cluster
+      input_data[self.final_result[:,col]==0]=np.nan
+    input_data, time_vec=data_organize.reduce_time_resolution(input_data, self.final_result[:,0:1], reduce_resolution)
+    
+    hr=np.unique(24*(time_vec-np.floor(time_vec)))
+    no_sample=len(time_vec)-np.remainder(len(time_vec), len(hr))
+    day=np.unique(np.floor(time_vec[0:no_sample]))
     python_dt=day+693960-366
 
+    plot_matrix=input_data.reshape((len(day), len(hr))).T
+    if empty_hr_remove:
+      list=np.where(np.sum(plot_matrix, axis=1)>0)[0]
+      plot_matrix=plot_matrix[list, :]
+      hr=hr[list]
+    if empty_day_remove:
+      list=np.where(np.sum(plot_matrix, axis=0)>0)[0]
+      plot_matrix=plot_matrix[:, list]
+      day=day[list]
+
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-    im = plt.imshow(self.final_result[:,col].reshape((len(day), len(hr))).T,
-                    vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
-                    extent=[python_dt[0], python_dt[-1], np.min(hr), np.max(hr)], interpolation='none')
+    im = plt.imshow(plot_matrix, vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
+                    extent=[python_dt[0], python_dt[-1], np.min(hr_boundary), np.max(hr_boundary)], interpolation='none')
     ax.xaxis_date()
     ax.set_title(self.result_header[col])
     plt.ylabel('Hour')
     plt.xlabel('Day')
     cbar1 = plt.colorbar(im)
-    return cbar1
+
+    plot_matrix=np.hstack((day[:,None]+693960, plot_matrix.T))
+    return plot_matrix, hr
+
+  def reduce_time_resolution(input_data, time_vec, reduce_resolution):
+    if reduce_resolution>1:
+      input_data=np.nanmean(input_data.reshape((int(len(input_data)/reduce_resolution), -1)), axis=1)
+      time_vec=np.mean(time_vec.reshape((len(input_data), -1)), axis=1)
+    return input_data, time_vec
     
   def save_csv(self, filename='Soundscape_analysis.csv',folder_id=[]):
     df = pd.DataFrame(self.final_result, columns = self.result_header) 
