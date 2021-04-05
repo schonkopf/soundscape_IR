@@ -214,6 +214,7 @@ class lts_maker:
           self.Result_PI=np.vstack((np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_PI)), self.Result_PI))
       run=+1
       read_interval=read_interval+time_resolution
+    if len(interval_range)>0:
       self.PI=pulse_analysis_result.PI
     
   def save_lts(self, save_filename, folder_id=[]):
