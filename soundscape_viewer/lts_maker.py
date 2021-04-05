@@ -185,6 +185,7 @@ class lts_maker:
       read_interval=np.array([0, time_resolution])
     else:
       read_interval=np.array([0, spec_time[-1]])
+      time_resolution=spec_time[-1]
     
     run=0
     while read_interval[0]<spec_time[-1]-0.5*time_resolution:
