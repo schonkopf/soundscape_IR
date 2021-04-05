@@ -180,7 +180,7 @@ class lts_maker:
     date=datetime.datetime(yy,mm,dd)
     self.time_vec=date.toordinal()*24*3600+HH*3600+MM*60+SS+366*24*3600 
 
-  def compress_spectrogram(self, spec_data, spec_time, time_resolution=[], linear_scale=True, interval_range=0, energy_percentile=0):
+  def compress_spectrogram(self, spec_data, spec_time, time_resolution=[], linear_scale=True, interval_range=[], energy_percentile=0):
     if time_resolution:
       read_interval=np.array([0, time_resolution])
     else:
