@@ -324,7 +324,7 @@ class supervised_nmf:
       W=np.array(self.W[:,W_list])
         
     # Plot
-    x_lim=np.array([self.time_vec[H_list[0]], self.time_vec[H_list[-1]]])
+    x_lim=np.array([self.time_vec[H_list[0]][0], self.time_vec[H_list[-1]][0]])
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     if plot_type=='W':
       im = ax.imshow(W, origin='lower',  aspect='auto', cmap=cm.jet,
