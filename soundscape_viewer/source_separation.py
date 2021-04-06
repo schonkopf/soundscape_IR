@@ -474,6 +474,8 @@ class supervised_nmf:
     self.nmf_output(input_data, self.time_vec, baseline)
 
   def save_model(self, filename='NMF_model.mat', folder_id=[]):
+    if (hasattr(self, 'W_cluster')==False):
+      self.W_cluster=np.repeat(0,self.basis_num)
     #import save_parameters
     nmf_model=save_parameters()
     nmf_model.pcnmf(self.f, self.W, self.W_cluster, self.source_num, self.feature_length, self.basis_num)
