@@ -128,14 +128,14 @@ class lts_maker:
     print('Minute:', filename[self.MM_pos[0]:self.MM_pos[1]])
     print('Second:', filename[self.SS_pos[0]:self.SS_pos[1]]) 
   
-  def collect_folder(self, path):
+  def collect_folder(self, path, file_extension='.wav'):
     file_list = os.listdir(path)
     self.link = path
     self.cloud = 0   
     n = 0
     self.audioname=np.array([], dtype=np.object)
     for filename in file_list:
-        if filename.endswith(".wav"):
+        if filename.endswith(file_extension):
             self.audioname = np.append(self.audioname, filename)
             n = n+1
     print('Identified ', len(self.audioname), 'files')
