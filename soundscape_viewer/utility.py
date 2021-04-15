@@ -61,6 +61,8 @@ class save_parameters:
     def supervised_nmf(self, f, W, feature_length, basis_num, adaptive_alpha=-1, additional_basis=-1):
         self.f=f
         self.W=W
+        self.W_cluster=W_cluster
+        self.k=source_num
         self.time_frame=feature_length
         self.basis_num=basis_num
         if adaptive_alpha!=-1:
