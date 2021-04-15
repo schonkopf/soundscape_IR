@@ -241,7 +241,7 @@ class pcnmf:
     print('Minima and maxima frequancy bin:', min(model['save_nmf']['f'].item()[0]), 'Hz and', max(model['save_nmf']['f'].item()[0]), 'Hz')
     print('Frequancy resolution:' ,intf, 'Hz')
     print('Feature length:' ,self.feature_length)
-    print('Number of asis:' ,self.basis_num)
+    print('Number of basis:' ,self.basis_num)
     print('Number of source:' ,self.source_num)
     if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       print('Sparseness:', self.sparseness)
@@ -520,7 +520,7 @@ class supervised_nmf:
     print('Minima and maxima frequancy bin:', min(model['save_nmf']['f'].item()[0]), 'Hz and', max(model['save_nmf']['f'].item()[0]), 'Hz')
     print('Frequancy resolution:' ,intf, 'Hz')
     print('Feature length:' ,self.feature_length)
-    print('Number of asis:' ,self.basis_num)
+    print('Number of basis:' ,self.basis_num)
     print('Number of source:' ,self.source_num)
     if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       print('Sparseness:', self.sparseness)
