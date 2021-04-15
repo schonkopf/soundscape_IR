@@ -122,7 +122,7 @@ class lts_viewer:
           else:
             self.assemble(data, time_sort, f_range)
         
-  def collect_Gdrive(self, folder_id, f_range=[], time_sort=1, file_extension = '.mat'):
+  def collect_Gdrive(self, folder_id, f_range=[], time_sort=1, file_extension = '.mat', parameter_check=False):
     Gdrive=gdrive_handle(folder_id)
     Gdrive.list_query(file_extension)
     
