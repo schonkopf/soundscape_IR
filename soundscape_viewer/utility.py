@@ -58,7 +58,7 @@ class save_parameters:
     def __init__(self):
         self.platform='python'
     
-    def supervised_nmf(self, f, W, feature_length, basis_num, adaptive_alpha, additional_basis):
+    def supervised_nmf(self, f, W, W_cluster, source_num, feature_length, basis_num, adaptive_alpha, additional_basis):
         self.f=f
         self.W=W
         self.W_cluster=W_cluster
