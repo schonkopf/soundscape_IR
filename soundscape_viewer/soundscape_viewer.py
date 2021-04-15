@@ -95,9 +95,10 @@ class lts_viewer:
           f_list=np.arange(len(self.f))
       self.f=self.f[f_list]
       f_list=np.concatenate([np.array([0]), f_list+1])
-      
+      intf=self.f[1]-self.f[0]
       Result_mean = data['Result']['LTS_mean'].item()[:,f_list]
       self.Result_mean = np.array(Result_mean)
+      
       #set time
       temp = self.Result_mean[:,0]
       print('LTS parameters check')
@@ -108,7 +109,8 @@ class lts_viewer:
       dift=pd.to_timedelta((temp[1]-temp[0]),unit="D")
       RT=round(dift.value/10**9)
       print('Time resolution:' ,RT, 'sec')
-      print('Bin range of frequancy from', round(min(self.f),2), 'Hz to ', round(max(self.f),2), 'Hz')
+      print('Minima and maxima frequancy bin:', min(self.f), 'Hz and ', max(self.f), 'Hz')
+      print('Frequancy resolution:' ,intf, 'Hz')
       print('---------------------------------------------------------------')
       
   def collect_folder(self, path='.', f_range=[], time_sort=1, parameter_check=False):
