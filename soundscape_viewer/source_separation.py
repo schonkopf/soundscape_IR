@@ -238,18 +238,18 @@ class pcnmf:
   def model_check(self, model):
     print('Model parameters check')
     intf=model['save_nmf']['f'].item()[0][1]-model['save_nmf']['f'].item()[0][0]
-    print('Bin range of frequancy from', round(min(model['save_nmf']['f'].item()[0]),2), 'Hz to ', round(max(model['save_nmf']['f'].item()[0]),2), 'Hz')
+    print('Minima and maxima frequancy bin:', min(model['save_nmf']['f'].item()[0]), 'Hz and', max(model['save_nmf']['f'].item()[0]), 'Hz')
     print('Frequancy resolution:' ,intf, 'Hz')
     print('Feature length:' ,self.feature_length)
-    print('Basis number:' ,self.basis_num)
-    print('Source number:' ,self.source_num)
-    if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness') == True:
+    print('Number of asis:' ,self.basis_num)
+    print('Number of source:' ,self.source_num)
+    if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       print('Sparseness:', self.sparseness)
-    if np.any(np.array(model['save_nmf'][0].dtype.names)=='adaptive_alpha') == True:
-      print('Adaptive_alpha:', self.adaptive_alpha)
-    if np.any(np.array(model['save_nmf'][0].dtype.names)=='additional_basis') == True:
-      print('Additional_basis:', self.additional_basis)
-      
+    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='adaptive_alpha'):
+    #  print('Adaptive_alpha:', self.adaptive_alpha)
+    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='additional_basis'):
+    #  print('Additional_basis:', self.additional_basis)
+  
   def load_model(self, filename):
     model = loadmat(filename)
     self.W=model['save_nmf']['W'].item()
@@ -257,12 +257,12 @@ class pcnmf:
     self.source_num=model['save_nmf']['k'].item()[0][0]
     self.feature_length=model['save_nmf']['time_frame'].item()[0][0]
     self.basis_num=model['save_nmf']['basis_num'].item()[0][0]
-    if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness') == True:
+    if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       self.sparseness=model['save_nmf']['sparseness'].item()[0][0]
-    if np.any(np.array(model['save_nmf'][0].dtype.names)=='adaptive_alpha') == True:
-      self.adaptive_alpha=model['save_nmf']['adaptive_alpha'].item()[0][0]
-    if np.any(np.array(model['save_nmf'][0].dtype.names)=='additional_basis') == True:
-      self.additional_basis=model['save_nmf']['additional_basis'].item()[0][0]
+    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='adaptive_alpha'):
+    #  self.adaptive_alpha=model['save_nmf']['adaptive_alpha'].item()[0][0]
+    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='additional_basis'):
+    #  self.additional_basis=model['save_nmf']['additional_basis'].item()[0][0]
     self.model_check(model)
   
   def supervised_separation(self, input_data, f, iter=50):
@@ -293,11 +293,12 @@ class pcnmf:
     print('Done')
     
 class supervised_nmf:
-  def __init__(self, feature_length=1, basis_num=60, adaptive_alpha=-1, additional_basis=-1):
+  def __init__(self, feature_length=1, basis_num=60):
+  #def __init__(self, feature_length=1, basis_num=60, adaptive_alpha=-1, additional_basis=-1):
     self.basis_num=basis_num
     self.feature_length=feature_length
-    self.adaptive_alpha=adaptive_alpha
-    self.additional_basis=additional_basis
+    #self.adaptive_alpha=adaptive_alpha
+    #self.additional_basis=additional_basis
   
   def reconstruct(self, source=None):
     if source:
@@ -503,7 +504,8 @@ class supervised_nmf:
   def save_model(self, filename='NMF_model.mat', folder_id=[]):
     #import save_parameters
     nmf_model=save_parameters()
-    nmf_model.supervised_nmf(self.f, self.W, self.W_cluster, self.source_num, self.feature_length, self.basis_num, self.adaptive_alpha, self.additional_basis)
+    nmf_model.supervised_nmf(self.f, self.W, self.W_cluster, self.source_num, self.feature_length, self.basis_num)
+    #nmf_model.supervised_nmf(self.f, self.W, self.W_cluster, self.source_num, self.feature_length, self.basis_num, self.adaptive_alpha, self.additional_basis)
     savemat(filename, {'save_nmf':nmf_model})
     print('Successifully save to '+filename)
     
@@ -515,17 +517,17 @@ class supervised_nmf:
   def model_check(self, model):
     print('Model parameters check')
     intf=model['save_nmf']['f'].item()[0][1]-model['save_nmf']['f'].item()[0][0]
-    print('Bin range of frequancy from', round(min(model['save_nmf']['f'].item()[0]),2), 'Hz to ', round(max(model['save_nmf']['f'].item()[0]),2), 'Hz')
+    print('Minima and maxima frequancy bin:', min(model['save_nmf']['f'].item()[0]), 'Hz and', max(model['save_nmf']['f'].item()[0]), 'Hz')
     print('Frequancy resolution:' ,intf, 'Hz')
     print('Feature length:' ,self.feature_length)
-    print('Basis number:' ,self.basis_num)
-    print('Source number:' ,self.source_num)
-    if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness') == True:
+    print('Number of asis:' ,self.basis_num)
+    print('Number of source:' ,self.source_num)
+    if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       print('Sparseness:', self.sparseness)
-    if np.any(np.array(model['save_nmf'][0].dtype.names)=='adaptive_alpha') == True:
-      print('Adaptive_alpha:', self.adaptive_alpha)
-    if np.any(np.array(model['save_nmf'][0].dtype.names)=='additional_basis') == True:
-      print('Additional_basis:', self.additional_basis)
+    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='adaptive_alpha'):
+    #  print('Adaptive_alpha:', self.adaptive_alpha)
+    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='additional_basis'):
+    #  print('Additional_basis:', self.additional_basis)
   
   def load_model(self, filename):
     model = loadmat(filename)
@@ -534,10 +536,10 @@ class supervised_nmf:
     self.source_num=model['save_nmf']['k'].item()[0][0]
     self.feature_length=model['save_nmf']['time_frame'].item()[0][0]
     self.basis_num=model['save_nmf']['basis_num'].item()[0][0]
-    if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness') == True:
+    if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       self.sparseness=model['save_nmf']['sparseness'].item()[0][0]
-    if np.any(np.array(model['save_nmf'][0].dtype.names)=='adaptive_alpha') == True:
-      self.adaptive_alpha=model['save_nmf']['adaptive_alpha'].item()[0][0]
-    if np.any(np.array(model['save_nmf'][0].dtype.names)=='additional_basis') == True:
-      self.additional_basis=model['save_nmf']['additional_basis'].item()[0][0]
+    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='adaptive_alpha'):
+    #  self.adaptive_alpha=model['save_nmf']['adaptive_alpha'].item()[0][0]
+    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='additional_basis'):
+    #  self.additional_basis=model['save_nmf']['additional_basis'].item()[0][0]
     self.model_check(model)
