@@ -293,9 +293,11 @@ class pcnmf:
     print('Done')
     
 class supervised_nmf:
-  def __init__(self, feature_length=1, basis_num=60):
+  def __init__(self, feature_length=1, basis_num=60, adaptive_alpha=-1, additional_basis=-1):
     self.basis_num=basis_num
     self.feature_length=feature_length
+    self.adaptive_alpha=adaptive_alpha
+    self.additional_basis=additional_basis
   
   def reconstruct(self, source=None):
     if source:
@@ -446,6 +448,8 @@ class supervised_nmf:
   def supervised_separation(self, input_data, f, iter=50, adaptive_alpha=0, additional_basis=0):
     self.f=f    
     self.time_vec=input_data[:,0:1]
+    self.adaptive_alpha=adaptive_alpha
+    self.additional_basis=additional_basis
     input_data=input_data[:,1:].T
     baseline=input_data.min()
     input_data=input_data-baseline
