@@ -109,7 +109,7 @@ class lts_viewer:
       RT=round(dift.value/10**9)
       print('Time resolution:' ,RT, 'sec')
       print('Bin range of frequancy from', round(min(self.f),2), 'Hz to ', round(max(self.f),2), 'Hz')
-      print('--------------------------------------------------------------')
+      print('---------------------------------------------------------------')
       
   def collect_folder(self, path='.', f_range=[], time_sort=1, parameter_check=False):
       items = os.listdir(path)
