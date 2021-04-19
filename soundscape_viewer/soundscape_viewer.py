@@ -85,15 +85,43 @@ class lts_viewer:
           if self.Result_PI.shape[0]>0:
             self.Result_PI=self.Result_PI[temp,:]
   
-  def collect_folder(self, path='.', f_range=[], time_sort=1):
+  def LTS_check(self, data, f_range=[]):
+      #set freq
+      self.f = np.array(data['Result']['f'].item()[0])
+      if f_range:
+          f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
+          f_list=np.where(f_list==True)[0]
+      else:
+          f_list=np.arange(len(self.f))
+      self.f=self.f[f_list]
+      f_list=np.concatenate([np.array([0]), f_list+1])
+      Result_mean = data['Result']['LTS_mean'].item()[:,f_list]
+      self.Result_mean = np.array(Result_mean)
+      
+      #set time
+      temp = self.Result_mean[:,0]
+      print('LTS parameters check')
+      print('Sampling rate:' ,round(data['Parameters']['sampling_freq'].item()[0][0]))
+      print('Start time:', pd.to_datetime(min(temp)-693962, unit='D',origin=pd.Timestamp('1900-01-01')))
+      print('End time:', pd.to_datetime(max(temp)-693962, unit='D',origin=pd.Timestamp('1900-01-01')))
+      print('FFT size:' ,round(data['Parameters']['FFT_size'].item()[0][0]))
+      print('Time resolution:' ,round((temp[1]-temp[0])*3600*24), 'sec')
+      print('Minima and maxima frequancy bin:', min(self.f), 'Hz and ', max(self.f), 'Hz')
+      print('Frequancy resolution:' ,self.f[1]-self.f[0], 'Hz')
+      print('---------------------------------------------------------------')
+      
+  def collect_folder(self, path='.', f_range=[], time_sort=1, parameter_check=False):
       items = os.listdir(path)
       for names in items:
         if names.endswith(".mat"):
           print('Loading file: %s' % (names))
           data = loadmat(path+'/'+names)
-          self.assemble(data, time_sort, f_range)
+          if parameter_check == True:
+            self.LTS_check(data, f_range)
+          else:
+            self.assemble(data, time_sort, f_range)
         
-  def collect_Gdrive(self, folder_id, f_range=[], time_sort=1, file_extension = '.mat'):
+  def collect_Gdrive(self, folder_id, f_range=[], time_sort=1, file_extension = '.mat', parameter_check=False):
     Gdrive=gdrive_handle(folder_id)
     Gdrive.list_query(file_extension)
     
@@ -102,8 +130,11 @@ class lts_viewer:
       infilename=file['title']
       file.GetContentFile(file['title'])
       data = loadmat(file['title'])
-      self.assemble(data, time_sort, f_range)
-      os.remove(infilename)
+      if parameter_check == True:
+        self.LTS_check(data, f_range)
+      else:
+        self.assemble(data, time_sort, f_range)
+        os.remove(infilename)
       
   def plot_lts(self, fig_width=12, fig_height=18, gap_fill=True):
     temp,f=self.input_selection(var_name='median')

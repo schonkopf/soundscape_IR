@@ -58,19 +58,22 @@ class save_parameters:
     def __init__(self):
         self.platform='python'
     
-    def supervised_nmf(self, f, W, feature_length, basis_num):
-        self.f=f
-        self.W=W
-        self.time_frame=feature_length
-        self.basis_num=basis_num
-    
-    def pcnmf(self, f, W, W_cluster, source_num, feature_length, basis_num):
+    def supervised_nmf(self, f, W, W_cluster, source_num, feature_length, basis_num):
         self.f=f
         self.W=W
         self.W_cluster=W_cluster
         self.k=source_num
         self.time_frame=feature_length
         self.basis_num=basis_num
+    
+    def pcnmf(self, f, W, W_cluster, source_num, feature_length, basis_num, sparseness):
+        self.f=f
+        self.W=W
+        self.W_cluster=W_cluster
+        self.k=source_num
+        self.time_frame=feature_length
+        self.basis_num=basis_num
+        self.sparseness=sparseness
 
     def LTS_Result(self, LTS_median, LTS_mean, f, link=[], PI=[], Result_PI=[]):
         self.LTS_median = LTS_median
