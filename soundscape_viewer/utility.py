@@ -59,17 +59,12 @@ class save_parameters:
         self.platform='python'
     
     def supervised_nmf(self, f, W, W_cluster, source_num, feature_length, basis_num):
-    #def supervised_nmf(self, f, W, W_cluster, source_num, feature_length, basis_num, adaptive_alpha, additional_basis):
         self.f=f
         self.W=W
         self.W_cluster=W_cluster
         self.k=source_num
         self.time_frame=feature_length
         self.basis_num=basis_num
-        #if adaptive_alpha!=-1:
-        #  self.adaptive_alpha=adaptive_alpha
-        #if additional_basis!=-1:
-        #  self.additional_basis=additional_basis
     
     def pcnmf(self, f, W, W_cluster, source_num, feature_length, basis_num, sparseness):
         self.f=f
