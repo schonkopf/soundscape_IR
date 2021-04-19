@@ -77,8 +77,9 @@ class save_parameters:
         self.LTS_mean = LTS_mean
         self.f = f
         self.link = link
-        self.PI = PI
-        self.Result_PI = Result_PI
+        if len(PI)>0:
+          self.PI = PI
+          self.Result_PI = Result_PI
 
     def LTS_Parameters(self, FFT_size, overlap, sensitivity, sampling_freq, channel):
         self.FFT_size=FFT_size
