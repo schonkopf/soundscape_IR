@@ -297,5 +297,4 @@ class lts_maker:
     self.Result_mean=self.Result_mean[temp,:]
     if len(self.Result_PI)>0:
       self.Result_PI=self.Result_PI[temp,:]
-    self.Result_PI=self.Result_PI[temp,:]
     self.save_lts(save_filename, folder_id)
