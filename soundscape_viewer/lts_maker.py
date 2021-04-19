@@ -88,7 +88,8 @@ class lts_maker:
     self.time_resolution=time_resolution
     self.Result_median=np.array([])
     self.Result_mean=np.array([])
-    self.IPI_result=np.array([])
+    self.Result_PI=np.array([])
+    self.PI=np.array([])
  
   def filename_check(self, dateformat='yyyymmdd_HHMMSS', initial=[], year_initial=2000, filename=[]):
     """
@@ -294,5 +295,7 @@ class lts_maker:
     temp = np.argsort(self.Result_median[:,0])
     self.Result_median=self.Result_median[temp,:]
     self.Result_mean=self.Result_mean[temp,:]
+    if len(self.Result_PI)>0:
+      self.Result_PI=self.Result_PI[temp,:]
     self.Result_PI=self.Result_PI[temp,:]
     self.save_lts(save_filename, folder_id)
