@@ -245,11 +245,7 @@ class pcnmf:
     print('Number of source:' ,self.source_num)
     if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       print('Sparseness:', self.sparseness)
-    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='adaptive_alpha'):
-    #  print('Adaptive_alpha:', self.adaptive_alpha)
-    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='additional_basis'):
-    #  print('Additional_basis:', self.additional_basis)
-  
+
   def load_model(self, filename):
     model = loadmat(filename)
     self.W=model['save_nmf']['W'].item()
@@ -259,10 +255,6 @@ class pcnmf:
     self.basis_num=model['save_nmf']['basis_num'].item()[0][0]
     if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       self.sparseness=model['save_nmf']['sparseness'].item()[0][0]
-    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='adaptive_alpha'):
-    #  self.adaptive_alpha=model['save_nmf']['adaptive_alpha'].item()[0][0]
-    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='additional_basis'):
-    #  self.additional_basis=model['save_nmf']['additional_basis'].item()[0][0]
     self.model_check(model)
   
   def supervised_separation(self, input_data, f, iter=50):
@@ -294,11 +286,8 @@ class pcnmf:
     
 class supervised_nmf:
   def __init__(self, feature_length=1, basis_num=60):
-  #def __init__(self, feature_length=1, basis_num=60, adaptive_alpha=-1, additional_basis=-1):
     self.basis_num=basis_num
     self.feature_length=feature_length
-    #self.adaptive_alpha=adaptive_alpha
-    #self.additional_basis=additional_basis
   
   def reconstruct(self, source=None):
     if source:
@@ -505,7 +494,6 @@ class supervised_nmf:
     #import save_parameters
     nmf_model=save_parameters()
     nmf_model.supervised_nmf(self.f, self.W, self.W_cluster, self.source_num, self.feature_length, self.basis_num)
-    #nmf_model.supervised_nmf(self.f, self.W, self.W_cluster, self.source_num, self.feature_length, self.basis_num, self.adaptive_alpha, self.additional_basis)
     savemat(filename, {'save_nmf':nmf_model})
     print('Successifully save to '+filename)
     
@@ -524,10 +512,6 @@ class supervised_nmf:
     print('Number of source:' ,self.source_num)
     if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       print('Sparseness:', self.sparseness)
-    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='adaptive_alpha'):
-    #  print('Adaptive_alpha:', self.adaptive_alpha)
-    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='additional_basis'):
-    #  print('Additional_basis:', self.additional_basis)
   
   def load_model(self, filename):
     model = loadmat(filename)
@@ -538,8 +522,4 @@ class supervised_nmf:
     self.basis_num=model['save_nmf']['basis_num'].item()[0][0]
     if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       self.sparseness=model['save_nmf']['sparseness'].item()[0][0]
-    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='adaptive_alpha'):
-    #  self.adaptive_alpha=model['save_nmf']['adaptive_alpha'].item()[0][0]
-    #if np.any(np.array(model['save_nmf'][0].dtype.names)=='additional_basis'):
-    #  self.additional_basis=model['save_nmf']['additional_basis'].item()[0][0]
     self.model_check(model)
