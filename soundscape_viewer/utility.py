@@ -199,7 +199,8 @@ class audio_visualization:
           data, ambient=matrix_operation.prewhiten(data, prewhiten_percent, 1)
           data[data<0]=0
         else:
-          ambient=data[:,0:1]*0
+          #ambient=data[:,0:1]*0
+          ambient=np.zeros(data.shape)
             
         # f_range: Hz
         if f_range:
@@ -210,7 +211,7 @@ class audio_visualization:
             
         f=f[f_list]
         data=data[f_list,:]
-        ambient=ambient[f_list]
+        ambient=ambient[f_list,:]
         P=P[f_list,:]
         
         # plot the spectrogram
@@ -231,7 +232,7 @@ class audio_visualization:
           cbar.set_label('PSD')
 
         self.data=np.hstack((t[:,None],data.T))
-        self.ambient=ambient
+        self.ambient=ambient.T
         self.f=f
         if not time_resolution:
           self.phase=np.angle(P)
@@ -378,18 +379,44 @@ class matrix_operation:
         cbar.set_label('Amplitude')
         return ax, cbar;
     
-    def prewhiten(input_data, prewhiten_percent, axis):
+    def prewhiten(input_data, prewhiten, axis=1, noise_init=[], eps=0, smooth=0):
         import numpy.matlib
-        list=np.where(np.abs(input_data)==float("inf"))[0]
-        input_data[list]=float("nan")
-        input_data[list]=np.nanmin(input_data)
+        from scipy.ndimage import gaussian_filter
+        if smooth > 0:
+          sm_data = gaussian_filter(input_data, smooth)
+          input_data = np.array(sm_data)
+        else:
+          input_data = np.array(input_data)
         
-        ambient = np.percentile(input_data, prewhiten_percent, axis=axis)
+        list=np.where(np.abs(input_data)==float("inf"))[0]       
+        if len(list)>0:
+          input_data[list]=float("nan")
+          input_data[list]=np.nanmin(input_data)
+
+        n, m = input_data.shape
+        ambient = np.zeros((n, m))
+
+        if len(noise_init) > 0:
+          noise = prewhiten
+        elif prewhiten > 0:
+          noise = np.percentile(input_data, prewhiten, axis=axis)
+        else:
+          ambient = np.zeros(input_data.shape)
+          return input_data, ambient
+
         if axis==0:
-            input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1))
+          for i in range(n):
+            ambient[i] = noise
+            noise = (1-eps)*noise + eps*input_data[i]
+
         elif axis==1:
-            input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1).T)
-        return input_data, ambient;
+          for i in range(m):
+            ambient[:, i] = noise
+            noise = (1-eps)*noise + eps*input_data[:, i]
+
+        input_data = np.subtract(input_data, ambient)
+        input_data[input_data<0]=0
+        return input_data, ambient
     
     def frame_normalization(input, axis=0, type='min-max'):
         if axis==0:
