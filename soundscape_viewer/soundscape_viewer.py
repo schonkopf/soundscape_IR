@@ -280,7 +280,7 @@ class data_organize:
     self.result_header=np.delete(self.result_header, col)
     print('Columns in the spreadsheet: ', self.result_header)
     
-  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6, empty_hr_remove=False, empty_day_remove=False, reduce_resolution=1, display_cluster=0):
+  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6, empty_hr_remove=False, empty_day_remove=False, reduce_resolution=1, display_cluster=0, plot=True):
     hr_boundary=[np.min(24*(self.final_result[:,0]-np.floor(self.final_result[:,0]))), np.max(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))]
     if display_cluster==0:
       input_data=self.final_result[:,col]
@@ -304,15 +304,15 @@ class data_organize:
       list=np.where(np.sum(plot_matrix, axis=0)>0)[0]
       plot_matrix=plot_matrix[:, list]
       day=day[list]
-
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-    im = plt.imshow(plot_matrix, vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
+    if plot:
+      fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+      im = plt.imshow(plot_matrix, vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
                     extent=[python_dt[0], python_dt[-1], np.min(hr_boundary), np.max(hr_boundary)], interpolation='none')
-    ax.xaxis_date()
-    ax.set_title(self.result_header[col])
-    plt.ylabel('Hour')
-    plt.xlabel('Day')
-    cbar1 = plt.colorbar(im)
+      ax.xaxis_date()
+      ax.set_title(self.result_header[col])
+      plt.ylabel('Hour')
+      plt.xlabel('Day')
+      cbar1 = plt.colorbar(im)
 
     plot_matrix=np.hstack((day[:,None]+693960, plot_matrix.T))
     return plot_matrix, hr
