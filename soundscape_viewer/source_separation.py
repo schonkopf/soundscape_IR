@@ -312,7 +312,7 @@ class supervised_nmf:
       source = self.reconstruct(source=run+1) #np.dot(self.W[:,self.W_cluster==run],self.H[self.W_cluster==run,:])
       mask=np.divide(source,source0)
       mask[np.isnan(mask)]=0
-      separation[run] = np.hstack((time_vec, np.multiply(data,mask).T+baseline))
+      separation[run] = np.hstack((np.reshape(time_vec,(-1,1)), np.multiply(data,mask).T+baseline))
       relative_level[run] = 10*np.log10((10**(separation[run][:,1:]/10)).sum(axis=1))
     self.separation=separation
     self.relative_level=relative_level
