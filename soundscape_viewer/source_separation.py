@@ -489,7 +489,7 @@ class supervised_nmf:
     self.W=W
     self.H=Ht.T
     self.nmf_output(input_data, self.time_vec, baseline)
-    self.time_vec=self.time_vec[:,0]
+    #self.time_vec=self.time_vec[:,0]
 
   def save_model(self, filename='NMF_model.mat', folder_id=[]):
     #import save_parameters
