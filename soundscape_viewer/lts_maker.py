@@ -88,7 +88,8 @@ class lts_maker:
     self.time_resolution=time_resolution
     self.Result_median=np.array([])
     self.Result_mean=np.array([])
-    self.IPI_result=np.array([])
+    self.Result_PI=np.array([])
+    self.PI=np.array([])
  
   def filename_check(self, dateformat='yyyymmdd_HHMMSS', initial=[], year_initial=2000, filename=[]):
     """
@@ -128,14 +129,14 @@ class lts_maker:
     print('Minute:', filename[self.MM_pos[0]:self.MM_pos[1]])
     print('Second:', filename[self.SS_pos[0]:self.SS_pos[1]]) 
   
-  def collect_folder(self, path):
+  def collect_folder(self, path, file_extension='.wav'):
     file_list = os.listdir(path)
     self.link = path
     self.cloud = 0   
     n = 0
     self.audioname=np.array([], dtype=np.object)
     for filename in file_list:
-        if filename.endswith(".wav"):
+        if filename.endswith(file_extension):
             self.audioname = np.append(self.audioname, filename)
             n = n+1
     print('Identified ', len(self.audioname), 'files')
@@ -180,11 +181,12 @@ class lts_maker:
     date=datetime.datetime(yy,mm,dd)
     self.time_vec=date.toordinal()*24*3600+HH*3600+MM*60+SS+366*24*3600 
 
-  def compress_spectrogram(self, spec_data, spec_time, time_resolution=[], linear_scale=True, interval_range=0, energy_percentile=0):
+  def compress_spectrogram(self, spec_data, spec_time, time_resolution=[], linear_scale=True, interval_range=[], energy_percentile=0):
     if time_resolution:
       read_interval=np.array([0, time_resolution])
     else:
       read_interval=np.array([0, spec_time[-1]])
+      time_resolution=spec_time[-1]
     
     run=0
     while read_interval[0]<spec_time[-1]-0.5*time_resolution:
@@ -213,6 +215,7 @@ class lts_maker:
           self.Result_PI=np.vstack((np.hstack((np.array(self.time_vec+read_interval[0])/24/3600,temp_PI)), self.Result_PI))
       run=+1
       read_interval=read_interval+time_resolution
+    if len(interval_range)>0:
       self.PI=pulse_analysis_result.PI
     
   def save_lts(self, save_filename, folder_id=[]):
@@ -292,5 +295,6 @@ class lts_maker:
     temp = np.argsort(self.Result_median[:,0])
     self.Result_median=self.Result_median[temp,:]
     self.Result_mean=self.Result_mean[temp,:]
-    self.Result_PI=self.Result_PI[temp,:]
+    if len(self.Result_PI)>0:
+      self.Result_PI=self.Result_PI[temp,:]
     self.save_lts(save_filename, folder_id)

@@ -88,7 +88,7 @@ class pcnmf:
   def unsupervised_separation(self, input_data, f, source_num=2):    
     self.source_num=source_num
     self.f=f
-    self.time_vec=input_data[:,0:1]
+    self.time_vec=input_data[:,0]
     input_data=input_data[:,1:].T
     baseline=input_data.min()
     input_data=input_data-baseline
@@ -120,7 +120,6 @@ class pcnmf:
     
     # Reconstruct individual sources
     self.pcnmf_output(input_data, self.time_vec, baseline)
-    self.time_vec=self.time_vec[:,0]
     print('Done')
     return self.W, self.H, self.W_cluster
     
@@ -226,7 +225,7 @@ class pcnmf:
   def save_model(self, filename='NMF_model.mat', folder_id=[]):
     #import save_parameters
     nmf_model=save_parameters()
-    nmf_model.pcnmf(self.f, self.W, self.W_cluster, self.source_num, self.feature_length, self.basis_num)
+    nmf_model.pcnmf(self.f, self.W, self.W_cluster, self.source_num, self.feature_length, self.basis_num, self.sparseness)
     savemat(filename, {'save_nmf':nmf_model})
     print('Successifully save to '+filename)
     
@@ -235,6 +234,17 @@ class pcnmf:
       Gdrive=gdrive_handle(folder_id)
       Gdrive.upload(filename)
       
+  def model_check(self, model):
+    print('Model parameters check')
+    intf=model['save_nmf']['f'].item()[0][1]-model['save_nmf']['f'].item()[0][0]
+    print('Minima and maxima frequancy bin:', min(model['save_nmf']['f'].item()[0]), 'Hz and', max(model['save_nmf']['f'].item()[0]), 'Hz')
+    print('Frequancy resolution:' ,intf, 'Hz')
+    print('Feature length:' ,self.feature_length)
+    print('Number of basis:' ,self.basis_num)
+    print('Number of source:' ,self.source_num)
+    if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
+      print('Sparseness:', self.sparseness)
+
   def load_model(self, filename):
     model = loadmat(filename)
     self.W=model['save_nmf']['W'].item()
@@ -242,6 +252,9 @@ class pcnmf:
     self.source_num=model['save_nmf']['k'].item()[0][0]
     self.feature_length=model['save_nmf']['time_frame'].item()[0][0]
     self.basis_num=model['save_nmf']['basis_num'].item()[0][0]
+    if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
+      self.sparseness=model['save_nmf']['sparseness'].item()[0][0]
+    self.model_check(model)
   
   def supervised_separation(self, input_data, f, iter=50):
     self.f=f    
@@ -376,6 +389,7 @@ class supervised_nmf:
       print('Feature learning...')
       self.W, self.H, _ = NMF(input_data, n_components=self.basis_num, beta_loss=beta, alpha=alpha, l1_ratio=l1_ratio)
       self.source_num = 1
+      self.W_cluster=np.zeros(self.basis_num)
       print('Done')
       if show_result:
         # Plot the spectral features(W) and temporal activations(H) learned by using the NMF
@@ -422,7 +436,9 @@ class supervised_nmf:
 
   def supervised_separation(self, input_data, f, iter=50, adaptive_alpha=0, additional_basis=0):
     self.f=f    
-    self.time_vec=input_data[:,0:1]
+    self.time_vec=input_data[:,0]
+    self.adaptive_alpha=adaptive_alpha
+    self.additional_basis=additional_basis
     input_data=input_data[:,1:].T
     baseline=input_data.min()
     input_data=input_data-baseline
@@ -476,7 +492,7 @@ class supervised_nmf:
   def save_model(self, filename='NMF_model.mat', folder_id=[]):
     #import save_parameters
     nmf_model=save_parameters()
-    nmf_model.pcnmf(self.f, self.W, self.W_cluster, self.source_num, self.feature_length, self.basis_num)
+    nmf_model.supervised_nmf(self.f, self.W, self.W_cluster, self.source_num, self.feature_length, self.basis_num)
     savemat(filename, {'save_nmf':nmf_model})
     print('Successifully save to '+filename)
     
@@ -485,6 +501,17 @@ class supervised_nmf:
       Gdrive=gdrive_handle(folder_id)
       Gdrive.upload(filename)
       
+  def model_check(self, model):
+    print('Model parameters check')
+    intf=model['save_nmf']['f'].item()[0][1]-model['save_nmf']['f'].item()[0][0]
+    print('Minima and maxima frequancy bin:', min(model['save_nmf']['f'].item()[0]), 'Hz and', max(model['save_nmf']['f'].item()[0]), 'Hz')
+    print('Frequancy resolution:' ,intf, 'Hz')
+    print('Feature length:' ,self.feature_length)
+    print('Number of basis:' ,self.basis_num)
+    print('Number of source:' ,self.source_num)
+    if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
+      print('Sparseness:', self.sparseness)
+  
   def load_model(self, filename):
     model = loadmat(filename)
     self.W=model['save_nmf']['W'].item()
@@ -492,3 +519,6 @@ class supervised_nmf:
     self.source_num=model['save_nmf']['k'].item()[0][0]
     self.feature_length=model['save_nmf']['time_frame'].item()[0][0]
     self.basis_num=model['save_nmf']['basis_num'].item()[0][0]
+    if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
+      self.sparseness=model['save_nmf']['sparseness'].item()[0][0]
+    self.model_check(model)

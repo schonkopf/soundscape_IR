@@ -58,27 +58,31 @@ class save_parameters:
     def __init__(self):
         self.platform='python'
     
-    def supervised_nmf(self, f, W, feature_length, basis_num):
-        self.f=f
-        self.W=W
-        self.time_frame=feature_length
-        self.basis_num=basis_num
-    
-    def pcnmf(self, f, W, W_cluster, source_num, feature_length, basis_num):
+    def supervised_nmf(self, f, W, W_cluster, source_num, feature_length, basis_num):
         self.f=f
         self.W=W
         self.W_cluster=W_cluster
         self.k=source_num
         self.time_frame=feature_length
         self.basis_num=basis_num
+    
+    def pcnmf(self, f, W, W_cluster, source_num, feature_length, basis_num, sparseness):
+        self.f=f
+        self.W=W
+        self.W_cluster=W_cluster
+        self.k=source_num
+        self.time_frame=feature_length
+        self.basis_num=basis_num
+        self.sparseness=sparseness
 
     def LTS_Result(self, LTS_median, LTS_mean, f, link=[], PI=[], Result_PI=[]):
         self.LTS_median = LTS_median
         self.LTS_mean = LTS_mean
         self.f = f
         self.link = link
-        self.PI = PI
-        self.Result_PI = Result_PI
+        if len(PI)>0:
+          self.PI = PI
+          self.Result_PI = Result_PI
 
     def LTS_Parameters(self, FFT_size, overlap, sensitivity, sampling_freq, channel):
         self.FFT_size=FFT_size
@@ -412,7 +416,7 @@ class matrix_operation:
         return output
 
 class spectrogram_detection:
-  def __init__(self, input, f, threshold, smooth=3, frequency_cut=25, minimum_interval=0, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[]):
+  def __init__(self, input, f, threshold, smooth=0, frequency_cut=25, minimum_interval=0, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[]):
       from scipy.ndimage import gaussian_filter
       
       time_vec=input[:,0]

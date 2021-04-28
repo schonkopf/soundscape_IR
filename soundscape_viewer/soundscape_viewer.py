@@ -85,15 +85,43 @@ class lts_viewer:
           if self.Result_PI.shape[0]>0:
             self.Result_PI=self.Result_PI[temp,:]
   
-  def collect_folder(self, path='.', f_range=[], time_sort=1):
+  def LTS_check(self, data, f_range=[]):
+      #set freq
+      self.f = np.array(data['Result']['f'].item()[0])
+      if f_range:
+          f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
+          f_list=np.where(f_list==True)[0]
+      else:
+          f_list=np.arange(len(self.f))
+      self.f=self.f[f_list]
+      f_list=np.concatenate([np.array([0]), f_list+1])
+      Result_mean = data['Result']['LTS_mean'].item()[:,f_list]
+      self.Result_mean = np.array(Result_mean)
+      
+      #set time
+      temp = self.Result_mean[:,0]
+      print('LTS parameters check')
+      print('Sampling rate:' ,round(data['Parameters']['sampling_freq'].item()[0][0]))
+      print('Start time:', pd.to_datetime(min(temp)-693962, unit='D',origin=pd.Timestamp('1900-01-01')))
+      print('End time:', pd.to_datetime(max(temp)-693962, unit='D',origin=pd.Timestamp('1900-01-01')))
+      print('FFT size:' ,round(data['Parameters']['FFT_size'].item()[0][0]))
+      print('Time resolution:' ,round((temp[1]-temp[0])*3600*24), 'sec')
+      print('Minima and maxima frequancy bin:', min(self.f), 'Hz and ', max(self.f), 'Hz')
+      print('Frequancy resolution:' ,self.f[1]-self.f[0], 'Hz')
+      print('---------------------------------------------------------------')
+      
+  def collect_folder(self, path='.', f_range=[], time_sort=1, parameter_check=False):
       items = os.listdir(path)
       for names in items:
         if names.endswith(".mat"):
           print('Loading file: %s' % (names))
           data = loadmat(path+'/'+names)
-          self.assemble(data, time_sort, f_range)
+          if parameter_check == True:
+            self.LTS_check(data, f_range)
+          else:
+            self.assemble(data, time_sort, f_range)
         
-  def collect_Gdrive(self, folder_id, f_range=[], time_sort=1, file_extension = '.mat'):
+  def collect_Gdrive(self, folder_id, f_range=[], time_sort=1, file_extension = '.mat', parameter_check=False):
     Gdrive=gdrive_handle(folder_id)
     Gdrive.list_query(file_extension)
     
@@ -102,8 +130,11 @@ class lts_viewer:
       infilename=file['title']
       file.GetContentFile(file['title'])
       data = loadmat(file['title'])
-      self.assemble(data, time_sort, f_range)
-      os.remove(infilename)
+      if parameter_check == True:
+        self.LTS_check(data, f_range)
+      else:
+        self.assemble(data, time_sort, f_range)
+        os.remove(infilename)
       
   def plot_lts(self, fig_width=12, fig_height=18, gap_fill=True):
     temp,f=self.input_selection(var_name='median')
@@ -249,7 +280,7 @@ class data_organize:
     self.result_header=np.delete(self.result_header, col)
     print('Columns in the spreadsheet: ', self.result_header)
     
-  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6, empty_hr_remove=False, empty_day_remove=False, reduce_resolution=1, display_cluster=0):
+  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6, empty_hr_remove=False, empty_day_remove=False, reduce_resolution=1, display_cluster=0, plot=True):
     hr_boundary=[np.min(24*(self.final_result[:,0]-np.floor(self.final_result[:,0]))), np.max(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))]
     if display_cluster==0:
       input_data=self.final_result[:,col]
@@ -273,15 +304,15 @@ class data_organize:
       list=np.where(np.sum(plot_matrix, axis=0)>0)[0]
       plot_matrix=plot_matrix[:, list]
       day=day[list]
-
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-    im = plt.imshow(plot_matrix, vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
+    if plot:
+      fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+      im = plt.imshow(plot_matrix, vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
                     extent=[python_dt[0], python_dt[-1], np.min(hr_boundary), np.max(hr_boundary)], interpolation='none')
-    ax.xaxis_date()
-    ax.set_title(self.result_header[col])
-    plt.ylabel('Hour')
-    plt.xlabel('Day')
-    cbar1 = plt.colorbar(im)
+      ax.xaxis_date()
+      ax.set_title(self.result_header[col])
+      plt.ylabel('Hour')
+      plt.xlabel('Day')
+      cbar1 = plt.colorbar(im)
 
     plot_matrix=np.hstack((day[:,None]+693960, plot_matrix.T))
     return plot_matrix, hr
