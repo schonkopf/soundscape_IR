@@ -26,12 +26,12 @@ class spatial_mapping():
         slice_df['Begin_time']=pd.to_datetime(slice_df['Begin_time'],utc=True)
         slice_df['End_time']=pd.to_datetime(slice_df['End_time'],utc=True)
     elif type(fragments)==int:
-      segment_list=np.diff(self.data[:,0]*24*3600)
-      split_point=np.vstack((self.data[np.concatenate(([0],np.where(segment_list>fragments)[0]+1)),0],
-                       self.data[np.concatenate((np.where(segment_list>fragments)[0],[self.data.shape[0]-1])),0]))
-      slice_df = pd.DataFrame(split_point.T-693962, columns = ['Begin_time', 'End_time']) 
-      slice_df['Begin_time']=pd.to_datetime(slice_df['Begin_time'], unit='D',origin=pd.Timestamp('1900-01-01'),utc=True)
-      slice_df['End_time']=pd.to_datetime(slice_df['End_time'], unit='D',origin=pd.Timestamp('1900-01-01'),utc=True)
+      segment_list=np.diff(self.data['Time'])
+      slice_df=pd.DataFrame()
+      slice_df['Begin_time']=self.data['Time'].values[np.concatenate(([0],np.where(segment_list>timedelta(seconds=fragments))[0]+1))]
+      slice_df['End_time']=self.data['Time'].values[np.concatenate((np.where(segment_list>timedelta(seconds=fragments))[0],[len(self.data)-1]))]
+      slice_df['Begin_time']=pd.to_datetime(slice_df['Begin_time'],utc=True)
+      slice_df['End_time']=pd.to_datetime(slice_df['End_time'],utc=True)
       
     ndf=pd.DataFrame()
     for i in range(0, len(slice_df)):
