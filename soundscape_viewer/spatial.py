@@ -26,9 +26,9 @@ class spatial_mapping():
         slice_df['Begin_time']=pd.to_datetime(slice_df['Begin_time'],utc=True)
         slice_df['End_time']=pd.to_datetime(slice_df['End_time'],utc=True)
     elif type(fragments)==int:
-      segment_list=np.diff(data[:,0]*24*3600)
-      split_point=np.vstack((data[np.concatenate(([0],np.where(segment_list>fragments)[0]+1)),0],
-                       data[np.concatenate((np.where(segment_list>fragments)[0],[data.shape[0]-1])),0]))
+      segment_list=np.diff(self.data[:,0]*24*3600)
+      split_point=np.vstack((self.data[np.concatenate(([0],np.where(segment_list>fragments)[0]+1)),0],
+                       self.data[np.concatenate((np.where(segment_list>fragments)[0],[self.data.shape[0]-1])),0]))
       slice_df = pd.DataFrame(split_point.T-693962, columns = ['Begin_time', 'End_time']) 
       slice_df['Begin_time']=pd.to_datetime(slice_df['Begin_time'], unit='D',origin=pd.Timestamp('1900-01-01'),utc=True)
       slice_df['End_time']=pd.to_datetime(slice_df['End_time'], unit='D',origin=pd.Timestamp('1900-01-01'),utc=True)
