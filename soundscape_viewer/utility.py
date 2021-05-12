@@ -327,7 +327,7 @@ class matrix_operation:
         self.hour_selection=hour_selection
         self.month_selection=month_selection
 
-    def plot_psd(self, freq_scale='linear', amplitude_range=[], f_range=[], fig_width=6, fig_height=6):
+    def plot_psd(self, freq_scale='linear', amplitude_range=[], f_range=[], fig_width=6, fig_height=6, title=[]):
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
         cmap=cm.get_cmap('jet', len(self.percentile))
         cmap_table=cmap(range(len(self.percentile)))
@@ -349,6 +349,8 @@ class matrix_operation:
             plt.ylim(np.min(amplitude_range), np.max(amplitude_range))
         plt.xlabel('Frequency')
         plt.ylabel('Amplitude')
+        if title:
+            plt.title(title)
         
         if len(self.percentile)>5:
             cbar=fig.colorbar(cbar, ticks=self.percentile[::int(np.ceil(len(self.percentile)/5))])
@@ -356,7 +358,7 @@ class matrix_operation:
             cbar=fig.colorbar(cbar, ticks=self.percentile)
         cbar.set_label('Percentile')
     
-    def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6, lts=True, mel=False):
+    def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6, lts=True, mel=False, title=[]):
         if lts:
             temp=matrix_operation().gap_fill(time_vec=input_data[:,0], data=input_data[:,1:], tail=[])
             temp[:,0]=temp[:,0]+693960-366
@@ -378,9 +380,11 @@ class matrix_operation:
             idx = np.linspace(0, len(f)-1, N, dtype = 'int')
             yticks = f[idx]+0.5
             ax.set_yticklabels(yticks.astype(int))
+        if title:
+            plt.title(title)
         cbar = fig.colorbar(im, ax=ax)
         cbar.set_label('Amplitude')
-        return ax, cbar;
+        
     
     def prewhiten(input_data, prewhiten_percent, axis):
         import numpy.matlib
