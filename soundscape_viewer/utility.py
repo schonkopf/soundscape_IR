@@ -36,6 +36,9 @@ class gdrive_handle:
     def list_query(self, file_extension, subfolder=False):
         location_cmd="title contains '"+file_extension+"' and '"+self.folder_id+"' in parents and trashed=false"
         self.file_list = self.Gdrive.ListFile({'q': location_cmd}).GetList()
+        self.subfolder_list=[]
+        if self.file_list!=[]:
+          self.subfolder_list=['Top']*len(self.file_list)
         if subfolder:
           self.list_subfolder(file_extension)
 
@@ -47,6 +50,7 @@ class gdrive_handle:
           subfolder_list=self.Gdrive.ListFile({'q': location_cmd}).GetList()
           if subfolder_list!=[]:
             self.file_list.extend(subfolder_list)
+            self.subfolder_list=np.append(self.subfolder_list, [folder['title']]*len(subfolder_list))
         
     def list_display(self):
         n=0
