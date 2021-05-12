@@ -77,7 +77,7 @@ class lts_viewer:
           self.Result_diff = self.Result_mean-self.Result_median
           self.Result_diff[:,0] = self.Result_mean[:,0]
           self.Result_PI = np.vstack((Result_PI, self.Result_PI))
-          self.location = np.vstack((self.location, np.matlib.repmat(np.array([location]),Result_median.shape[0],1)))
+          self.location = np.vstack((np.matlib.repmat(np.array([location]),Result_median.shape[0],1), self.location))
 
       if time_sort == 1:
           temp = np.argsort(self.Result_mean[:,0])
