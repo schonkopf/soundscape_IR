@@ -21,6 +21,7 @@ def interactive_matrix(input_data, f, vmin=None, vmax=None, x_title=None, y_titl
   fig.update_layout(title=figure_title, yaxis_title=y_title, xaxis_title=x_title)
   if figure_plot:
     fig.show()
-
-  if html_save:
+    if html_save:
+      fig.write_html(file=html_name)
+  else:
     fig.write_html(file=html_name)
