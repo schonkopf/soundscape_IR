@@ -14,17 +14,19 @@ class spatial_mapping():
     if type(gps)==str:
       if gps[-3:].lower()=='csv':
         self.gps=pd.read_csv(gps)
-    self.gps.time=pd.to_datetime(self.gps.time)+timedelta(hours=gps_utc)    
+    if 'time' in self.gps:
+      self.gps.time=pd.to_datetime(self.gps.time)+timedelta(hours=gps_utc)    
         
-  def extract_fragments(self, fragments, mean=True):
+  def extract_fragments(self, fragments, mean=True, fragment_method='time'):
     # fragments: a csv file contains beginning and ending time of recording sessions
     # Or providing a time interval (seconds) for separating recording sessions
     
     if type(fragments)==str:
       if fragments[-3:].lower()=='csv':
         slice_df=pd.read_csv(fragments, sep=',')
-        slice_df['Begin_time']=pd.to_datetime(slice_df['Begin_time'],utc=True)
-        slice_df['End_time']=pd.to_datetime(slice_df['End_time'],utc=True)
+        if fragment_method=='time':
+          slice_df['Begin_time']=pd.to_datetime(slice_df['Begin_time'],utc=True)
+          slice_df['End_time']=pd.to_datetime(slice_df['End_time'],utc=True)
     elif type(fragments)==int:
       segment_list=np.diff(self.data['Time'])
       slice_df=pd.DataFrame()
@@ -34,30 +36,51 @@ class spatial_mapping():
       slice_df['End_time']=pd.to_datetime(slice_df['End_time'],utc=True)
       
     ndf=pd.DataFrame()
-    for i in range(0, len(slice_df)):
-      temp=self.data['Time']-slice_df['Begin_time'][i]
-      data_list=np.where(temp>=timedelta(seconds=0))[0]
-      temp2=self.data['Time']-slice_df['End_time'][i]
-      data_list2=np.where(temp2<=timedelta(seconds=0))[0]
-      if mean:
-        result=np.mean(self.data.loc[data_list[temp[data_list].argmin()]:data_list2[temp2[data_list2].argmax()]+1])
-        result['Time']=self.data.loc[data_list[temp[data_list].argmin()],'Time']
-      else:
-        result=self.data.loc[data_list[temp[data_list].argmin()]:data_list2[temp2[data_list2].argmax()]+1]
-      ndf=ndf.append(result,ignore_index=True)
+    if fragment_method=='time':
+      for i in range(0, len(slice_df)):
+        temp=self.data['Time']-slice_df['Begin_time'][i]
+        data_list=np.where(temp>=timedelta(seconds=0))[0]
+        temp2=self.data['Time']-slice_df['End_time'][i]
+        data_list2=np.where(temp2<=timedelta(seconds=0))[0]
+        if mean:
+          result=np.mean(self.data.loc[data_list[temp[data_list].argmin()]:data_list2[temp2[data_list2].argmax()]+1])
+          result['Time']=self.data.loc[data_list[temp[data_list].argmin()],'Time']
+        else:
+          result=self.data.loc[data_list[temp[data_list].argmin()]:data_list2[temp2[data_list2].argmax()]+1]
+        ndf=ndf.append(result,ignore_index=True)
+    elif fragment_method=='site':
+      site_list=np.unique(fragments)
+      for site in site_list:
+        list_site=np.where(fragments==site)[0]
+        if mean:
+          result=np.mean(self.data.loc[list_site])
+          result['Site']=site
+        else:
+          result=self.data.loc[list_site]
+          result['Site']=fragments[list_site]
+        ndf=ndf.append(result,ignore_index=True)
     self.data=ndf
+    self.fragment_method=fragment_method
             
   def gps_mapping(self, tolerance=60):
     # tolerance: seconds
 
     for i in range(0,len(self.data)):
-      location=(self.gps['time']-self.data['Time'][i]).abs().argmin()
-      if (self.gps.loc[location, 'time']-self.data['Time'][i])>timedelta(seconds=tolerance):
-        self.data.loc[i, 'Latitude']=np.nan
-        self.data.loc[i, 'Longitude']=np.nan
-      else:
-        self.data.loc[i, 'Latitude']=self.gps.loc[location, 'lat']
-        self.data.loc[i, 'Longitude']=self.gps.loc[location, 'lon']
+      if self.fragment_method=='time':
+        location=(self.gps['time']-self.data['Time'][i]).abs().argmin()
+        if (self.gps.loc[location, 'time']-self.data['Time'][i])>timedelta(seconds=tolerance):
+          self.data.loc[i, 'Latitude']=np.nan
+          self.data.loc[i, 'Longitude']=np.nan
+        else:
+          self.data.loc[i, 'Latitude']=self.gps.loc[location, 'lat']
+          self.data.loc[i, 'Longitude']=self.gps.loc[location, 'lon']
+      elif self.fragment_method=='site':
+        self.data.loc[i, 'Latitude']=self.gps.loc[np.where(self.gps['site']==self.data['Site'][i])[0][0], 'lat']
+        self.data.loc[i, 'Longitude']=self.gps.loc[np.where(self.gps['site']==self.data['Site'][i])[0][0], 'lon']
+    if self.fragment_method=='time':
+      self.data=self.data.drop(columns=['Time'])
+    elif self.fragment_method=='site':
+      self.data=self.data.drop(columns=['Site'])
         
   def save_csv(self, filename='Spatial_mapping.csv'):
     self.data.to_csv(filename, sep=',')
