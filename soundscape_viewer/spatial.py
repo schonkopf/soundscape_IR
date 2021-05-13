@@ -97,7 +97,7 @@ class spatial_mapping():
     yy=np.arange(np.floor(np.min(y)/mapping_resolution)*mapping_resolution,np.ceil(np.max(y)/mapping_resolution)*mapping_resolution+mapping_resolution,mapping_resolution)
     grid_x, grid_y = np.meshgrid(xx, yy, indexing='ij')
 
-    plt.figure(figsize=(15, 12))
+    plt.figure(figsize=(int(np.round(10*(np.max(x)-np.min(x))/(np.max(y)-np.min(y)))), int(np.round(10*(np.max(y)-np.min(y))/(np.max(x)-np.min(x))))))
     if plot_type=='contour' or plot_type=='both':
       grid = griddata(np.hstack((x[:,None],y[:,None])), z, (grid_x, grid_y), method='cubic')
       plt.contourf(grid.T, extent=(np.min(x),np.max(x),np.min(y),np.max(y)), levels=contour_levels, vmin=vmin, vmax=vmax)
