@@ -86,7 +86,7 @@ class spatial_mapping():
     self.data.to_csv(filename, sep=',')
     print('Successifully save to '+filename)
     
-  def plot_map(self, plot_col=1, plot_type='contour', mapping_resolution=10, contour_levels=15, vmin=None, vmax=None):
+  def plot_map(self, plot_col=1, plot_type='contour', mapping_resolution=10, contour_levels=15, vmin=None, vmax=None, shapefile=None):
     # mapping resolution: meters
 
     x=self.data['Longitude'][:]
@@ -97,14 +97,21 @@ class spatial_mapping():
     yy=np.arange(np.floor(np.min(y)/mapping_resolution)*mapping_resolution,np.ceil(np.max(y)/mapping_resolution)*mapping_resolution+mapping_resolution,mapping_resolution)
     grid_x, grid_y = np.meshgrid(xx, yy, indexing='ij')
 
-    plt.figure(figsize=(int(np.round(10*(np.max(x)-np.min(x))/(np.max(y)-np.min(y)))), int(np.round(10*(np.max(y)-np.min(y))/(np.max(x)-np.min(x))))))
+    fig, ax1 = plt.subplots(figsize=(int(np.round(10*(np.max(x)-np.min(x))/(np.max(y)-np.min(y)))), int(np.round(10*(np.max(y)-np.min(y))/(np.max(x)-np.min(x))))))
     if plot_type=='contour' or plot_type=='both':
       grid = griddata(np.hstack((x[:,None],y[:,None])), z, (grid_x, grid_y), method='cubic')
-      plt.contourf(grid.T, extent=(np.min(x),np.max(x),np.min(y),np.max(y)), levels=contour_levels, vmin=vmin, vmax=vmax)
-      cbar= plt.colorbar()
+      im = ax1.contourf(grid.T, extent=(np.min(x),np.max(x),np.min(y),np.max(y)), levels=contour_levels, vmin=vmin, vmax=vmax)
+      cbar= fig.colorbar(im)
     if plot_type=='scatter' or plot_type=='both':
-      plt.scatter(x, y, c=z, cmap='jet', vmin=vmin, vmax=vmax)
-      cbar= plt.colorbar()
+      im = ax1.scatter(x, y, c=z, cmap='jet', vmin=vmin, vmax=vmax)
+      cbar= fig.colorbar(im)
+    
+    if shapefile:
+      import geopandas
+      map_load = geopandas.read_file(shapefile).to_crs({'init': 'epsg:4326'})
+      map_load.plot(ax=ax1, facecolor='gray', edgecolor='0.5')
+      _,_=plt.xlim((np.min(x),np.max(x)))
+      _,_=plt.ylim((np.min(y),np.max(y)))
 
     self.grid=grid
     self.x=xx
