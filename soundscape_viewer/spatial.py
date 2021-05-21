@@ -104,7 +104,8 @@ class spatial_mapping():
       cbar= fig.colorbar(im)
     if plot_type=='scatter' or plot_type=='both':
       im = ax1.scatter(x, y, c=z, cmap='jet', vmin=vmin, vmax=vmax)
-      cbar= fig.colorbar(im)
+      if plot_type=='scatter':
+        cbar= fig.colorbar(im)
     
     if shapefile:
       import geopandas
