@@ -103,7 +103,7 @@ class spatial_mapping():
       im = ax1.contourf(grid.T, extent=(np.min(x),np.max(x),np.min(y),np.max(y)), levels=contour_levels, vmin=vmin, vmax=vmax)
       cbar= fig.colorbar(im)
     if plot_type=='scatter' or plot_type=='both':
-      im = ax1.scatter(x, y, c=z, c='red', vmin=vmin, vmax=vmax)
+      im = ax1.scatter(x, y, c='red', vmin=vmin, vmax=vmax)
       if plot_type=='scatter':
         cbar= fig.colorbar(im)
     
