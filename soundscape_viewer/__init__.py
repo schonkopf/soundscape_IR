@@ -18,5 +18,7 @@ from .utility import performance_evaluation
 from .utility import pulse_interval
 from .utility import tonal_detection
 from .batch_processing import batch_processing
+from .interactive import interactive_matrix
+from .spatial import spatial_mapping
 
-__all__ = ["lts_maker", "soundscape_viewer", "source_separation", "utility", "batch_processing"]
+__all__ = ["lts_maker", "soundscape_viewer", "source_separation", "utility", "batch_processing", "interactive", "spatial"]

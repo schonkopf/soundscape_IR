@@ -36,6 +36,9 @@ class gdrive_handle:
     def list_query(self, file_extension, subfolder=False):
         location_cmd="title contains '"+file_extension+"' and '"+self.folder_id+"' in parents and trashed=false"
         self.file_list = self.Gdrive.ListFile({'q': location_cmd}).GetList()
+        self.subfolder_list=[]
+        if self.file_list!=[]:
+          self.subfolder_list=['Top']*len(self.file_list)
         if subfolder:
           self.list_subfolder(file_extension)
 
@@ -47,6 +50,7 @@ class gdrive_handle:
           subfolder_list=self.Gdrive.ListFile({'q': location_cmd}).GetList()
           if subfolder_list!=[]:
             self.file_list.extend(subfolder_list)
+            self.subfolder_list=np.append(self.subfolder_list, [folder['title']]*len(subfolder_list))
         
     def list_display(self):
         n=0
@@ -58,27 +62,31 @@ class save_parameters:
     def __init__(self):
         self.platform='python'
     
-    def supervised_nmf(self, f, W, feature_length, basis_num):
-        self.f=f
-        self.W=W
-        self.time_frame=feature_length
-        self.basis_num=basis_num
-    
-    def pcnmf(self, f, W, W_cluster, source_num, feature_length, basis_num):
+    def supervised_nmf(self, f, W, W_cluster, source_num, feature_length, basis_num):
         self.f=f
         self.W=W
         self.W_cluster=W_cluster
         self.k=source_num
         self.time_frame=feature_length
         self.basis_num=basis_num
+    
+    def pcnmf(self, f, W, W_cluster, source_num, feature_length, basis_num, sparseness):
+        self.f=f
+        self.W=W
+        self.W_cluster=W_cluster
+        self.k=source_num
+        self.time_frame=feature_length
+        self.basis_num=basis_num
+        self.sparseness=sparseness
 
     def LTS_Result(self, LTS_median, LTS_mean, f, link=[], PI=[], Result_PI=[]):
         self.LTS_median = LTS_median
         self.LTS_mean = LTS_mean
         self.f = f
         self.link = link
-        self.PI = PI
-        self.Result_PI = Result_PI
+        if len(PI)>0:
+          self.PI = PI
+          self.Result_PI = Result_PI
 
     def LTS_Parameters(self, FFT_size, overlap, sensitivity, sampling_freq, channel):
         self.FFT_size=FFT_size
@@ -280,7 +288,7 @@ class matrix_operation:
         return save_result
 
     def spectral_variation(self, input_data, f, percentile=[], hour_selection=[], month_selection=[]):
-        if not percentile:
+        if len(percentile)==0:
             percentile=np.arange(1,100)
         
         time_vec=input_data[:,0]
@@ -319,7 +327,7 @@ class matrix_operation:
         self.hour_selection=hour_selection
         self.month_selection=month_selection
 
-    def plot_psd(self, freq_scale='linear', amplitude_range=[], f_range=[], fig_width=6, fig_height=6):
+    def plot_psd(self, freq_scale='linear', amplitude_range=[], f_range=[], fig_width=6, fig_height=6, title=[]):
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
         cmap=cm.get_cmap('jet', len(self.percentile))
         cmap_table=cmap(range(len(self.percentile)))
@@ -341,6 +349,8 @@ class matrix_operation:
             plt.ylim(np.min(amplitude_range), np.max(amplitude_range))
         plt.xlabel('Frequency')
         plt.ylabel('Amplitude')
+        if title:
+            plt.title(title)
         
         if len(self.percentile)>5:
             cbar=fig.colorbar(cbar, ticks=self.percentile[::int(np.ceil(len(self.percentile)/5))])
@@ -348,7 +358,7 @@ class matrix_operation:
             cbar=fig.colorbar(cbar, ticks=self.percentile)
         cbar.set_label('Percentile')
     
-    def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6, lts=True, mel=False):
+    def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6, lts=True, mel=False, title=[]):
         if lts:
             temp=matrix_operation().gap_fill(time_vec=input_data[:,0], data=input_data[:,1:], tail=[])
             temp[:,0]=temp[:,0]+693960-366
@@ -370,9 +380,11 @@ class matrix_operation:
             idx = np.linspace(0, len(f)-1, N, dtype = 'int')
             yticks = f[idx]+0.5
             ax.set_yticklabels(yticks.astype(int))
+        if title:
+            plt.title(title)
         cbar = fig.colorbar(im, ax=ax)
         cbar.set_label('Amplitude')
-        return ax, cbar;
+        
     
     def prewhiten(input_data, prewhiten_percent, axis):
         import numpy.matlib
@@ -412,7 +424,7 @@ class matrix_operation:
         return output
 
 class spectrogram_detection:
-  def __init__(self, input, f, threshold, smooth=3, frequency_cut=25, minimum_interval=0, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[]):
+  def __init__(self, input, f, threshold, smooth=0, frequency_cut=25, minimum_interval=0, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[]):
       from scipy.ndimage import gaussian_filter
       
       time_vec=input[:,0]
