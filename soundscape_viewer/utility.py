@@ -96,7 +96,7 @@ class save_parameters:
         self.channel=channel
 
 class audio_visualization:
-    def __init__(self, filename=None,  path=None, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0, annotation=None, padding=0):
+    def __init__(self, filename=None,  path=None, channel=0, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0, annotation=None, padding=0):
         if not path:
           path=os.getcwd()
         
@@ -144,9 +144,15 @@ class audio_visualization:
               cbar.set_label('PSD')
             
           else:
-            x, _ = librosa.load(path+'/'+filename, sr=sf, offset=offset_read, duration=duration_read)
-            self.x=x-np.mean(x)
-            self.run(x, sf, offset_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp)
+            if channel>0:
+              channel=channel-1
+              x, _ = librosa.load(path+'/'+filename, sr=sf, offset=offset_read, duration=duration_read, mono=False)
+              self.x=x[channel,:]-np.mean(x[channel,:])
+              self.run(x[channel,:], sf, offset_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp)
+            else:
+              x, _ = librosa.load(path+'/'+filename, sr=sf, offset=offset_read, duration=duration_read)
+              self.x=x-np.mean(x)
+              self.run(x, sf, offset_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp)
 
             
     def run(self, x, sf, offset_read=0, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0):
