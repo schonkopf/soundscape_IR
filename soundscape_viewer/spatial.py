@@ -99,12 +99,14 @@ class spatial_mapping():
 
     fig, ax1 = plt.subplots(figsize=(int(np.round(10*(np.max(x)-np.min(x))/(np.max(y)-np.min(y)))), int(np.round(10*(np.max(y)-np.min(y))/(np.max(x)-np.min(x))))))
     if plot_type=='contour' or plot_type=='both':
-      grid = griddata(np.hstack((x[:,None],y[:,None])), z, (grid_x, grid_y), method='cubic')
-      im = ax1.contourf(grid.T, extent=(np.min(x),np.max(x),np.min(y),np.max(y)), levels=contour_levels, vmin=vmin, vmax=vmax)
+      self.grid = griddata(np.hstack((x[:,None],y[:,None])), z, (grid_x, grid_y), method='cubic')
+      im = ax1.contourf(self.grid.T, extent=(np.min(x),np.max(x),np.min(y),np.max(y)), levels=contour_levels, vmin=vmin, vmax=vmax)
       cbar= fig.colorbar(im)
     if plot_type=='scatter' or plot_type=='both':
-      im = ax1.scatter(x, y, c='red', vmin=vmin, vmax=vmax)
+      if plot_type=='both':
+        im = ax1.scatter(x, y, c='', marker='o', edgecolors='k', vmin=vmin, vmax=vmax)
       if plot_type=='scatter':
+        im = ax1.scatter(x, y, c=z, vmin=vmin, vmax=vmax)
         cbar= fig.colorbar(im)
     
     if shapefile:
@@ -114,6 +116,5 @@ class spatial_mapping():
       _,_=plt.xlim((np.min(x),np.max(x)))
       _,_=plt.ylim((np.min(y),np.max(y)))
 
-    self.grid=grid
     self.x=xx
     self.y=yy
