@@ -13,7 +13,7 @@ import matplotlib.cm as cm
 import os
 
 class gdrive_handle:
-    def __init__(self, folder_id):
+    def __init__(self, folder_id, status_print=True):
         get_ipython().system('pip install -U -q PyDrive')
         from pydrive.auth import GoogleAuth
         from pydrive.drive import GoogleDrive
@@ -25,13 +25,15 @@ class gdrive_handle:
         gauth = GoogleAuth()
         gauth.credentials = GoogleCredentials.get_application_default()
         self.Gdrive = GoogleDrive(gauth)
-        print('Now establishing link to Google drive.')
+        if status_print:
+            print('Now establishing link to Google drive.')
     
-    def upload(self, filename):
+    def upload(self, filename, status_print=True):
         upload_ = self.Gdrive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": self.folder_id}], 'title': filename})
         upload_.SetContentFile(filename)
         upload_.Upload()
-        print('Successifully upload to Google drive')
+        if status_print:
+            print('Successifully upload to Google drive')
     
     def list_query(self, file_extension, subfolder=False):
         location_cmd="title contains '"+file_extension+"' and '"+self.folder_id+"' in parents and trashed=false"
@@ -424,7 +426,7 @@ class matrix_operation:
         return output
 
 class spectrogram_detection:
-  def __init__(self, input, f, threshold, smooth=0, frequency_cut=25, minimum_interval=0, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[]):
+  def __init__(self, input, f, threshold, smooth=0, frequency_cut=25, minimum_interval=0, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[], status_print=True):
       from scipy.ndimage import gaussian_filter
       
       time_vec=input[:,0]
@@ -475,8 +477,8 @@ class spectrogram_detection:
         
       if folder_id:
         #import Gdrive_upload
-        Gdrive=gdrive_handle(folder_id)
-        Gdrive.upload(filename)
+        Gdrive=gdrive_handle(folder_id, status_print=False)
+        Gdrive.upload(filename, status_print=False)
     
 class performance_evaluation:
   def __init__(self, label_filename):
