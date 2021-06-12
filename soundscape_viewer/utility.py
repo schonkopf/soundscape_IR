@@ -468,9 +468,9 @@ class spectrogram_detection:
       self.detection=np.vstack((begin, ending)).T
       self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)']
       if filename:
-        self.save_txt(filename=filename, folder_id=folder_id)
+        self.save_txt(filename=filename, folder_id=folder_id, status_print=status_print)
 
-  def save_txt(self, filename='Separation.txt',folder_id=[]):
+  def save_txt(self, filename='Separation.txt',folder_id=[], status_print=True):
       df = pd.DataFrame(self.output, columns = self.header) 
       df.to_csv(filename, sep='\t', index=False)
       if status_print:
