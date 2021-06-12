@@ -473,7 +473,8 @@ class spectrogram_detection:
   def save_txt(self, filename='Separation.txt',folder_id=[]):
       df = pd.DataFrame(self.output, columns = self.header) 
       df.to_csv(filename, sep='\t', index=False)
-      print('Successifully save to '+filename)
+      if status_print:
+            print('Successifully save to '+filename)
         
       if folder_id:
         #import Gdrive_upload
