@@ -195,12 +195,12 @@ class batch_processing:
         if self.run_detection:
           for n in range(0, len(self.source)):
             filename=self.audioname[file][:-4]+'_S'+str(self.source[n])+'.txt'
-            spectrogram_detection(model.separation[self.source[n]-1], model.f, threshold=self.threshold[n], smooth=self.smooth, frequency_cut=self.frequency_cut[n], frequency_count=self.frequency_count[n], minimum_interval=self.minimum_interval[n], pad_size=self.padding, filename=filename, folder_id = self.folder_id)
+            spectrogram_detection(model.separation[self.source[n]-1], model.f, threshold=self.threshold[n], smooth=self.smooth, frequency_cut=self.frequency_cut[n], frequency_count=self.frequency_count[n], minimum_interval=self.minimum_interval[n], pad_size=self.padding, filename=filename, folder_id = self.folder_id, status_print=False)
             
       if self.run_detection:
         if not self.source:
           filename=self.audioname[file][:-4]+'.txt'
-          spectrogram_detection(audio.data, audio.f, threshold=self.threshold[n], smooth=self.smooth, frequency_cut=self.frequency_cut[n], frequency_count=self.frequency_count[n], minimum_interval=self.minimum_interval[n], pad_size=self.padding, filename=filename, folder_id = self.folder_id)
+          spectrogram_detection(audio.data, audio.f, threshold=self.threshold[n], smooth=self.smooth, frequency_cut=self.frequency_cut[n], frequency_count=self.frequency_count[n], minimum_interval=self.minimum_interval[n], pad_size=self.padding, filename=filename, folder_id = self.folder_id, status_print=False)
 
       if self.run_pulse_analysis:
         if self.run_separation:
@@ -219,4 +219,4 @@ class batch_processing:
           os.remove(temp2['title'])
 
     if self.run_lts:
-      lts.save_lts(self.lts_filename, self.lts_folder_id)
+      lts.save_lts(self.lts_filename, self.lts_folder_id, status_print=False)
