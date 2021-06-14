@@ -60,6 +60,12 @@ class batch_processing:
     self.mel_comp=mel_comp
     self.sensitivity=sensitivity
     self.run_lts=False
+    self.run_adaptive_prewhiten=False
+
+  def params_adaptive_prewhiten(self, eps=0.1, smooth=1):
+    self.eps=eps
+    self.adaptive_smooth=smooth
+    self.run_adaptive_prewhiten=True
 
   def params_separation(self, model, iter=50, adaptive_alpha=0, additional_basis=0):
     self.model = model
@@ -120,10 +126,11 @@ class batch_processing:
       self.run_pulse_analysis=True
   
   def run(self, start=0, num_file=None):
-    from .lts_maker import lts_maker
-    from .utility import audio_visualization
-    from .utility import spectrogram_detection
-    from .utility import pulse_interval
+    from soundscape_IR.soundscape_viewer.lts_maker import lts_maker
+    from soundscape_IR.soundscape_viewer.utility import audio_visualization
+    from soundscape_IR.soundscape_viewer.utility import spectrogram_detection
+    from soundscape_IR.soundscape_viewer.utility import pulse_interval
+    from soundscape_IR.soundscape_viewer.utility import matrix_operation
 
     import copy
     import os
@@ -178,6 +185,13 @@ class batch_processing:
       else:
         audio = audio_visualization(self.audioname[file], path, FFT_size = self.fft_size, time_resolution=self.time_resolution, window_overlap=self.window_overlap, f_range = self.f_range, sensitivity=self.sensitivity,
                                   environment=self.environment, plot_type=None, prewhiten_percent=self.prewhiten_percent, mel_comp=self.mel_comp)
+        if self.run_adaptive_prewhiten:
+          if file==self.start:
+            audio.data[:,1:], ambient=matrix_operation.adaptive_prewhiten(audio.data[:,1:], prewhiten_percent=50, axis=0, eps=self.eps, smooth=self.adaptive_smooth)
+          else:
+            audio.data[:,1:], ambient=matrix_operation.adaptive_prewhiten(audio.data[:,1:], axis=0, noise_init=ambient, eps=self.eps, smooth=self.adaptive_smooth)
+          print(np.min(ambient))
+          audio.data[np.isnan(audio.data)]=0
       
       if self.run_separation:
         model = copy.deepcopy(model_backup)
