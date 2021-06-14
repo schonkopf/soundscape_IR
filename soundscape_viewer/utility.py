@@ -401,7 +401,7 @@ class matrix_operation:
             input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1).T)
         return input_data, ambient;
     
-      def adaptive_prewhiten(input_data, axis, prewhiten_percent=50, noise_init=None, eps=0.1, smooth=1):
+    def adaptive_prewhiten(input_data, axis, prewhiten_percent=50, noise_init=None, eps=0.1, smooth=1):
         from scipy.ndimage import gaussian_filter
         if smooth>0:
           input_data = gaussian_filter(input_data, smooth)
