@@ -190,7 +190,6 @@ class batch_processing:
             audio.data[:,1:], ambient=matrix_operation.adaptive_prewhiten(audio.data[:,1:], prewhiten_percent=50, axis=0, eps=self.eps, smooth=self.adaptive_smooth)
           else:
             audio.data[:,1:], ambient=matrix_operation.adaptive_prewhiten(audio.data[:,1:], axis=0, noise_init=ambient, eps=self.eps, smooth=self.adaptive_smooth)
-          print(np.min(ambient))
           audio.data[np.isnan(audio.data)]=0
       
       if self.run_separation:
