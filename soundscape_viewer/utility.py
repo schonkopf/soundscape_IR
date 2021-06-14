@@ -401,6 +401,34 @@ class matrix_operation:
             input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1).T)
         return input_data, ambient;
     
+      def adaptive_prewhiten(input_data, axis, prewhiten_percent=50, noise_init=None, eps=0.1, smooth=1):
+        from scipy.ndimage import gaussian_filter
+        if smooth>0:
+          input_data = gaussian_filter(input_data, smooth)
+        if axis==1:
+          input_data = input_data.T  
+
+        ambient = np.zeros((input_data.shape))
+        if noise_init is None:
+          noise_init = np.percentile(input_data, prewhiten_percent, axis=0)
+        for i in range(input_data.shape[0]):
+          if i==0:
+            ambient[i] = (1-eps)*noise_init + eps*input_data[i]
+          else:
+            ambient[i] = (1-eps)*ambient[i-1] + eps*input_data[i]
+
+        input_data = np.subtract(input_data, ambient)
+        list=np.where(np.abs(input_data)==float("inf"))[0]
+        input_data[list]=float("nan")
+        input_data[list]=np.nanmin(input_data)
+        input_data[input_data<0]=0
+        ambient=ambient[-1,:]
+        if axis==1:
+          input_data=input_data.T
+          ambient=ambient.T
+
+        return input_data, ambient;
+    
     def frame_normalization(input, axis=0, type='min-max'):
         if axis==0:
           if type=='min-max':
