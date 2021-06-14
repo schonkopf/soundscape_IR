@@ -289,14 +289,14 @@ class data_organize:
     self.result_header=np.delete(self.result_header, col)
     print('Columns in the spreadsheet: ', self.result_header)
     
-  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6, empty_hr_remove=False, empty_day_remove=False, reduce_resolution=1, display_cluster=0, plot=True):
+  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6, empty_hr_remove=False, empty_day_remove=False, reduce_resolution=1, display_cluster=0, plot=True, nan_value=0):
     hr_boundary=[np.min(24*(self.final_result[:,0]-np.floor(self.final_result[:,0]))), np.max(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))]
     if display_cluster==0:
       input_data=self.final_result[:,col]
-      input_data[input_data==0]=np.nan
+      input_data[input_data==nan_value]=np.nan
     else:
       input_data=self.final_result[:,col]==display_cluster
-      input_data[self.final_result[:,col]==0]=np.nan
+      input_data[self.final_result[:,col]==nan_value]=np.nan
     input_data, time_vec=data_organize.reduce_time_resolution(input_data, self.final_result[:,0:1], reduce_resolution)
     
     hr=np.unique(24*(time_vec-np.floor(time_vec)))
