@@ -388,46 +388,19 @@ class matrix_operation:
         cbar = fig.colorbar(im, ax=ax)
         cbar.set_label('Amplitude')
         
-    
-    def prewhiten(input_data, prewhiten, axis=1, noise_init=[], eps=0, smooth=0):
+    def prewhiten(input_data, prewhiten_percent, axis):
         import numpy.matlib
-        from scipy.ndimage import gaussian_filter
-        if smooth > 0:
-          sm_data = gaussian_filter(input_data, smooth)
-          input_data = np.array(sm_data)
-        else:
-          input_data = np.array(input_data)
+        list=np.where(np.abs(input_data)==float("inf"))[0]
+        input_data[list]=float("nan")
+        input_data[list]=np.nanmin(input_data)
         
-        list=np.where(np.abs(input_data)==float("inf"))[0]       
-        if len(list)>0:
-          input_data[list]=float("nan")
-          input_data[list]=np.nanmin(input_data)
-
-        n, m = input_data.shape
-        ambient = np.zeros((n, m))
-
-        if len(noise_init) > 0:
-          noise = prewhiten
-        elif prewhiten > 0:
-          noise = np.percentile(input_data, prewhiten, axis=axis)
-        else:
-          ambient = np.zeros(input_data.shape)
-          return input_data, ambient
-
+        ambient = np.percentile(input_data, prewhiten_percent, axis=axis)
         if axis==0:
-          for i in range(n):
-            ambient[i] = noise
-            noise = (1-eps)*noise + eps*input_data[i]
-
+            input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1))
         elif axis==1:
-          for i in range(m):
-            ambient[:, i] = noise
-            noise = (1-eps)*noise + eps*input_data[:, i]
+            input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1).T)
+        return input_data, ambient;
 
-        input_data = np.subtract(input_data, ambient)
-        input_data[input_data<0]=0
-        return input_data, ambient
-    
     def adaptive_prewhiten(input_data, axis, prewhiten_percent=50, noise_init=None, eps=0.1, smooth=1):
         from scipy.ndimage import gaussian_filter
         list=np.where(np.abs(input_data)==float("inf"))[0]
