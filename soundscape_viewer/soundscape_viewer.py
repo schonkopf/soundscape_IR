@@ -46,7 +46,7 @@ class lts_viewer:
       self.Result_diff=np.array([])
       self.Result_PI=np.array([])
       
-  def assemble(self, data, time_sort=1, f_range=[]):
+  def assemble(self, data, time_sort=1, f_range=[], location=0):
       if any('PI' in s for s in data['Result'].dtype.names):
         self.PI = np.array(data['Result']['PI'].item()[0])
         Result_PI = data['Result']['Result_PI'].item()
@@ -70,18 +70,21 @@ class lts_viewer:
           self.Result_diff = self.Result_mean-self.Result_median
           self.Result_diff[:,0] = self.Result_mean[:,0]
           self.Result_PI = np.array(Result_PI)
+          self.location = np.matlib.repmat(np.array([location]),Result_median.shape[0],1)
       else:
           self.Result_median = np.vstack((Result_median, self.Result_median))
           self.Result_mean = np.vstack((Result_mean, self.Result_mean))
           self.Result_diff = self.Result_mean-self.Result_median
           self.Result_diff[:,0] = self.Result_mean[:,0]
           self.Result_PI = np.vstack((Result_PI, self.Result_PI))
+          self.location = np.vstack((np.matlib.repmat(np.array([location]),Result_median.shape[0],1), self.location))
 
       if time_sort == 1:
           temp = np.argsort(self.Result_mean[:,0])
           self.Result_median=self.Result_median[temp,:]
           self.Result_mean=self.Result_mean[temp,:]
           self.Result_diff=self.Result_diff[temp,:]
+          self.location=self.location[temp]
           if self.Result_PI.shape[0]>0:
             self.Result_PI=self.Result_PI[temp,:]
   
@@ -121,10 +124,11 @@ class lts_viewer:
           else:
             self.assemble(data, time_sort, f_range)
         
-  def collect_Gdrive(self, folder_id, f_range=[], time_sort=1, file_extension = '.mat', parameter_check=False):
+  def collect_Gdrive(self, folder_id, f_range=[], time_sort=1, file_extension = '.mat', parameter_check=False, subfolder=False):
     Gdrive=gdrive_handle(folder_id)
-    Gdrive.list_query(file_extension)
+    Gdrive.list_query(file_extension, subfolder=subfolder)
     
+    n=0
     for file in Gdrive.file_list:
       print('Loading file: %s' % (file['title']))
       infilename=file['title']
@@ -133,14 +137,16 @@ class lts_viewer:
       if parameter_check == True:
         self.LTS_check(data, f_range)
       else:
-        self.assemble(data, time_sort, f_range)
+        self.assemble(data, time_sort, f_range, location=Gdrive.subfolder_list[n])
+        n+=1
         os.remove(infilename)
       
   def plot_lts(self, fig_width=12, fig_height=18, gap_fill=True):
     temp,f=self.input_selection(var_name='median')
     if gap_fill:
       temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
-    temp[:,0]=temp[:,0]+693960-366
+      temp[:,0]=temp[:,0]+693960
+    temp[:,0]=temp[:,0]-366
     
     fig, (ax1, ax2, ax3) = plt.subplots(nrows=3, figsize=(fig_width, fig_height))
     im = ax1.imshow(temp.T, vmin=np.min(temp[:,1:]), vmax=np.max(temp[:,1:]),
@@ -156,7 +162,8 @@ class lts_viewer:
     temp,f=self.input_selection(var_name='mean')
     if gap_fill:
       temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
-    temp[:,0]=temp[:,0]+693960-366
+      temp[:,0]=temp[:,0]+693960
+    temp[:,0]=temp[:,0]-366
     
     im2 = ax2.imshow(temp.T, vmin=np.min(temp[:,1:]), vmax=np.max(temp[:,1:]),
                     origin='lower',  aspect='auto', cmap=cm.jet,
@@ -171,7 +178,8 @@ class lts_viewer:
     temp,f=self.input_selection(var_name='diff')
     if gap_fill:
       temp=matrix_operation().gap_fill(time_vec=temp[:,0], data=temp[:,1:], tail=[])
-    temp[:,0]=temp[:,0]+693960-366
+      temp[:,0]=temp[:,0]+693960
+    temp[:,0]=temp[:,0]-366
     
     im3 = ax3.imshow(temp.T, vmin=np.min(temp[:,1:]), vmax=np.max(temp[:,1:]),
                     origin='lower',  aspect='auto', cmap=cm.jet,
@@ -183,10 +191,8 @@ class lts_viewer:
     ax3.xaxis_date()
     cbar3 = fig.colorbar(im3, ax=ax3)
     cbar3.set_label('SNR')
-    
-    return cbar1, cbar2, cbar3;
 
-  def input_selection(self, var_name='median', begin_date=[], end_date=[], f_range=[], prewhiten_percent=0, threshold=0, annotation=None, padding=0, annotation_target=None):
+  def input_selection(self, var_name='median', begin_date=[], end_date=[], f_range=[], prewhiten_percent=0, threshold=0, annotation=None, padding=0, annotation_target=None, gap_fill=False):
     if var_name=='median':
       input_data=self.Result_median
     elif var_name=='mean':
@@ -256,7 +262,10 @@ class lts_viewer:
         input_data, ambient=matrix_operation.prewhiten(input_data, prewhiten_percent, 0)
         input_data[input_data<threshold]=threshold
         input_data[:,0]=time_vec
-      return input_data, f;
+      if gap_fill:
+        input_data=matrix_operation().gap_fill(time_vec=time_vec, data=input_data[:,1:], tail=[])
+        input_data[:,0]=input_data[:,0]+693960-366
+      return input_data, f
     
 class data_organize:
   def __init__(self):
@@ -280,14 +289,14 @@ class data_organize:
     self.result_header=np.delete(self.result_header, col)
     print('Columns in the spreadsheet: ', self.result_header)
     
-  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6, empty_hr_remove=False, empty_day_remove=False, reduce_resolution=1, display_cluster=0):
+  def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6, empty_hr_remove=False, empty_day_remove=False, reduce_resolution=1, display_cluster=0, plot=True, nan_value=0):
     hr_boundary=[np.min(24*(self.final_result[:,0]-np.floor(self.final_result[:,0]))), np.max(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))]
     if display_cluster==0:
       input_data=self.final_result[:,col]
-      input_data[input_data==0]=np.nan
+      input_data[input_data==nan_value]=np.nan
     else:
       input_data=self.final_result[:,col]==display_cluster
-      input_data[self.final_result[:,col]==0]=np.nan
+      input_data[self.final_result[:,col]==nan_value]=np.nan
     input_data, time_vec=data_organize.reduce_time_resolution(input_data, self.final_result[:,0:1], reduce_resolution)
     
     hr=np.unique(24*(time_vec-np.floor(time_vec)))
@@ -304,15 +313,15 @@ class data_organize:
       list=np.where(np.sum(plot_matrix, axis=0)>0)[0]
       plot_matrix=plot_matrix[:, list]
       day=day[list]
-
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-    im = plt.imshow(plot_matrix, vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
+    if plot:
+      fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+      im = plt.imshow(plot_matrix, vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
                     extent=[python_dt[0], python_dt[-1], np.min(hr_boundary), np.max(hr_boundary)], interpolation='none')
-    ax.xaxis_date()
-    ax.set_title(self.result_header[col])
-    plt.ylabel('Hour')
-    plt.xlabel('Day')
-    cbar1 = plt.colorbar(im)
+      ax.xaxis_date()
+      ax.set_title(self.result_header[col])
+      plt.ylabel('Hour')
+      plt.xlabel('Day')
+      cbar1 = plt.colorbar(im)
 
     plot_matrix=np.hstack((day[:,None]+693960, plot_matrix.T))
     return plot_matrix, hr
