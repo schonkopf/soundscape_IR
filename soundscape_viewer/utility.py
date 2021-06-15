@@ -206,7 +206,7 @@ class audio_visualization:
           data[data<0]=0
         else:
           ambient=data[:,0:1]*0
-            
+
         # f_range: Hz
         if f_range:
             f_list=(f>=min(f_range))*(f<=max(f_range))
@@ -387,7 +387,7 @@ class matrix_operation:
         cbar = fig.colorbar(im, ax=ax)
         cbar.set_label('Amplitude')
         
-    
+        
     def prewhiten(input_data, prewhiten_percent, axis):
         import numpy.matlib
         list=np.where(np.abs(input_data)==float("inf"))[0]
@@ -400,7 +400,7 @@ class matrix_operation:
         elif axis==1:
             input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1).T)
         return input_data, ambient;
-    
+
     def adaptive_prewhiten(input_data, axis, prewhiten_percent=50, noise_init=None, eps=0.1, smooth=1):
         from scipy.ndimage import gaussian_filter
         list=np.where(np.abs(input_data)==float("inf"))[0]
@@ -416,13 +416,15 @@ class matrix_operation:
           noise_init = np.percentile(input_data, prewhiten_percent, axis=0)
         for i in range(input_data.shape[0]):
           if i==0:
-            ambient[i] = (1-eps)*noise_init + eps*input_data[i]
+            ambient[i] = noise_init
+            noise = (1-eps)*noise_init + eps*input_data[i]
           else:
-            ambient[i] = (1-eps)*ambient[i-1] + eps*input_data[i]
+            ambient[i] = noise
+            noise = (1-eps)*noise + eps*input_data[i]
 
         input_data = np.subtract(input_data, ambient)
         input_data[input_data<0]=0
-        ambient=ambient[-1,:]
+        ambient=noise
         if axis==1:
           input_data=input_data.T
           ambient=ambient.T
