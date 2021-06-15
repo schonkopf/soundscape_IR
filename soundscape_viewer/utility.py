@@ -205,9 +205,8 @@ class audio_visualization:
           data, ambient=matrix_operation.prewhiten(data, prewhiten_percent, 1)
           data[data<0]=0
         else:
-          #ambient=data[:,0:1]*0
-          ambient=np.zeros(data.shape)
-            
+          ambient=data[:,0:1]*0
+
         # f_range: Hz
         if f_range:
             f_list=(f>=min(f_range))*(f<=max(f_range))
@@ -217,7 +216,7 @@ class audio_visualization:
             
         f=f[f_list]
         data=data[f_list,:]
-        ambient=ambient[f_list,:]
+        ambient=ambient[f_list]
         P=P[f_list,:]
         
         # plot the spectrogram
@@ -238,7 +237,7 @@ class audio_visualization:
           cbar.set_label('PSD')
 
         self.data=np.hstack((t[:,None],data.T))
-        self.ambient=ambient.T
+        self.ambient=ambient
         self.f=f
         if not time_resolution:
           self.phase=np.angle(P)
@@ -387,6 +386,7 @@ class matrix_operation:
             plt.title(title)
         cbar = fig.colorbar(im, ax=ax)
         cbar.set_label('Amplitude')
+        
         
     def prewhiten(input_data, prewhiten_percent, axis):
         import numpy.matlib
