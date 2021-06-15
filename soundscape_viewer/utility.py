@@ -443,13 +443,15 @@ class matrix_operation:
           noise_init = np.percentile(input_data, prewhiten_percent, axis=0)
         for i in range(input_data.shape[0]):
           if i==0:
-            ambient[i] = (1-eps)*noise_init + eps*input_data[i]
+            ambient[i] = noise_init
+            noise = (1-eps)*noise_init + eps*input_data[i]
           else:
-            ambient[i] = (1-eps)*ambient[i-1] + eps*input_data[i]
+            ambient[i] = noise
+            noise = (1-eps)*noise + eps*input_data[i]
 
         input_data = np.subtract(input_data, ambient)
         input_data[input_data<0]=0
-        ambient=ambient[-1,:]
+        ambient=noise
         if axis==1:
           input_data=input_data.T
           ambient=ambient.T
