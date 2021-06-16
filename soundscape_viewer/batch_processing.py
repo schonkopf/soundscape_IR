@@ -62,10 +62,11 @@ class batch_processing:
     self.run_lts=False
     self.run_adaptive_prewhiten=False
 
-  def params_adaptive_prewhiten(self, eps=0.1, smooth=1):
+  def params_adaptive_prewhiten(self, eps=0.1, smooth=1, continuous_adaptive=True):
     self.eps=eps
     self.adaptive_smooth=smooth
     self.run_adaptive_prewhiten=True
+    self.continuous_adaptive=continuous_adaptive
 
   def params_separation(self, model, iter=50, adaptive_alpha=0, additional_basis=0):
     self.model = model
@@ -116,6 +117,8 @@ class batch_processing:
     self.lts_source=source
     self.lts_filename=filename
     self.lts_folder_id=folder_id
+    self.interval_range=[]
+    self.energy_percentile=0
 
   def params_pulse_interval(self, energy_percentile=50, interval_range=[1, 1000], LTS_combine=False):
     self.energy_percentile=energy_percentile
@@ -189,6 +192,8 @@ class batch_processing:
           if file==self.start:
             audio.data[:,1:], ambient=matrix_operation.adaptive_prewhiten(audio.data[:,1:], prewhiten_percent=50, axis=0, eps=self.eps, smooth=self.adaptive_smooth)
           else:
+            if self.continuous_adaptive:
+              ambient=None
             audio.data[:,1:], ambient=matrix_operation.adaptive_prewhiten(audio.data[:,1:], axis=0, noise_init=ambient, eps=self.eps, smooth=self.adaptive_smooth)
           audio.data[np.isnan(audio.data)]=0
       
