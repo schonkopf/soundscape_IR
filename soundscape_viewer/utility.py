@@ -527,6 +527,7 @@ class performance_evaluation:
     level=test_spec[:,1:].max(axis=1)
     self.fpr, self.tpr, thresholds = roc_curve(label, level)
     self.auc = auc(self.fpr, self.tpr)
+    self.all_threshold = thresholds
 
     self.threshold = thresholds[(np.abs(self.fpr - fpr_control)).argmin()]
     if plot:
