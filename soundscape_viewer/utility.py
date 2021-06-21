@@ -148,7 +148,7 @@ class audio_visualization:
           else:
             x, _ = librosa.load(path+'/'+filename, sr=sf, offset=offset_read, duration=duration_read)
             self.x=x-np.mean(x)
-            self.run(x, sf, offset_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp)
+            self.run(self.x, sf, offset_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp)
 
             
     def run(self, x, sf, offset_read=0, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0):
