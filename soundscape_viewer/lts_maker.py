@@ -218,7 +218,7 @@ class lts_maker:
     if len(interval_range)>0:
       self.PI=pulse_analysis_result.PI
     
-  def save_lts(self, save_filename, folder_id=[]):
+  def save_lts(self, save_filename, folder_id=[], status_print=True):
     Result=save_parameters()
     Parameters=save_parameters()
     Result.LTS_Result(self.Result_median, self.Result_mean, self.f, self.link, self.PI, self.Result_PI)
@@ -227,8 +227,8 @@ class lts_maker:
     print('Successifully save to '+save_filename)
     
     if folder_id:
-      Gdrive=gdrive_handle(folder_id)
-      Gdrive.upload(save_filename)
+      Gdrive=gdrive_handle(folder_id, status_print=True)
+      Gdrive.upload(save_filename, status_print=True)
     
   def run(self, save_filename='LTS.mat', folder_id=[], file_begin=0, num_file=[], duration_read=[]):
     import audioread

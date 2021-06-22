@@ -88,7 +88,7 @@ class pcnmf:
   def unsupervised_separation(self, input_data, f, source_num=2):    
     self.source_num=source_num
     self.f=f
-    self.time_vec=input_data[:,0]
+    self.time_vec=input_data[:,0:1]
     input_data=input_data[:,1:].T
     baseline=input_data.min()
     input_data=input_data-baseline
@@ -120,6 +120,7 @@ class pcnmf:
     
     # Reconstruct individual sources
     self.pcnmf_output(input_data, self.time_vec, baseline)
+    self.time_vec=self.time_vec[:,0]
     print('Done')
     return self.W, self.H, self.W_cluster
     
@@ -436,7 +437,7 @@ class supervised_nmf:
 
   def supervised_separation(self, input_data, f, iter=50, adaptive_alpha=0, additional_basis=0):
     self.f=f    
-    self.time_vec=input_data[:,0]
+    self.time_vec=input_data[:,0:1]
     self.adaptive_alpha=adaptive_alpha
     self.additional_basis=additional_basis
     input_data=input_data[:,1:].T
@@ -488,6 +489,7 @@ class supervised_nmf:
     self.W=W
     self.H=Ht.T
     self.nmf_output(input_data, self.time_vec, baseline)
+    #self.time_vec=self.time_vec[:,0]
 
   def save_model(self, filename='NMF_model.mat', folder_id=[]):
     #import save_parameters

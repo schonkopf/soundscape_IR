@@ -13,7 +13,7 @@ import matplotlib.cm as cm
 import os
 
 class gdrive_handle:
-    def __init__(self, folder_id):
+    def __init__(self, folder_id, status_print=True):
         get_ipython().system('pip install -U -q PyDrive')
         from pydrive.auth import GoogleAuth
         from pydrive.drive import GoogleDrive
@@ -25,17 +25,22 @@ class gdrive_handle:
         gauth = GoogleAuth()
         gauth.credentials = GoogleCredentials.get_application_default()
         self.Gdrive = GoogleDrive(gauth)
-        print('Now establishing link to Google drive.')
+        if status_print:
+            print('Now establishing link to Google drive.')
     
-    def upload(self, filename):
+    def upload(self, filename, status_print=True):
         upload_ = self.Gdrive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": self.folder_id}], 'title': filename})
         upload_.SetContentFile(filename)
         upload_.Upload()
-        print('Successifully upload to Google drive')
+        if status_print:
+            print('Successifully upload to Google drive')
     
     def list_query(self, file_extension, subfolder=False):
         location_cmd="title contains '"+file_extension+"' and '"+self.folder_id+"' in parents and trashed=false"
         self.file_list = self.Gdrive.ListFile({'q': location_cmd}).GetList()
+        self.subfolder_list=[]
+        if self.file_list!=[]:
+          self.subfolder_list=['Top']*len(self.file_list)
         if subfolder:
           self.list_subfolder(file_extension)
 
@@ -47,6 +52,7 @@ class gdrive_handle:
           subfolder_list=self.Gdrive.ListFile({'q': location_cmd}).GetList()
           if subfolder_list!=[]:
             self.file_list.extend(subfolder_list)
+            self.subfolder_list=np.append(self.subfolder_list, [folder['title']]*len(subfolder_list))
         
     def list_display(self):
         n=0
@@ -142,7 +148,7 @@ class audio_visualization:
           else:
             x, _ = librosa.load(path+'/'+filename, sr=sf, offset=offset_read, duration=duration_read)
             self.x=x-np.mean(x)
-            self.run(x, sf, offset_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp)
+            self.run(self.x, sf, offset_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp)
 
             
     def run(self, x, sf, offset_read=0, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0):
@@ -200,7 +206,7 @@ class audio_visualization:
           data[data<0]=0
         else:
           ambient=data[:,0:1]*0
-            
+
         # f_range: Hz
         if f_range:
             f_list=(f>=min(f_range))*(f<=max(f_range))
@@ -284,7 +290,7 @@ class matrix_operation:
         return save_result
 
     def spectral_variation(self, input_data, f, percentile=[], hour_selection=[], month_selection=[]):
-        if not percentile:
+        if len(percentile)==0:
             percentile=np.arange(1,100)
         
         time_vec=input_data[:,0]
@@ -323,7 +329,7 @@ class matrix_operation:
         self.hour_selection=hour_selection
         self.month_selection=month_selection
 
-    def plot_psd(self, freq_scale='linear', amplitude_range=[], f_range=[], fig_width=6, fig_height=6):
+    def plot_psd(self, freq_scale='linear', amplitude_range=[], f_range=[], fig_width=6, fig_height=6, title=[]):
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
         cmap=cm.get_cmap('jet', len(self.percentile))
         cmap_table=cmap(range(len(self.percentile)))
@@ -345,6 +351,8 @@ class matrix_operation:
             plt.ylim(np.min(amplitude_range), np.max(amplitude_range))
         plt.xlabel('Frequency')
         plt.ylabel('Amplitude')
+        if title:
+            plt.title(title)
         
         if len(self.percentile)>5:
             cbar=fig.colorbar(cbar, ticks=self.percentile[::int(np.ceil(len(self.percentile)/5))])
@@ -352,7 +360,7 @@ class matrix_operation:
             cbar=fig.colorbar(cbar, ticks=self.percentile)
         cbar.set_label('Percentile')
     
-    def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6, lts=True, mel=False):
+    def plot_lts(self, input_data, f, vmin=None, vmax=None, fig_width=18, fig_height=6, lts=True, mel=False, title=[]):
         if lts:
             temp=matrix_operation().gap_fill(time_vec=input_data[:,0], data=input_data[:,1:], tail=[])
             temp[:,0]=temp[:,0]+693960-366
@@ -374,10 +382,12 @@ class matrix_operation:
             idx = np.linspace(0, len(f)-1, N, dtype = 'int')
             yticks = f[idx]+0.5
             ax.set_yticklabels(yticks.astype(int))
+        if title:
+            plt.title(title)
         cbar = fig.colorbar(im, ax=ax)
         cbar.set_label('Amplitude')
-        return ax, cbar;
-    
+        
+        
     def prewhiten(input_data, prewhiten_percent, axis):
         import numpy.matlib
         list=np.where(np.abs(input_data)==float("inf"))[0]
@@ -389,6 +399,36 @@ class matrix_operation:
             input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1))
         elif axis==1:
             input_data = np.subtract(input_data, np.matlib.repmat(ambient, input_data.shape[axis], 1).T)
+        return input_data, ambient;
+
+    def adaptive_prewhiten(input_data, axis, prewhiten_percent=50, noise_init=None, eps=0.1, smooth=1):
+        from scipy.ndimage import gaussian_filter
+        list=np.where(np.abs(input_data)==float("inf"))[0]
+        input_data[list]=float("nan")
+        input_data[list]=np.nanmin(input_data)
+        if smooth>0:
+          input_data = gaussian_filter(input_data, smooth)
+        if axis==1:
+          input_data = input_data.T  
+
+        ambient = np.zeros((input_data.shape))
+        if noise_init is None:
+          noise_init = np.percentile(input_data, prewhiten_percent, axis=0)
+        for i in range(input_data.shape[0]):
+          if i==0:
+            ambient[i] = noise_init
+            noise = (1-eps)*noise_init + eps*input_data[i]
+          else:
+            ambient[i] = noise
+            noise = (1-eps)*noise + eps*input_data[i]
+
+        input_data = np.subtract(input_data, ambient)
+        input_data[input_data<0]=0
+        ambient=noise
+        if axis==1:
+          input_data=input_data.T
+          ambient=ambient.T
+
         return input_data, ambient;
     
     def frame_normalization(input, axis=0, type='min-max'):
@@ -416,7 +456,7 @@ class matrix_operation:
         return output
 
 class spectrogram_detection:
-  def __init__(self, input, f, threshold, smooth=0, frequency_cut=25, minimum_interval=0, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[]):
+  def __init__(self, input, f, threshold, smooth=0, frequency_cut=25, minimum_interval=0, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[], status_print=True):
       from scipy.ndimage import gaussian_filter
       
       time_vec=input[:,0]
@@ -448,27 +488,30 @@ class spectrogram_detection:
 
       min_F=np.array([])
       max_F=np.array([])
+      snr=np.array([])
       if frequency_cut:
         for n in range(len(begin)):
           psd=np.mean(data[(time_vec>=begin[n])*(time_vec<=ending[n]),:], axis=0)
           f_temp=f[psd>(np.max(psd)-frequency_cut)]
           min_F=np.append(min_F, np.min(f_temp))
           max_F=np.append(max_F, np.max(f_temp))
-      self.output=np.vstack([np.arange(len(begin))+1, np.repeat('Spectrogram',len(begin)), np.repeat(1,len(begin)), begin, ending, min_F, max_F]).T
+          snr=np.append(snr, np.max(psd))
+      self.output=np.vstack([np.arange(len(begin))+1, np.repeat('Spectrogram',len(begin)), np.repeat(1,len(begin)), begin, ending, min_F, max_F, snr]).T
       self.detection=np.vstack((begin, ending)).T
-      self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)']
+      self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)', 'Maximum SNR (dB)']
       if filename:
-        self.save_txt(filename=filename, folder_id=folder_id)
+        self.save_txt(filename=filename, folder_id=folder_id, status_print=status_print)
 
-  def save_txt(self, filename='Separation.txt',folder_id=[]):
+  def save_txt(self, filename='Separation.txt',folder_id=[], status_print=True):
       df = pd.DataFrame(self.output, columns = self.header) 
       df.to_csv(filename, sep='\t', index=False)
-      print('Successifully save to '+filename)
+      if status_print:
+            print('Successifully save to '+filename)
         
       if folder_id:
         #import Gdrive_upload
-        Gdrive=gdrive_handle(folder_id)
-        Gdrive.upload(filename)
+        Gdrive=gdrive_handle(folder_id, status_print=False)
+        Gdrive.upload(filename, status_print=False)
     
 class performance_evaluation:
   def __init__(self, label_filename):
@@ -484,6 +527,7 @@ class performance_evaluation:
     level=test_spec[:,1:].max(axis=1)
     self.fpr, self.tpr, thresholds = roc_curve(label, level)
     self.auc = auc(self.fpr, self.tpr)
+    self.all_threshold = thresholds
 
     self.threshold = thresholds[(np.abs(self.fpr - fpr_control)).argmin()]
     if plot:
