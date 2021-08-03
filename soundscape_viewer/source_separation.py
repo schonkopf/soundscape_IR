@@ -524,3 +524,42 @@ class supervised_nmf:
     if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       self.sparseness=model['save_nmf']['sparseness'].item()[0][0]
     self.model_check(model)
+  
+  def output_selection(self, source=1, begin_date=[], end_date=[], f_range=[]):
+    source=source-1
+    output_data=self.separation[source]
+    
+    # f_range: Hz
+    if f_range:
+        f_list=(self.f>=min(f_range))*(self.f<=max(f_range))
+        f_list=np.where(f_list==True)[0]
+    else:
+        f_list=np.arange(len(self.f))
+    
+    f=self.f[f_list]
+    f_list=np.concatenate([np.array([0]), f_list+1])
+    
+    # format of begin_data: yyyymmdd
+    if begin_date:
+      yy=int(begin_date[0:4])
+      mm=int(begin_date[4:6])
+      dd=int(begin_date[6:8])
+      date=datetime.datetime(yy,mm,dd)
+      begin_time=date.toordinal()+366
+      list=output_data[:,0:1]>=begin_time
+      if end_date:
+            yy=int(end_date[0:4])
+            mm=int(end_date[4:6])
+            dd=int(end_date[6:8])
+            date=datetime.datetime(yy,mm,dd)
+            end_time=date.toordinal()+366+1
+      else:
+            end_time=begin_time+1
+      list=list*(output_data[:,0:1]<end_time)
+      list=np.where(list==True)[0]
+    else:
+      list=np.arange(output_data.shape[0])
+    output_data=output_data[:,f_list]
+    output_data=output_data[list,:]
+    
+    return output_data, f

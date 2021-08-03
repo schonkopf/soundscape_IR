@@ -113,10 +113,10 @@ class lts_viewer:
       print('Frequancy resolution:' ,self.f[1]-self.f[0], 'Hz')
       print('---------------------------------------------------------------')
       
-  def collect_folder(self, path='.', f_range=[], time_sort=1, parameter_check=False):
+  def collect_folder(self, path='.', f_range=[], time_sort=1, parameter_check=False, file_extension = '.mat'):
       items = os.listdir(path)
       for names in items:
-        if names.endswith(".mat"):
+        if names.endswith(file_extension):
           print('Loading file: %s' % (names))
           data = loadmat(path+'/'+names)
           if parameter_check == True:
