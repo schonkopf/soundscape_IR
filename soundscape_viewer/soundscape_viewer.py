@@ -113,16 +113,26 @@ class lts_viewer:
       print('Frequancy resolution:' ,self.f[1]-self.f[0], 'Hz')
       print('---------------------------------------------------------------')
       
-  def collect_folder(self, path='.', f_range=[], time_sort=1, parameter_check=False, file_extension = '.mat'):
-      items = os.listdir(path)
-      for names in items:
-        if names.endswith(file_extension):
-          print('Loading file: %s' % (names))
-          data = loadmat(path+'/'+names)
-          if parameter_check == True:
-            self.LTS_check(data, f_range)
-          else:
-            self.assemble(data, time_sort, f_range)
+  def collect_folder(self, path='.', f_range=[], time_sort=1, parameter_check=False, file_extension = '.mat', subfolder=False):
+      if subfolder:
+        subfolder_list = [folder for folder in os.listdir(path) if os.path.isdir(os.path.join(path, folder))]
+        subfolder_path = [os.path.join(path, folder) for folder in subfolder_list]
+      else:
+        subfolder_list = ['Top']
+        subfolder_path = [path]
+
+      n=0
+      for path in subfolder_path:
+        items = os.listdir(path)
+        for names in items:
+          if names.endswith(file_extension):
+            print('Loading file: %s' % (names))
+            data = loadmat(path+'/'+names)
+            if parameter_check == True:
+              self.LTS_check(data, f_range)
+            else:
+              self.assemble(data, time_sort, f_range, location=subfolder_list[n])
+        n+=1
         
   def collect_Gdrive(self, folder_id, f_range=[], time_sort=1, file_extension = '.mat', parameter_check=False, subfolder=False):
     Gdrive=gdrive_handle(folder_id)
