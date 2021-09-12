@@ -104,7 +104,7 @@ class spatial_mapping():
         self.grid[self.grid<vmin]=vmin
       if vmax:
         self.grid[self.grid>vmax]=vmax
-      im = ax1.contourf(self.grid.T, extent=(np.min(x),np.max(x),np.min(y),np.max(y)), levels=contour_levels, vmin=vmin, vmax=vmax)
+      im = ax1.contourf(self.grid.T, extent=(np.min(x),np.max(x),np.min(y),np.max(y)), levels=contour_levels, vmin=vmin, vmax=vmax, extend='both')
       cbar= fig.colorbar(im)
     if plot_type=='scatter' or plot_type=='both':
       if plot_type=='both':
