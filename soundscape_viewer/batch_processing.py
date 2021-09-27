@@ -192,7 +192,7 @@ class batch_processing:
           if file==self.start:
             audio.data[:,1:], ambient=matrix_operation.adaptive_prewhiten(audio.data[:,1:], prewhiten_percent=50, axis=0, eps=self.eps, smooth=self.adaptive_smooth)
           else:
-            if self.continuous_adaptive:
+            if not self.continuous_adaptive:
               ambient=None
             audio.data[:,1:], ambient=matrix_operation.adaptive_prewhiten(audio.data[:,1:], axis=0, noise_init=ambient, eps=self.eps, smooth=self.adaptive_smooth)
           audio.data[np.isnan(audio.data)]=0
