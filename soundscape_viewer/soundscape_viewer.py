@@ -406,7 +406,7 @@ class clustering:
     
     # dimension reduction by PCA
     input_data[np.isnan(input_data)]=0
-    if pca_percent>0:
+    if self.pca_percent>0:
       pca = PCA(n_components=self.pca_percent)
       input_data=pca.fit_transform(input_data)
     
