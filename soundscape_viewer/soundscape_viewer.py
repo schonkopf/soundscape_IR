@@ -409,6 +409,8 @@ class clustering:
     if self.pca_percent>0:
       pca = PCA(n_components=self.pca_percent)
       data=pca.fit_transform(input_data)
+    else:
+      data=input_data
     
     if self.method=='kmeans':
       cluster=self.run_kmeans(data)
