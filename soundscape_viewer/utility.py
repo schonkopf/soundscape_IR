@@ -456,7 +456,7 @@ class matrix_operation:
         return output
 
 class spectrogram_detection:
-  def __init__(self, input, f, threshold, smooth=0, frequency_cut=25, minimum_interval=0, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[], status_print=True):
+  def __init__(self, input, f, threshold, smooth=0, frequency_cut=25, minimum_interval=0, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[],path=[], status_print=True):
       from scipy.ndimage import gaussian_filter
       
       time_vec=input[:,0]
@@ -500,7 +500,7 @@ class spectrogram_detection:
       self.detection=np.vstack((begin, ending)).T
       self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)', 'Maximum SNR (dB)']
       if filename:
-        self.save_txt(filename=filename, folder_id=folder_id, status_print=status_print)
+        self.save_txt(filename=path+filename, folder_id=folder_id, status_print=status_print)
 
   def save_txt(self, filename='Separation.txt',folder_id=[], status_print=True):
       df = pd.DataFrame(self.output, columns = self.header) 
