@@ -283,8 +283,8 @@ class data_organize:
     self.result_header=np.array([])
     print('A new spreadsheet has been created.')
       
-  def time_fill(self, time_vec, data, header):
-    save_result=matrix_operation().gap_fill(time_vec, data, tail=True)
+  def time_fill(self, time_vec, data, header, value_input=0):
+    save_result=matrix_operation().gap_fill(time_vec, data, tail=True, value_input=value_input)
     
     if len(self.final_result)==0:
       self.final_result=save_result
