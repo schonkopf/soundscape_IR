@@ -250,7 +250,7 @@ class matrix_operation:
     def __init__(self, header=[]):
         self.header=header
     
-    def gap_fill(self, time_vec, data, tail=[]):
+    def gap_fill(self, time_vec, data, tail=[], value_input=0):
         # fill the gaps in a time series
         temp = np.argsort(time_vec)
         time_vec=time_vec[temp]
@@ -268,9 +268,9 @@ class matrix_operation:
                                  np.ceil(np.max(time_vec))*24*3600+resolution,resolution)/24/3600
 
         if data.ndim>1:
-            save_result=np.zeros((n_time_vec.size, data.shape[1]+1))
+            save_result=np.zeros((n_time_vec.size, data.shape[1]+1))+value_input
         else:
-            save_result=np.zeros((n_time_vec.size, 2))
+            save_result=np.zeros((n_time_vec.size, 2))+value_input
         #save_result[:] = np.nan
 
         save_result[:,0]=n_time_vec-693960
