@@ -75,7 +75,7 @@ class batch_processing:
     self.additional_basis = additional_basis
     self.run_separation = True
   
-  def params_spectrogram_detection(self, source=1, threshold=20, smooth=3, frequency_cut=20, frequency_count=0, minimum_interval=0, padding=0, folder_id=[],path=[]):
+  def params_spectrogram_detection(self, source=1, threshold=20, smooth=3, frequency_cut=20, frequency_count=0, minimum_interval=0, padding=0, folder_id=[],path='.'):
     if isinstance(source, int):
       self.source = [source]
       if source==0:
