@@ -303,7 +303,7 @@ class data_organize:
     hr_boundary=[np.min(24*(self.final_result[:,0]-np.floor(self.final_result[:,0]))), np.max(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))]
     if display_cluster==0:
       input_data=self.final_result[:,col]
-      input_data[input_data==nan_value]=0
+      input_data[input_data==nan_value]=np.nan
     else:
       input_data=self.final_result[:,col]==display_cluster
       input_data[self.final_result[:,col]==nan_value]=np.nan
