@@ -75,7 +75,7 @@ class batch_processing:
     self.additional_basis = additional_basis
     self.run_separation = True
   
-  def params_spectrogram_detection(self, source=1, threshold=20, smooth=3, frequency_cut=20, frequency_count=0, minimum_interval=0, padding=0, folder_id=[]):
+  def params_spectrogram_detection(self, source=1, threshold=20, smooth=3, frequency_cut=20, frequency_count=0, minimum_interval=0, padding=0, folder_id=[],path='./'):
     if isinstance(source, int):
       self.source = [source]
       if source==0:
@@ -106,6 +106,7 @@ class batch_processing:
     self.smooth = smooth
     self.padding = padding
     self.folder_id = folder_id
+    self.path = path
     self.run_detection=True
   
   def params_lts_maker(self, source=1, time_resolution=[], dateformat='yyyymmdd_HHMMSS', initial=[], year_initial=2000, filename='Separation_LTS.mat', folder_id=[]):
@@ -192,7 +193,7 @@ class batch_processing:
           if file==self.start:
             audio.data[:,1:], ambient=matrix_operation.adaptive_prewhiten(audio.data[:,1:], prewhiten_percent=50, axis=0, eps=self.eps, smooth=self.adaptive_smooth)
           else:
-            if self.continuous_adaptive:
+            if not self.continuous_adaptive:
               ambient=None
             audio.data[:,1:], ambient=matrix_operation.adaptive_prewhiten(audio.data[:,1:], axis=0, noise_init=ambient, eps=self.eps, smooth=self.adaptive_smooth)
           audio.data[np.isnan(audio.data)]=0
@@ -213,12 +214,12 @@ class batch_processing:
         if self.run_detection:
           for n in range(0, len(self.source)):
             filename=self.audioname[file][:-4]+'_S'+str(self.source[n])+'.txt'
-            spectrogram_detection(model.separation[self.source[n]-1], model.f, threshold=self.threshold[n], smooth=self.smooth, frequency_cut=self.frequency_cut[n], frequency_count=self.frequency_count[n], minimum_interval=self.minimum_interval[n], pad_size=self.padding, filename=filename, folder_id = self.folder_id, status_print=False)
+            spectrogram_detection(model.separation[self.source[n]-1], model.f, threshold=self.threshold[n], smooth=self.smooth, frequency_cut=self.frequency_cut[n], frequency_count=self.frequency_count[n], minimum_interval=self.minimum_interval[n], pad_size=self.padding, filename=filename, folder_id = self.folder_id, status_print=False,path=self.path)
             
       if self.run_detection:
         if not self.source:
           filename=self.audioname[file][:-4]+'.txt'
-          spectrogram_detection(audio.data, audio.f, threshold=self.threshold[n], smooth=self.smooth, frequency_cut=self.frequency_cut[n], frequency_count=self.frequency_count[n], minimum_interval=self.minimum_interval[n], pad_size=self.padding, filename=filename, folder_id = self.folder_id, status_print=False)
+          spectrogram_detection(audio.data, audio.f, threshold=self.threshold[n], smooth=self.smooth, frequency_cut=self.frequency_cut[n], frequency_count=self.frequency_count[n], minimum_interval=self.minimum_interval[n], pad_size=self.padding, filename=filename, folder_id = self.folder_id, status_print=False,path=self.path)
 
       if self.run_pulse_analysis:
         if self.run_separation:

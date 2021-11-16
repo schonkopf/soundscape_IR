@@ -100,7 +100,11 @@ class spatial_mapping():
     fig, ax1 = plt.subplots(figsize=(int(np.round(10*(np.max(x)-np.min(x))/(np.max(y)-np.min(y)))), int(np.round(10*(np.max(y)-np.min(y))/(np.max(x)-np.min(x))))))
     if plot_type=='contour' or plot_type=='both':
       self.grid = griddata(np.hstack((x[:,None],y[:,None])), z, (grid_x, grid_y), method='cubic')
-      im = ax1.contourf(self.grid.T, extent=(np.min(x),np.max(x),np.min(y),np.max(y)), levels=contour_levels, vmin=vmin, vmax=vmax)
+      if vmin:
+        self.grid[self.grid<vmin]=vmin
+      if vmax:
+        self.grid[self.grid>vmax]=vmax
+      im = ax1.contourf(self.grid.T, extent=(np.min(x),np.max(x),np.min(y),np.max(y)), levels=contour_levels, vmin=vmin, vmax=vmax, extend='both')
       cbar= fig.colorbar(im)
     if plot_type=='scatter' or plot_type=='both':
       if plot_type=='both':

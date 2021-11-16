@@ -113,16 +113,26 @@ class lts_viewer:
       print('Frequancy resolution:' ,self.f[1]-self.f[0], 'Hz')
       print('---------------------------------------------------------------')
       
-  def collect_folder(self, path='.', f_range=[], time_sort=1, parameter_check=False, file_extension = '.mat'):
-      items = os.listdir(path)
-      for names in items:
-        if names.endswith(file_extension):
-          print('Loading file: %s' % (names))
-          data = loadmat(path+'/'+names)
-          if parameter_check == True:
-            self.LTS_check(data, f_range)
-          else:
-            self.assemble(data, time_sort, f_range)
+  def collect_folder(self, path='.', f_range=[], time_sort=1, parameter_check=False, file_extension = '.mat', subfolder=False):
+      if subfolder:
+        subfolder_list = [folder for folder in os.listdir(path) if os.path.isdir(os.path.join(path, folder))]
+        subfolder_path = [os.path.join(path, folder) for folder in subfolder_list]
+      else:
+        subfolder_list = ['Top']
+        subfolder_path = [path]
+
+      n=0
+      for path in subfolder_path:
+        items = os.listdir(path)
+        for names in items:
+          if names.endswith(file_extension):
+            print('Loading file: %s' % (names))
+            data = loadmat(path+'/'+names)
+            if parameter_check == True:
+              self.LTS_check(data, f_range)
+            else:
+              self.assemble(data, time_sort, f_range, location=subfolder_list[n])
+        n+=1
         
   def collect_Gdrive(self, folder_id, f_range=[], time_sort=1, file_extension = '.mat', parameter_check=False, subfolder=False):
     Gdrive=gdrive_handle(folder_id)
@@ -273,8 +283,8 @@ class data_organize:
     self.result_header=np.array([])
     print('A new spreadsheet has been created.')
       
-  def time_fill(self, time_vec, data, header):
-    save_result=matrix_operation().gap_fill(time_vec, data, tail=True)
+  def time_fill(self, time_vec, data, header, value_input=0):
+    save_result=matrix_operation().gap_fill(time_vec, data, tail=True, value_input=value_input)
     
     if len(self.final_result)==0:
       self.final_result=save_result
@@ -396,11 +406,14 @@ class clustering:
     
     # dimension reduction by PCA
     input_data[np.isnan(input_data)]=0
-    pca = PCA(n_components=self.pca_percent)
-    data=pca.fit_transform(input_data)
+    if self.pca_percent>0:
+      pca = PCA(n_components=self.pca_percent)
+      data=pca.fit_transform(input_data)
+    else:
+      data=input_data
     
     if self.method=='kmeans':
-      cluster=self.run_kmeans(input_data)
+      cluster=self.run_kmeans(data)
 
     # extract scene features by percentiles
     soundscape_scene = np.zeros((np.max(cluster)+1,), dtype=np.object)

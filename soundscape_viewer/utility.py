@@ -250,7 +250,7 @@ class matrix_operation:
     def __init__(self, header=[]):
         self.header=header
     
-    def gap_fill(self, time_vec, data, tail=[]):
+    def gap_fill(self, time_vec, data, tail=[], value_input=0):
         # fill the gaps in a time series
         temp = np.argsort(time_vec)
         time_vec=time_vec[temp]
@@ -268,9 +268,9 @@ class matrix_operation:
                                  np.ceil(np.max(time_vec))*24*3600+resolution,resolution)/24/3600
 
         if data.ndim>1:
-            save_result=np.zeros((n_time_vec.size, data.shape[1]+1))
+            save_result=np.zeros((n_time_vec.size, data.shape[1]+1))+value_input
         else:
-            save_result=np.zeros((n_time_vec.size, 2))
+            save_result=np.zeros((n_time_vec.size, 2))+value_input
         #save_result[:] = np.nan
 
         save_result[:,0]=n_time_vec-693960
@@ -285,7 +285,7 @@ class matrix_operation:
             else:
                 save_result[np.arange(i,i+np.diff(split_point[:,run])+1),1]=output[np.arange(split_point[0,run], split_point[1,run]+1)]
         
-        if np.sum(save_result[-1,1:])==0:
+        if np.mean(save_result[-1,1:])==value_input:
             save_result=np.delete(save_result, -1, 0)
         return save_result
 
@@ -456,7 +456,7 @@ class matrix_operation:
         return output
 
 class spectrogram_detection:
-  def __init__(self, input, f, threshold, smooth=0, frequency_cut=25, minimum_interval=0, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[], status_print=True):
+  def __init__(self, input, f, threshold, smooth=0, frequency_cut=25, minimum_interval=0, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[],path='./', status_print=True):
       from scipy.ndimage import gaussian_filter
       
       time_vec=input[:,0]
@@ -500,7 +500,7 @@ class spectrogram_detection:
       self.detection=np.vstack((begin, ending)).T
       self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)', 'Maximum SNR (dB)']
       if filename:
-        self.save_txt(filename=filename, folder_id=folder_id, status_print=status_print)
+        self.save_txt(filename=path+filename, folder_id=folder_id, status_print=status_print)
 
   def save_txt(self, filename='Separation.txt',folder_id=[], status_print=True):
       df = pd.DataFrame(self.output, columns = self.header) 
