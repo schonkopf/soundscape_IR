@@ -11,8 +11,8 @@ from scipy.io import loadmat
 from scipy.io import savemat
 from scipy.fftpack import fft
 from sklearn.decomposition import non_negative_factorization as NMF
-from sklearn.decomposition.nmf import _initialize_nmf as NMF_init
-from sklearn.decomposition.nmf import _update_coordinate_descent as basis_update
+from sklearn.decomposition._nmf import _initialize_nmf as NMF_init
+from sklearn.decomposition._nmf import _update_coordinate_descent as basis_update
 from sklearn.utils import check_array
 from .utility import save_parameters
 from .utility import gdrive_handle
