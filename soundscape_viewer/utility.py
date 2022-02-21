@@ -521,7 +521,8 @@ class spectrogram_detection:
     
 class performance_evaluation:
   def __init__(self, label_filename):
-    self.annotations = pd.read_table(label_filename,index_col=0)
+    if label_filename:
+        self.annotations = pd.read_table(label_filename,index_col=0)
 
   def spectrogram(self, ori_spec, test_spec, fpr_control=0.05, plot=True):
     from sklearn.metrics import roc_curve, auc
