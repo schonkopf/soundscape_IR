@@ -45,7 +45,8 @@ class batch_processing:
     print('Identified ', len(audioname), 'files')
     return Gdrive, link, audioname
 
-  def params_spectrogram(self, fft_size=512, environment='wat', time_resolution=None, window_overlap=0, f_range=[], prewhiten_percent=0, padding=0, folder_combine=False, mel_comp=0, sensitivity=0):
+  def params_spectrogram(self, offset_read=0, fft_size=512, environment='wat', time_resolution=None, window_overlap=0, f_range=[], prewhiten_percent=0, padding=0, folder_combine=False, mel_comp=0, sensitivity=0):
+    self.offset_read = offset_read
     self.fft_size = fft_size 
     self.time_resolution = time_resolution
     self.window_overlap = window_overlap
@@ -187,7 +188,7 @@ class batch_processing:
           self.f=np.array(audio.f)
           self.time_notation=time_notation
       else:
-        audio = audio_visualization(self.audioname[file], path, FFT_size = self.fft_size, time_resolution=self.time_resolution, window_overlap=self.window_overlap, f_range = self.f_range, sensitivity=self.sensitivity,
+        audio = audio_visualization(self.audioname[file], path, offset_read = self.offset_read, FFT_size = self.fft_size, time_resolution=self.time_resolution, window_overlap=self.window_overlap, f_range = self.f_range, sensitivity=self.sensitivity,
                                   environment=self.environment, plot_type=None, prewhiten_percent=self.prewhiten_percent, mel_comp=self.mel_comp)
         if self.run_adaptive_prewhiten:
           if file==self.start:
