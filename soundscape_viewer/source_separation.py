@@ -332,22 +332,26 @@ class supervised_nmf:
 
     # Prepare W
     if self.W.shape[0]>len(self.f):
-      W=np.vstack((np.zeros((len(self.f),len(W_list))), self.W[:,W_list])).T.reshape(1,-1)
+      W=np.vstack((np.full((len(self.f),len(W_list)),np.nan), self.W[:,W_list])).T.reshape(1,-1)
       W=W.reshape((-1,len(self.f))).T
     elif self.W.shape[0]==len(self.f):
       W=np.array(self.W[:,W_list])
         
     # Plot
-    x_lim=np.array([self.time_vec[H_list[0]], self.time_vec[H_list[-1]]])
+    x_lim=[self.time_vec[H_list[0]][0], self.time_vec[H_list[-1]][0]]
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     if plot_type=='W':
-      im = ax.imshow(W, origin='lower',  aspect='auto', cmap=cm.jet,
+      im = ax.imshow(W[:,1:], origin='lower',  aspect='auto', cmap=cm.jet,
                       extent=[0, len(W_list), self.f[0], self.f[-1]], interpolation='none')
       ax.set_ylabel('Frequency')
       ax.set_xlabel('Basis')
       cbar = fig.colorbar(im, ax=ax)
       cbar.set_label('Amplitude')
-
+      if source:
+        ax.set_title('Basis functions of source %s' % source)
+      else:
+        ax.set_title('Basis functions')
+      
     elif plot_type=='H':
       im = ax.imshow(self.H[W_list,:][:,H_list+int(self.feature_length/2)], origin='lower',  aspect='auto', cmap=cm.jet,
                        extent=[x_lim[0], x_lim[1], 0, len(W_list)], interpolation='none')
@@ -355,6 +359,10 @@ class supervised_nmf:
       ax.set_xlabel('Time')
       cbar = fig.colorbar(im, ax=ax)
       cbar.set_label('Amplitude')
+      if source:
+        ax.set_title('Temporal activation of source %s' % source)
+      else:
+        ax.set_title('Temporal activation')
       
     elif plot_type=='reconstruction':
       im = ax.imshow(self.reconstruct(source=source)[:,H_list], origin='lower',  aspect='auto', cmap=cm.jet,
@@ -363,6 +371,10 @@ class supervised_nmf:
       ax.set_xlabel('Time')
       cbar = fig.colorbar(im, ax=ax)
       cbar.set_label('Amplitude')
+      if source:
+        ax.set_title('Reconstruction of source %s' % source)
+      else:
+        ax.set_title('Reconstruction')
 
     elif plot_type=='separation':
       im = ax.imshow(self.separation[source-1][H_list,:][:,1:].T, origin='lower',  aspect='auto', cmap=cm.jet,
@@ -371,8 +383,12 @@ class supervised_nmf:
       ax.set_xlabel('Time')
       cbar = fig.colorbar(im, ax=ax)
       cbar.set_label('Amplitude')
+      if source:
+        ax.set_title('Separation of source %s' % source)
+      else:
+        ax.set_title('Separation')
 
-  def learn_feature(self, input_data, f, alpha=1, l1_ratio=1, beta=2, method='NMF', show_result=True):   
+  def learn_feature(self, input_data, f, alpha=1, l1_ratio=1, beta=2, method='NMF', show_result=False):   
     self.f=f
     self.method=method
     self.time_vec=input_data[:,0:1]
