@@ -462,7 +462,7 @@ class matrix_operation:
         return output
 
 class spectrogram_detection:
-  def __init__(self, input, f, threshold, smooth=0, minimum_interval=0, maximum_duration=None, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[],path='./', status_print=True, show_result = True):
+  def __init__(self, input, f, threshold, smooth=0, minimum_interval=0, minimum_duration = None, maximum_duration=None, pad_size=0, filename='Detection.txt', folder_id=[], path='./', status_print=True, show_result = True):
       from scipy.ndimage import gaussian_filter
       
       time_vec=input[:,0]
@@ -474,7 +474,7 @@ class spectrogram_detection:
       elif smooth==0:
         level_2d = data>threshold
 
-      level=level_2d.astype(int).sum(axis = 1)>frequency_count
+      level=level_2d.astype(int).sum(axis = 1)>0
       begin=time_vec[np.where(np.diff(level.astype(int),1)==1)[0]]
       ending=time_vec[np.where(np.diff(level.astype(int),1)==-1)[0]+1]
 
@@ -491,6 +491,12 @@ class spectrogram_detection:
             
       if maximum_duration:
         keep_list=np.where((ending-begin)<=maximum_duration)[0]
+        if len(remove_list)>0:
+          begin=begin[keep_list]
+          ending=ending[keep_list]
+
+      if minimum_duration:
+        keep_list=np.where((ending-begin)>=minimum_duration)[0]
         if len(remove_list)>0:
           begin=begin[keep_list]
           ending=ending[keep_list]
@@ -522,7 +528,7 @@ class spectrogram_detection:
         cbar.set_label('Amplitude')
 
         for n in range(len(begin)):
-          rect = patches.Rectangle((begin[n], min_F[n]), ending[n]-begin[n], max_F[n]-min_F[n], linewidth=1, edgecolor='r', facecolor='none')
+          rect = patches.Rectangle((begin[n], min_F[n]), ending[n]-begin[n], max_F[n]-min_F[n], linewidth=1.5, edgecolor='r', facecolor='none')
           ax.add_patch(rect)
 
   def save_txt(self, filename='Separation.txt',folder_id=[], status_print=True):
