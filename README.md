@@ -3,7 +3,7 @@
 </div></br>
 
 **soundscape_IR** is a python-based toolbox of soundscape information retrieval, aiming to assist in the analysis of a large amount of audio data. 
-The toolbox has two primary modules: (1) visualization of long-duration recordings and (2) audio source separation.
+The toolbox has two primary modules: (1) visualization of long-duration recordings (based on the MATLAB package Soundscape Viewer) and (2) audio source separation.
 
 [![DOI](https://img.shields.io/badge/DOI-10.1038%2Fs41598--017--04790--7-blue)](
 https://doi.org/10.1038/s41598-017-04790-7)
@@ -122,18 +122,22 @@ sp=spectrogram_detection(model.separation[source_num-1], model.f, threshold=5.5,
 
 <details open>
 <summary>More tutorials</summary>
-
-- [Demo of soundscape_IR - Case study I](https://github.com/yijensun/soundscape_IR/blob/master/docs/tutorials/Demo_of_soundscape_IR_Case_study_I.ipynb)
-- [Demo of soundscape_IR - Case study II](https://github.com/yijensun/soundscape_IR/blob/master/docs/tutorials/Demo_of_soundscape_IR_Case_study_II.ipynb)
+- [Demo of Soundscape Viewer - Investigating soundscape dynamics via visualization of long-duration recordings, blind source separation, and clustering](https://github.com/schonkopf/soundscape_IR/blob/master/docs/tutorials/Demo_of_soundscape_information_retrieval.ipynb)
+- [Demo of audio source separation - Detecting deer calls from tropical forest soundscapes](https://github.com/schonkopf/soundscape_IR/blob/master/docs/tutorials/Demo_of_soundscape_IR_Case_study_I.ipynb)
+- [Demo of audio source separation - Learning the diversity of underwater sounds from subtropical estuary soundscapes](https://github.com/schonkopf/soundscape_IR/blob/master/docs/tutorials/Demo_of_soundscape_IR_Case_study_II.ipynb)
 </details>
 
+## Currently ongoing developments
+- [ ] Soundscape spatial analysis
+- [ ] Extraction of inter-pulse intervals
+- [ ] Plotly-based interactive plots
+    
 ## Future works
-- [ ] GPU accelaration (under development)
+- [ ] GPU accelaration
 
 ## Bugs report and suggestions 
 If you encounter any bug or issue, please contact Tzu-Hao Lin via schonkopf@gmail.com. Suggestions are also appreciated!
 
 ## About the team
-[Marine Ecoacoustics and Informatics Lab](https://meil.biodiv.tw/?fbclid=IwAR00dofeH1kIde9E8MjOTaBbHaZH-TesL4APRf8qqlicCubURW8fbgtPWDU)
+[Marine Ecoacoustics and Informatics Lab](https://meil.biodiv.tw/home)
 [<img alt="fb" width="25px" src="./docs/logos/logo_fb.png" />](https://www.facebook.com/meil.brcas)
-[<img alt="yt" width="25px" src="./docs/logos/logo_yt.png" />](https://www.youtube.com/channel/UC49FN6MoqrVr3UPpqEOhfEw)</br>
