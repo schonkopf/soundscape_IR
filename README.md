@@ -122,9 +122,9 @@ sp=spectrogram_detection(model.separation[source_num-1], model.f, threshold=5.5,
 
 <details open>
 <summary>More tutorials</summary>
-- [Demo of Soundscape Viewer](https://github.com/schonkopf/soundscape_IR/blob/master/docs/tutorials/Demo_of_soundscape_information_retrieval.ipynb)
-- [Demo of audio source separation - Detecting deer calls from tropical forest soundscapes](https://github.com/schonkopf/soundscape_IR/blob/master/docs/tutorials/Demo_of_soundscape_IR_Case_study_I.ipynb)
-- [Demo of audio source separation - Learning the diversity of underwater sounds from subtropical estuary soundscapes](https://github.com/schonkopf/soundscape_IR/blob/master/docs/tutorials/Demo_of_soundscape_IR_Case_study_II.ipynb)
+    - [Demo of Soundscape Viewer](https://github.com/schonkopf/soundscape_IR/blob/master/docs/tutorials/Demo_of_soundscape_information_retrieval.ipynb)
+    - [Demo of audio source separation - Detecting deer calls from tropical forest soundscapes](https://github.com/schonkopf/soundscape_IR/blob/master/docs/tutorials/Demo_of_soundscape_IR_Case_study_I.ipynb)
+    - [Demo of audio source separation - Learning the diversity of underwater sounds from subtropical estuary soundscapes](https://github.com/schonkopf/soundscape_IR/blob/master/docs/tutorials/Demo_of_soundscape_IR_Case_study_II.ipynb)
 </details>
 
 ## Currently ongoing developments
