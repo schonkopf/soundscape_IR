@@ -11,6 +11,7 @@ import scipy.signal
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import os
+import matplotlib.patches as patches
 
 class gdrive_handle:
     def __init__(self, folder_id, status_print=True):
@@ -98,7 +99,7 @@ class save_parameters:
         self.channel=channel
 
 class audio_visualization:
-    def __init__(self, filename=None,  path=None, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0, annotation=None, padding=0):
+    def __init__(self, filename=None,  path=None, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Spectrogram', vmin=None, vmax=None, prewhiten_percent=0, mel_comp=0, annotation=None, padding=0):
         if not path:
           path=os.getcwd()
         
@@ -109,6 +110,7 @@ class audio_visualization:
           self.sf=sf
           self.FFT_size=FFT_size
           self.overlap=window_overlap
+          self.filename = filename
 
           # load audio data  
           if annotation:
@@ -116,7 +118,7 @@ class audio_visualization:
             idx_st = np.where(df.columns.values == 'Begin Time (s)')[0][0]
             idx_et = np.where(df.columns.values == 'End Time (s)')[0][0]
             for i in range(len(df)):
-              x, _ = librosa.load(filename, sr=sf, offset=df.iloc[i,idx_st]-padding, duration=df.iloc[i,idx_et]-df.iloc[i,idx_st]+padding*2)
+              x, _ = librosa.load(path+'/'+filename, sr=sf, offset=df.iloc[i,idx_st]-padding, duration=df.iloc[i,idx_et]-df.iloc[i,idx_st]+padding*2)
               self.run(x, sf, df.iloc[i,idx_st]-padding, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, None, vmin, vmax, prewhiten_percent, mel_comp)
               if i==0:
                 spec = np.array(self.data)
@@ -135,6 +137,8 @@ class audio_visualization:
                           extent=[self.data[0,0], self.data[-1,0], self.f[0], self.f[-1]], interpolation='none')
               ax2.set_ylabel('Frequency')
               ax2.set_xlabel('Time')
+              ax2.set_title('Concatenated spectrogram of %s' % self.filename)
+                
               if(mel_comp > 0):
                 ymin, ymax = ax2.get_ylim()
                 N=6
@@ -170,6 +174,7 @@ class audio_visualization:
           ax1.set_ylabel('Amplitude')
           ax1.set_xlabel('Time')
           ax1.set_xlim(offset_read, offset_read+len(x)/sf)
+          ax1.set_title('Waveform of %s' % self.filename)
         
         # run FFT and make a log-magnitude spectrogram
         if time_resolution:
@@ -226,6 +231,7 @@ class audio_visualization:
                        extent=[t[0], t[-1], f[0], f[-1]], interpolation='none')
           ax2.set_ylabel('Frequency')
           ax2.set_xlabel('Time')
+          ax2.set_title('Spectrogram of %s' % self.filename)
           if(mel_comp > 0):
               ymin, ymax = ax2.get_ylim()
               N=6
@@ -456,7 +462,7 @@ class matrix_operation:
         return output
 
 class spectrogram_detection:
-  def __init__(self, input, f, threshold, smooth=0, frequency_cut=25, minimum_interval=0, maximum_duration=None, frequency_count=0, pad_size=0, filename='Detection.txt',folder_id=[],path='./', status_print=True):
+  def __init__(self, input, f, threshold, smooth=0, minimum_interval=0, minimum_duration = None, maximum_duration=None, pad_size=0, filename='Detection.txt', folder_id=[], path='./', status_print=True, show_result = True):
       from scipy.ndimage import gaussian_filter
       
       time_vec=input[:,0]
@@ -464,10 +470,11 @@ class spectrogram_detection:
       begin=np.array([])
 
       if smooth>0:
-        level = gaussian_filter(data, smooth)>threshold
+        level_2d = gaussian_filter(data, smooth)>threshold
       elif smooth==0:
-        level = data>threshold
-      level=level.astype(int).sum(axis = 1)>frequency_count
+        level_2d = data>threshold
+
+      level=level_2d.astype(int).sum(axis = 1)>0
       begin=time_vec[np.where(np.diff(level.astype(int),1)==1)[0]]
       ending=time_vec[np.where(np.diff(level.astype(int),1)==-1)[0]+1]
 
@@ -487,6 +494,12 @@ class spectrogram_detection:
         if len(remove_list)>0:
           begin=begin[keep_list]
           ending=ending[keep_list]
+
+      if minimum_duration:
+        keep_list=np.where((ending-begin)>=minimum_duration)[0]
+        if len(remove_list)>0:
+          begin=begin[keep_list]
+          ending=ending[keep_list]
       
       if len(begin)>0:
         begin=begin-pad_size
@@ -494,19 +507,29 @@ class spectrogram_detection:
 
       min_F=np.array([])
       max_F=np.array([])
-      snr=np.array([])
-      if frequency_cut:
-        for n in range(len(begin)):
-          psd=np.mean(data[(time_vec>=begin[n])*(time_vec<=ending[n]),:], axis=0)
-          f_temp=f[psd>(np.max(psd)-frequency_cut)]
-          min_F=np.append(min_F, np.min(f_temp))
-          max_F=np.append(max_F, np.max(f_temp))
-          snr=np.append(snr, np.max(psd))
-      self.output=np.vstack([np.arange(len(begin))+1, np.repeat('Spectrogram',len(begin)), np.repeat(1,len(begin)), begin, ending, min_F, max_F, snr]).T
+      for n in range(len(begin)):
+        idx = (time_vec >= begin[n]) & (time_vec < ending[n])
+        f_idx = np.where(np.sum(level_2d[idx,:],axis = 0) > 0)[0]
+        min_F = np.append(min_F, f[f_idx[0]])
+        max_F = np.append(max_F, f[f_idx[-1]])
+
+      self.output=np.vstack([np.arange(len(begin))+1, np.repeat('Spectrogram',len(begin)), np.repeat(1,len(begin)), begin, ending, min_F, max_F]).T
       self.detection=np.vstack((begin, ending)).T
-      self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)', 'Maximum SNR (dB)']
+      self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)']
       if filename:
         self.save_txt(filename=path+filename, folder_id=folder_id, status_print=status_print)
+      if show_result:
+        x_lim=[time_vec[0],time_vec[-1]]
+        fig, ax = plt.subplots(figsize=(14, 6))
+        im = ax.imshow(data.T, origin='lower',  aspect='auto', cmap=cm.jet, extent=[x_lim[0], x_lim[1], f[0], f[-1]], interpolation='none')
+        ax.set_ylabel('Frequency')
+        ax.set_xlabel('Time')
+        cbar = fig.colorbar(im, ax=ax)
+        cbar.set_label('Amplitude')
+
+        for n in range(len(begin)):
+          rect = patches.Rectangle((begin[n], min_F[n]), ending[n]-begin[n], max_F[n]-min_F[n], linewidth=1.5, edgecolor='r', facecolor='none')
+          ax.add_patch(rect)
 
   def save_txt(self, filename='Separation.txt',folder_id=[], status_print=True):
       df = pd.DataFrame(self.output, columns = self.header) 
