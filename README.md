@@ -1,9 +1,9 @@
 <div align="center">
-    <img src="./docs/images/logo.png" alt="logo" width="500"/>
+    <img src="./docs/images/logo_v2.png" alt="logo" width="500"/>
 </div>
 
 **soundscape_IR** is a python-based toolbox of soundscape information retrieval, aiming to assist in the analysis of soundscape recordings. 
-The toolbox is primarily desgined for: (1) visualization of soundscape dynamics (based on the MATLAB package Soundscape Viewer) and (2) audio source separation.
+The toolbox is primarily desgined for: (1) visualization of soundscape dynamics (based on the MATLAB package [Soundscape Viewer](https://github.com/schonkopf/soundscape-viewer)) and (2) audio source separation.
 
 ## Installation
 Dependencies:
