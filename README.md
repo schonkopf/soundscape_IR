@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="./docs/images/logo_v4.png" alt="logo" width="500"/>
+    <img src="./docs/images/logo_v5.png" alt="logo" width="500"/>
 </div>
 
 **soundscape_IR** is a python-based toolbox of soundscape information retrieval, aiming to assist in the analysis of soundscape recordings. 
