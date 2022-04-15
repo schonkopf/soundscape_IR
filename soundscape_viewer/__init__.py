@@ -8,7 +8,7 @@ from .soundscape_viewer import lts_viewer
 from .soundscape_viewer import data_organize
 from .soundscape_viewer import clustering
 from .source_separation import pcnmf
-from .source_separation import supervised_nmf
+from .source_separation import source_separation
 from .utility import save_parameters
 from .utility import gdrive_handle
 from .utility import matrix_operation
