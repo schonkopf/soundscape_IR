@@ -1,9 +1,9 @@
 <div align="center">
-    <img src="./docs/logos/logo.jpg" alt="drawing" width="300"/>
-</div></br>
+    <img src="./docs/images/logo_v5.png" alt="logo" width="500"/>
+</div>
 
 **soundscape_IR** is a python-based toolbox of soundscape information retrieval, aiming to assist in the analysis of soundscape recordings. 
-The toolbox is primarily desgined for: (1) visualization of soundscape dynamics (based on the MATLAB package Soundscape Viewer) and (2) audio source separation.
+The toolbox is primarily desgined for: (1) visualization of soundscape dynamics (based on the MATLAB package [Soundscape Viewer](https://github.com/schonkopf/soundscape-viewer)) and (2) audio source separation.
 
 ## Installation
 Dependencies:
@@ -135,8 +135,8 @@ sp=spectrogram_detection(model.separation[source_num-1], model.f, threshold=5.5,
 - [ ] GPU accelaration
 
 ## Bugs report and suggestions 
-If you encounter any bug or issue, please contact Tzu-Hao Lin via schonkopf@gmail.com. Suggestions are also appreciated!
+If you encounter any bug or issue, please contact Dr. Tzu-Hao Lin via schonkopf@gmail.com. Suggestions are also appreciated!
 
 ## About the team
-[Marine Ecoacoustics and Informatics Lab](https://meil.biodiv.tw/home)
-[<img alt="fb" width="25px" src="./docs/logos/logo_fb.png" />](https://www.facebook.com/meil.brcas)
+**Marine Ecoacoustics and Informatics Lab (MEIL)**</br>
+Led by Dr. Tzu-Hao Lin, the MEIL investigates the applications of ecological informatics in biodiversity monitoring and conservation management. If you're interested in our work, please check our [website](https://meil.biodiv.tw/home) or follow us on [facebook](https://www.facebook.com/meil.brcas).
