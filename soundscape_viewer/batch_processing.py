@@ -201,7 +201,7 @@ class batch_processing:
       
       if self.run_separation:
         model = copy.deepcopy(model_backup)
-        model.supervised_separation(audio.data, audio.f, iter = self.iter, adaptive_alpha = self.adaptive_alpha, additional_basis = self.additional_basis)
+        model.prediction(audio.data, audio.f, iter = self.iter, adaptive_alpha = self.adaptive_alpha, additional_basis = self.additional_basis)
         if self.run_lts:
           if file==self.start:
             lts = lts_maker(time_resolution=self.lts_time_resolution)
