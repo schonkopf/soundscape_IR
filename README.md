@@ -49,7 +49,7 @@ sound_train = audio_visualization(filename='case1_train.wav', path='./data/wav/'
 <details open>
 <summary>Model training</summary>
     
-After preparing the training spectrgram, we can train the source separation model with ```supervised_nmf```. NMF learns a set of basis functions to reconstruct the training spectrogram. In **soundscape_IR**, we can apply PC-NMF to separate the basis functions into two groups according to their source-specific periodicity. In this example, one group of basis funcitons is associated with deer call (mainly < 4 kHz) and another group is associated with noise (mainly > 3.5 kHz). Save the model for further applications.
+After preparing the training spectrgram, we can train a model with ```source_separation```. NMF learns a set of basis functions to reconstruct the training spectrogram. In **soundscape_IR**, we can apply PC-NMF to separate the basis functions into two groups according to their source-specific periodicity. In this example, one group of basis funcitons is associated with deer call (mainly < 4 kHz) and another group is associated with noise (mainly > 3.5 kHz). Save the model for further applications.
 
 ```python
 from soundscape_IR.soundscape_viewer import source_separation
