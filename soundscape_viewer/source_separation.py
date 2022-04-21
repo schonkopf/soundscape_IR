@@ -209,7 +209,7 @@ class pcnmf:
       ax1.set_ylabel('Frequency')
       ax1.set_xlabel('Basis')
       cbar1 = fig.colorbar(im, ax=ax1)
-      cbar1.set_label('Relative amplitude')
+      #cbar1.set_label('Relative amplitude')
 
       im2 = ax2.imshow(data[:,1:].T,
                       origin='lower',  aspect='auto', cmap=cm.jet,
@@ -219,7 +219,7 @@ class pcnmf:
       ax2.set_ylabel('Frequency')
       ax2.set_xlabel('Samples')
       cbar2 = fig.colorbar(im2, ax=ax2)
-      cbar2.set_label('Relative amplitude')
+      #cbar2.set_label('Relative amplitude')
     else:
       print('Higher than the number of separated sources, choose a smaller number.')
       
@@ -346,7 +346,7 @@ class source_separation:
       ax.set_ylabel('Frequency')
       ax.set_xlabel('Basis')
       cbar = fig.colorbar(im, ax=ax)
-      cbar.set_label('Amplitude')
+      #cbar.set_label('Amplitude')
       if source:
         ax.set_title('Basis functions of source %s' % source)
       else:
@@ -358,7 +358,7 @@ class source_separation:
       ax.set_ylabel('Basis')
       ax.set_xlabel('Time')
       cbar = fig.colorbar(im, ax=ax)
-      cbar.set_label('Amplitude')
+      #cbar.set_label('Amplitude')
       if source:
         ax.set_title('Temporal activation of source %s' % source)
       else:
@@ -370,7 +370,7 @@ class source_separation:
       ax.set_ylabel('Frequency')
       ax.set_xlabel('Time')
       cbar = fig.colorbar(im, ax=ax)
-      cbar.set_label('Amplitude')
+      #cbar.set_label('Amplitude')
       if source:
         ax.set_title('Reconstruction of source %s' % source)
       else:
@@ -382,7 +382,7 @@ class source_separation:
       ax.set_ylabel('Frequency')
       ax.set_xlabel('Time')
       cbar = fig.colorbar(im, ax=ax)
-      cbar.set_label('Amplitude')
+      #cbar.set_label('Amplitude')
       if source:
         ax.set_title('Separation of source %s' % source)
       else:
