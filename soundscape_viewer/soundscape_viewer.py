@@ -167,7 +167,7 @@ class lts_viewer:
     ax1.set_xlabel('Date')
     ax1.xaxis_date()
     cbar1 = fig.colorbar(im, ax=ax1)
-    cbar1.set_label('PSD')
+    #cbar1.set_label('PSD')
 
     temp,f=self.input_selection(var_name='mean')
     if gap_fill:
@@ -183,7 +183,7 @@ class lts_viewer:
     ax2.set_xlabel('Date')
     ax2.xaxis_date()
     cbar2 = fig.colorbar(im2, ax=ax2)
-    cbar2.set_label('PSD')
+    #cbar2.set_label('PSD')
 
     temp,f=self.input_selection(var_name='diff')
     if gap_fill:
@@ -200,7 +200,7 @@ class lts_viewer:
     ax3.set_xlabel('Date')
     ax3.xaxis_date()
     cbar3 = fig.colorbar(im3, ax=ax3)
-    cbar3.set_label('SNR')
+    #cbar3.set_label('SNR')
 
   def input_selection(self, var_name='median', begin_date=[], end_date=[], f_range=[], prewhiten_percent=0, threshold=0, annotation=None, padding=0, annotation_target=None, gap_fill=False):
     if var_name=='median':

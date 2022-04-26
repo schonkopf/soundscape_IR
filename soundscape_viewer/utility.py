@@ -147,7 +147,7 @@ class audio_visualization:
                 yticks = self.f[idx]+0.5
                 ax2.set_yticklabels(yticks.astype(int))
               cbar = fig.colorbar(im, ax=ax2)
-              cbar.set_label('PSD')
+              #cbar.set_label('PSD')
             
           else:
             x, _ = librosa.load(path+'/'+filename, sr=sf, offset=offset_read, duration=duration_read)
@@ -240,7 +240,7 @@ class audio_visualization:
               yticks = f[idx]+0.5
               ax2.set_yticklabels(yticks.astype(int))
           cbar = fig.colorbar(im, ax=ax2)
-          cbar.set_label('PSD')
+          #cbar.set_label('PSD')
 
         self.data=np.hstack((t[:,None],data.T))
         self.ambient=ambient
@@ -391,7 +391,7 @@ class matrix_operation:
         if title:
             plt.title(title)
         cbar = fig.colorbar(im, ax=ax)
-        cbar.set_label('Amplitude')
+        #cbar.set_label('Amplitude')
         
         
     def prewhiten(input_data, prewhiten_percent, axis):
@@ -525,7 +525,7 @@ class spectrogram_detection:
         ax.set_ylabel('Frequency')
         ax.set_xlabel('Time')
         cbar = fig.colorbar(im, ax=ax)
-        cbar.set_label('Amplitude')
+        #cbar.set_label('Amplitude')
 
         for n in range(len(begin)):
           rect = patches.Rectangle((begin[n], min_F[n]), ending[n]-begin[n], max_F[n]-min_F[n], linewidth=1.5, edgecolor='r', facecolor='none')
