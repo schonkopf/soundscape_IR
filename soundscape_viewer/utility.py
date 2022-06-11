@@ -599,9 +599,10 @@ class pulse_interval:
     if standardization==True:
       data=data/np.max(np.abs(data))
     PI=np.arange(-1*data.shape[0], data.shape[0])
-    time_resolution=time_vec[1]-time_vec[0]
     if millisec:
-      PI=np.round(100000*PI*time_resolution)/100
+      time_vec=np.round(time_vec*1000000)/1000
+      time_resolution=time_vec[1]-time_vec[0]
+      PI=np.round(100*PI*time_resolution)/100
 
     PI_list=(PI>=min(interval_range))*(PI<=max(interval_range))
     PI_list=np.where(PI_list)[0]
