@@ -236,13 +236,13 @@ class pcnmf:
       Gdrive.upload(filename)
       
   def model_check(self, model):
-    print('Model parameters check')
+    print('Model parameters:')
     intf=model['save_nmf']['f'].item()[0][1]-model['save_nmf']['f'].item()[0][0]
-    print('Minima and maxima frequancy bin:', min(model['save_nmf']['f'].item()[0]), 'Hz and', max(model['save_nmf']['f'].item()[0]), 'Hz')
-    print('Frequancy resolution:' ,intf, 'Hz')
+    print('Minimum and maximum frequency:', min(model['save_nmf']['f'].item()[0]), 'Hz and', max(model['save_nmf']['f'].item()[0]), 'Hz')
+    print('Frequency resolution:' ,intf, 'Hz')
     print('Feature length:' ,self.feature_length)
-    print('Number of basis:' ,self.basis_num)
-    print('Number of source:' ,self.source_num)
+    print('Number of basis functions:' ,self.basis_num)
+    print('Number of sources:' ,self.source_num)
     if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       print('Sparseness:', self.sparseness)
 
