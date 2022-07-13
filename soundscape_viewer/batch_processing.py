@@ -17,7 +17,7 @@ class batch_processing:
     file_list = os.listdir(path)
     self.link = path
     self.cloud = 0   
-    self.audioname=np.array([], dtype=np.object)
+    self.audioname=np.array([], dtype=object)
     for filename in file_list:
         if filename.endswith(file_extension):
             self.audioname = np.append(self.audioname, filename)
@@ -36,8 +36,8 @@ class batch_processing:
     Gdrive=gdrive_handle(folder_id)
     Gdrive.list_query(file_extension=file_extension)
     self.cloud=2
-    link=np.array([], dtype=np.object)
-    audioname=np.array([], dtype=np.object)
+    link=np.array([], dtype=object)
+    audioname=np.array([], dtype=object)
     #self.Gdrive=Gdrive
     for file in Gdrive.file_list:
       link=np.append(link, file['alternateLink'])
@@ -76,7 +76,7 @@ class batch_processing:
     self.additional_basis = additional_basis
     self.run_separation = True
   
-  def params_spectrogram_detection(self, source=1, threshold=20, smooth=3, frequency_cut=20, frequency_count=0, minimum_interval=0, padding=0, folder_id=[],path='./'):
+  def params_spectrogram_detection(self, source=1, threshold=20, smooth=3, minimum_interval=0, padding=0, folder_id=[], path='./'):
     if isinstance(source, int):
       self.source = [source]
       if source==0:
@@ -88,16 +88,6 @@ class batch_processing:
         self.threshold = [threshold]*len(self.source)
     else:
       self.threshold = threshold
-    
-    if isinstance(frequency_cut, int) or isinstance(frequency_cut, float):
-      self.frequency_cut = [frequency_cut]*len(self.source)
-    else:
-      self.frequency_cut = frequency_cut
-
-    if isinstance(frequency_count, int) or isinstance(frequency_count, float):
-      self.frequency_count = [frequency_count]*len(self.source)
-    else:
-      self.frequency_count = frequency_count
 
     if isinstance(minimum_interval, int) or isinstance(minimum_interval, float):
       self.minimum_interval = [minimum_interval]*len(self.source)
@@ -215,12 +205,12 @@ class batch_processing:
         if self.run_detection:
           for n in range(0, len(self.source)):
             filename=self.audioname[file][:-4]+'_S'+str(self.source[n])+'.txt'
-            spectrogram_detection(model.separation[self.source[n]-1], model.f, threshold=self.threshold[n], smooth=self.smooth, frequency_cut=self.frequency_cut[n], frequency_count=self.frequency_count[n], minimum_interval=self.minimum_interval[n], pad_size=self.padding, filename=filename, folder_id = self.folder_id, status_print=False,path=self.path)
+            spectrogram_detection(model.separation[self.source[n]-1], model.f, threshold=self.threshold[n], smooth=self.smooth, minimum_interval=self.minimum_interval[n], pad_size=self.padding, filename=filename, folder_id=self.folder_id, status_print=False, show_result=False, path=self.path)
             
       if self.run_detection:
         if not self.source:
           filename=self.audioname[file][:-4]+'.txt'
-          spectrogram_detection(audio.data, audio.f, threshold=self.threshold[n], smooth=self.smooth, frequency_cut=self.frequency_cut[n], frequency_count=self.frequency_count[n], minimum_interval=self.minimum_interval[n], pad_size=self.padding, filename=filename, folder_id = self.folder_id, status_print=False,path=self.path)
+          spectrogram_detection(audio.data, audio.f, threshold=self.threshold[n], smooth=self.smooth, minimum_interval=self.minimum_interval[n], pad_size=self.padding, filename=filename, folder_id=self.folder_id, status_print=False, show_result=False, path=self.path)
 
       if self.run_pulse_analysis:
         if self.run_separation:
