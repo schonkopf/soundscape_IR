@@ -507,15 +507,17 @@ class spectrogram_detection:
 
       min_F=np.array([])
       max_F=np.array([])
+      snr=np.array([])
       for n in range(len(begin)):
         idx = (time_vec >= begin[n]) & (time_vec < ending[n])
         f_idx = np.where(np.sum(level_2d[idx,:],axis = 0) > 0)[0]
         min_F = np.append(min_F, f[f_idx[0]])
         max_F = np.append(max_F, f[f_idx[-1]])
-
-      self.output=np.vstack([np.arange(len(begin))+1, np.repeat('Spectrogram',len(begin)), np.repeat(1,len(begin)), begin, ending, min_F, max_F]).T
+        psd=np.mean(data[idx,:], axis=0)
+        snr=np.append(snr, np.max(psd))
+      self.output=np.vstack([np.arange(len(begin))+1, np.repeat('Spectrogram',len(begin)), np.repeat(1,len(begin)), begin, ending, min_F, max_F, snr]).T
       self.detection=np.vstack((begin, ending)).T
-      self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)']
+      self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)', 'Maximum SNR (dB)']
       if filename:
         self.save_txt(filename=path+filename, folder_id=folder_id, status_print=status_print)
       if show_result:
