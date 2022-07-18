@@ -177,27 +177,13 @@ class audio_visualization:
           ax1.set_title('Waveform of %s' % self.filename)
         
         # run FFT and make a log-magnitude spectrogram
+        f,t,P = scipy.signal.stft(x, fs=sf, window='hann', nperseg=FFT_size, noverlap=int(window_overlap*FFT_size), nfft=FFT_size, detrend='constant', boundary=None, padded=False)
         if time_resolution:
-          if FFT_size>time_resolution*sf:
-            samples=int(time_resolution*sf/2)
-            print('FFT_size has been changed to '+str(samples))
-          else:
-            samples=FFT_size
-          for segment_run in range(int(np.ceil(len(x)/sf/time_resolution))):
-            read_interval=[np.floor(time_resolution*segment_run*sf), np.ceil(time_resolution*(segment_run+1)*sf)]
-            if read_interval[1]>len(x):
-              read_interval[1]=len(x)
-            if read_interval[1]-read_interval[0]>=samples:
-              f,t,P = scipy.signal.stft(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window='hann', nperseg=samples, noverlap=int(window_overlap*FFT_size), nfft=FFT_size, detrend='constant', boundary=None, padded=False)
-              P = np.abs(P)/np.power(P_ref,2)
-              if segment_run==0:
-                data=10*np.log10(np.mean(P,axis=1))-sensitivity
-              else:
-                data=np.vstack((data, 10*np.log10(np.mean(P,axis=1))-sensitivity))
-          data=data.T
-          t=np.arange(time_resolution-time_resolution/2, time_resolution*(data.shape[1]), time_resolution)
+          P = np.abs(P)/np.power(P_ref,2)
+          P_scaled = matrix_operation().rescale(np.hstack((t[:,None], P.T)), time_resolution)
+          data=10*np.log10(P_scaled[:,1:].T)-sensitivity
+          t=P_scaled[:,0]
         else:
-          f,t,P = scipy.signal.stft(x, fs=sf, window='hann', nperseg=FFT_size, noverlap=int(window_overlap*FFT_size), nfft=FFT_size, detrend='constant', boundary=None, padded=False)
           data = 10*np.log10(np.abs(P)/np.power(P_ref,2))-sensitivity
         t=t+offset_read
         
@@ -222,7 +208,6 @@ class audio_visualization:
         f=f[f_list]
         data=data[f_list,:]
         ambient=ambient[f_list]
-        P=P[f_list,:]
         
         # plot the spectrogram
         if plot_type=='Both' or plot_type=='Spectrogram':
@@ -246,7 +231,7 @@ class audio_visualization:
         self.ambient=ambient
         self.f=f
         if not time_resolution:
-          self.phase=np.angle(P)
+          self.phase=np.angle(P[f_list,:])
 
     def convert_audio(self, magnitude_spec, snr_factor=1):
         temp=np.multiply(10**(magnitude_spec[:,1:].T*snr_factor/10), np.exp(1j*self.phase))
@@ -255,6 +240,15 @@ class audio_visualization:
 class matrix_operation:
     def __init__(self, header=[]):
         self.header=header
+
+    def rescale(self, spec, time_reso):
+        rescale_spec=spec
+        time_ori=spec[0,0]
+        if time_reso>(spec[1,0]-spec[0,0]):
+          spec[:,0]=np.floor((spec[:,0]-spec[0,0])/time_reso)
+          rescale_spec=np.array(pd.DataFrame(spec).groupby(by=[0]).mean().reset_index())
+          rescale_spec[:,0]=time_reso*rescale_spec[:,0]+time_ori
+        return rescale_spec
     
     def gap_fill(self, time_vec, data, tail=[], value_input=0):
         # fill the gaps in a time series
