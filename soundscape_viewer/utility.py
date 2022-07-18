@@ -513,7 +513,7 @@ class spectrogram_detection:
       self.detection=np.vstack((begin, ending)).T
       self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)', 'Maximum SNR (dB)']
       if filename:
-        self.save_txt(filename=path+filename, folder_id=folder_id, status_print=status_print)
+        self.save_txt(filename=filename, path=path, folder_id=folder_id, status_print=status_print)
       if show_result:
         x_lim=[time_vec[0],time_vec[-1]]
         fig, ax = plt.subplots(figsize=(14, 6))
@@ -527,9 +527,9 @@ class spectrogram_detection:
           rect = patches.Rectangle((begin[n], min_F[n]), ending[n]-begin[n], max_F[n]-min_F[n], linewidth=1.5, edgecolor='r', facecolor='none')
           ax.add_patch(rect)
 
-  def save_txt(self, filename='Separation.txt',folder_id=[], status_print=True):
+  def save_txt(self, filename='Separation.txt', path='./', folder_id=[], status_print=True):
       df = pd.DataFrame(self.output, columns = self.header) 
-      df.to_csv(filename, sep='\t', index=False)
+      df.to_csv(path+'/'filename, sep='\t', index=False)
       if status_print:
             print('Successifully save to '+filename)
         
