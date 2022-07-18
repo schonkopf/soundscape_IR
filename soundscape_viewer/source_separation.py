@@ -227,8 +227,8 @@ class pcnmf:
     
     # save the result in Gdrive as a mat file
     if folder_id:
-      Gdrive=gdrive_handle(folder_id)
-      Gdrive.upload(filename)
+      Gdrive=gdrive_handle(folder_id, status_print=False)
+      Gdrive.upload(filename, status_print=False)
       
   def model_check(self, model):
     print('Model parameters:')
@@ -507,8 +507,8 @@ class source_separation:
     
     # save the result in Gdrive as a mat file
     if folder_id:
-      Gdrive=gdrive_handle(folder_id)
-      Gdrive.upload(filename)
+      Gdrive=gdrive_handle(folder_id, status_print=False)
+      Gdrive.upload(filename, status_print=False)
       
   def model_check(self, model):
     print('Model parameters check')
