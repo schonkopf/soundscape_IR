@@ -513,7 +513,7 @@ class spectrogram_detection:
       self.detection=np.vstack((begin, ending)).T
       self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)', 'Maximum SNR (dB)']
       if filename:
-        self.save_txt(filename=path+'/'+filename, folder_id=folder_id, status_print=status_print)
+        self.save_txt(filename=path+filename, folder_id=folder_id, status_print=status_print)
       if show_result:
         x_lim=[time_vec[0],time_vec[-1]]
         fig, ax = plt.subplots(figsize=(14, 6))
