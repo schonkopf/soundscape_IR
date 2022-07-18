@@ -246,7 +246,7 @@ class pcnmf:
     if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       print('Sparseness:', self.sparseness)
 
-  def load_model(self, filename):
+  def load_model(self, filename, model_check=True):
     model = loadmat(filename)
     self.W=model['save_nmf']['W'].item()
     self.W_cluster=model['save_nmf']['W_cluster'].item()[0]
@@ -255,7 +255,8 @@ class pcnmf:
     self.basis_num=model['save_nmf']['basis_num'].item()[0][0]
     if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       self.sparseness=model['save_nmf']['sparseness'].item()[0][0]
-    self.model_check(model)
+    if model_check:
+      self.model_check(model)
   
   def supervised_separation(self, input_data, f, iter=50):
     self.f=f    
@@ -531,7 +532,7 @@ class source_separation:
     if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       print('Sparseness:', self.sparseness)
   
-  def load_model(self, filename):
+  def load_model(self, filename, model_check=True):
     model = loadmat(filename)
     self.f=model['save_nmf']['f'].item()[0]
     self.W=model['save_nmf']['W'].item()
@@ -541,7 +542,8 @@ class source_separation:
     self.basis_num=model['save_nmf']['basis_num'].item()[0][0]
     if np.any(np.array(model['save_nmf'][0].dtype.names)=='sparseness'):
       self.sparseness=model['save_nmf']['sparseness'].item()[0][0]
-    self.model_check(model)
+    if model_check:
+      self.model_check(model)
   
   def output_selection(self, source=1, begin_date=[], end_date=[], f_range=[]):
     source=source-1
