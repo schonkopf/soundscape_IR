@@ -529,7 +529,7 @@ class spectrogram_detection:
 
   def save_txt(self, filename='Separation.txt', path='./', folder_id=[], status_print=True):
       df = pd.DataFrame(self.output, columns = self.header) 
-      df.to_csv(path+'/'filename, sep='\t', index=False)
+      df.to_csv(path+'/'+filename, sep='\t', index=False)
       if status_print:
             print('Successifully save to '+filename)
         
