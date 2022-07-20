@@ -539,29 +539,30 @@ class spectrogram_detection:
         Gdrive.upload(filename, status_print=False)
     
 class performance_evaluation:
-  def __init__(self, label_filename):
-    if label_filename:
-        self.annotations = pd.read_table(label_filename,index_col=0)
+  def __init__(self, test_spec, label_filename, fpr_control=0.05, plot=True): 
+    annotations = pd.read_table(label_filename,index_col=0)
+    time_vec=test_spec[:,0]
+    self.label=0*time_vec
+    for n in range(len(annotations)):
+      self.label[(time_vec>=annotations.iloc[n,2])*(time_vec<=annotations.iloc[n,3])]=1
+    self.level=test_spec[:,1:].max(axis=1)
+    if fpr_control>0:
+      threshold, fpr, tpr=self.auc(self.label, self.level, fpr_control=fpr_control, plot=plot)
 
-  def spectrogram(self, ori_spec, test_spec, fpr_control=0.05, plot=True):
+  def auc(self, label, level, fpr_control=0.05, plot=True):
     from sklearn.metrics import roc_curve, auc
-    time_vec=ori_spec[:,0]
-    label=0*time_vec
-    for n in range(len(self.annotations)):
-      label[(time_vec>=self.annotations.iloc[n,2])*(time_vec<=self.annotations.iloc[n,3])]=1
-    
-    level=test_spec[:,1:].max(axis=1)
-    self.fpr, self.tpr, thresholds = roc_curve(label, level)
-    self.auc = auc(self.fpr, self.tpr)
-    self.all_threshold = thresholds
-
-    self.threshold = thresholds[(np.abs(self.fpr - fpr_control)).argmin()]
+    fpr, tpr, thresholds = roc_curve(label, level)
+    auc_score = auc(fpr, tpr)
+    threshold = thresholds[(np.abs(fpr - fpr_control)).argmin()]
     if plot:
       plt.figure()
-      plt.plot(self.fpr, self.tpr)
+      plt.plot(fpr, tpr)
       plt.xlabel('False Positive Rate')
       plt.ylabel('True Positive Rate')
+      plt.title('AUC: '+str(np.round(auc_score*100)/100))
       plt.show()
+      print('Threshold = '+str(np.round(threshold*100)/100)+' @ '+str(fpr_control)+' FPR')
+    return threshold, fpr, tpr
 
 class pulse_interval:
   def __init__(self, data, sf=None, energy_percentile=50, interval_range=None, plot_type='Both', standardization=True):
