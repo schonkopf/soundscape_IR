@@ -572,10 +572,8 @@ class pulse_interval:
       data=np.percentile(data[:,1:], energy_percentile, axis=1)
     elif len(data.shape)==1:
       data=data/np.max(np.abs(data))
-      #input=np.power(data,2)
-      input=np.abs(hilbert(data))
+      data=np.abs(hilbert(data))
       time_vec=np.arange(len(data))/sf
-    self.data=data
     self.autocorrelation(data, time_vec, interval_range, plot_type, millisec=True, standardization=standardization)
 
   def autocorrelation(self, data, time_vec, interval_range=None, plot_type='Both', millisec=True, standardization=True):
