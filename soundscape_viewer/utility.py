@@ -456,76 +456,78 @@ class matrix_operation:
         return output
 
 class spectrogram_detection:
-  def __init__(self, input, f, threshold, smooth=0, minimum_interval=0, minimum_duration = None, maximum_duration=None, pad_size=0, filename='Detection.txt', folder_id=[], path='./', status_print=True, show_result = True):
+  def __init__(self, input, f, threshold, smooth=0, minimum_interval=0, minimum_duration=None, maximum_duration=None, pad_size=0, filename='Detection.txt', folder_id=[], path='./', status_print=True, show_result=True, run_detection=True):
       from scipy.ndimage import gaussian_filter
-      
-      time_vec=input[:,0]
-      data=input[:,1:]
-      begin=np.array([])
+      if not run_detection:
+        self.detection=np.array([input[0,0],input[-1,0]])[None,:]
+      else:
+        time_vec=input[:,0]
+        data=input[:,1:]
+        begin=np.array([])
 
-      if smooth>0:
-        level_2d = gaussian_filter(data, smooth)>threshold
-      elif smooth==0:
-        level_2d = data>threshold
+        if smooth>0:
+          level_2d = gaussian_filter(data, smooth)>threshold
+        elif smooth==0:
+          level_2d = data>threshold
 
-      level=level_2d.astype(int).sum(axis = 1)>0
-      begin=time_vec[np.where(np.diff(level.astype(int),1)==1)[0]]
-      ending=time_vec[np.where(np.diff(level.astype(int),1)==-1)[0]+1]
+        level=level_2d.astype(int).sum(axis = 1)>0
+        begin=time_vec[np.where(np.diff(level.astype(int),1)==1)[0]]
+        ending=time_vec[np.where(np.diff(level.astype(int),1)==-1)[0]+1]
 
-      if level[0]:
-        begin=np.append(time_vec[0], begin)
-      if level[-1]:
-        ending=np.append(ending, time_vec[-1])
-      
-      if minimum_interval>0:
-        remove_list=np.where((begin[1:]-ending[0:-1])>minimum_interval)[0]
-        if len(remove_list)>0:
-          begin=begin[np.append(0,remove_list+1)]
-          ending=ending[np.append(remove_list, len(ending)-1)]
-            
-      if maximum_duration:
-        keep_list=np.where((ending-begin)<=maximum_duration)[0]
-        if len(remove_list)>0:
-          begin=begin[keep_list]
-          ending=ending[keep_list]
+        if level[0]:
+          begin=np.append(time_vec[0], begin)
+        if level[-1]:
+          ending=np.append(ending, time_vec[-1])
+        
+        if minimum_interval>0:
+          remove_list=np.where((begin[1:]-ending[0:-1])>minimum_interval)[0]
+          if len(remove_list)>0:
+            begin=begin[np.append(0,remove_list+1)]
+            ending=ending[np.append(remove_list, len(ending)-1)]
+              
+        if maximum_duration:
+          keep_list=np.where((ending-begin)<=maximum_duration)[0]
+          if len(remove_list)>0:
+            begin=begin[keep_list]
+            ending=ending[keep_list]
 
-      if minimum_duration:
-        keep_list=np.where((ending-begin)>=minimum_duration)[0]
-        if len(remove_list)>0:
-          begin=begin[keep_list]
-          ending=ending[keep_list]
-      
-      if len(begin)>0:
-        begin=begin-pad_size
-        ending=ending+pad_size
+        if minimum_duration:
+          keep_list=np.where((ending-begin)>=minimum_duration)[0]
+          if len(remove_list)>0:
+            begin=begin[keep_list]
+            ending=ending[keep_list]
+        
+        if len(begin)>0:
+          begin=begin-pad_size
+          ending=ending+pad_size
 
-      min_F=np.array([])
-      max_F=np.array([])
-      snr=np.array([])
-      for n in range(len(begin)):
-        idx = (time_vec >= begin[n]) & (time_vec < ending[n])
-        f_idx = np.where(np.sum(level_2d[idx,:],axis = 0) > 0)[0]
-        min_F = np.append(min_F, f[f_idx[0]])
-        max_F = np.append(max_F, f[f_idx[-1]])
-        psd=np.mean(data[idx,:], axis=0)
-        snr=np.append(snr, np.max(psd))
-      self.output=np.vstack([np.arange(len(begin))+1, np.repeat('Spectrogram',len(begin)), np.repeat(1,len(begin)), begin, ending, min_F, max_F, snr]).T
-      self.detection=np.vstack((begin, ending)).T
-      self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)', 'Maximum SNR (dB)']
-      if filename:
-        self.save_txt(filename=filename, path=path, folder_id=folder_id, status_print=status_print)
-      if show_result:
-        x_lim=[time_vec[0],time_vec[-1]]
-        fig, ax = plt.subplots(figsize=(14, 6))
-        im = ax.imshow(data.T, origin='lower',  aspect='auto', cmap=cm.jet, extent=[x_lim[0], x_lim[1], f[0], f[-1]], interpolation='none')
-        ax.set_ylabel('Frequency')
-        ax.set_xlabel('Time')
-        cbar = fig.colorbar(im, ax=ax)
-        #cbar.set_label('Amplitude')
-
+        min_F=np.array([])
+        max_F=np.array([])
+        snr=np.array([])
         for n in range(len(begin)):
-          rect = patches.Rectangle((begin[n], min_F[n]), ending[n]-begin[n], max_F[n]-min_F[n], linewidth=1.5, edgecolor='r', facecolor='none')
-          ax.add_patch(rect)
+          idx = (time_vec >= begin[n]) & (time_vec < ending[n])
+          f_idx = np.where(np.sum(level_2d[idx,:],axis = 0) > 0)[0]
+          min_F = np.append(min_F, f[f_idx[0]])
+          max_F = np.append(max_F, f[f_idx[-1]])
+          psd=np.mean(data[idx,:], axis=0)
+          snr=np.append(snr, np.max(psd))
+        self.output=np.vstack([np.arange(len(begin))+1, np.repeat('Spectrogram',len(begin)), np.repeat(1,len(begin)), begin, ending, min_F, max_F, snr]).T
+        self.detection=np.vstack((begin, ending)).T
+        self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)', 'Maximum SNR (dB)']
+        if filename:
+          self.save_txt(filename=filename, path=path, folder_id=folder_id, status_print=status_print)
+        if show_result:
+          x_lim=[time_vec[0],time_vec[-1]]
+          fig, ax = plt.subplots(figsize=(14, 6))
+          im = ax.imshow(data.T, origin='lower',  aspect='auto', cmap=cm.jet, extent=[x_lim[0], x_lim[1], f[0], f[-1]], interpolation='none')
+          ax.set_ylabel('Frequency')
+          ax.set_xlabel('Time')
+          cbar = fig.colorbar(im, ax=ax)
+          #cbar.set_label('Amplitude')
+
+          for n in range(len(begin)):
+            rect = patches.Rectangle((begin[n], min_F[n]), ending[n]-begin[n], max_F[n]-min_F[n], linewidth=1.5, edgecolor='r', facecolor='none')
+            ax.add_patch(rect)
 
   def save_txt(self, filename='Separation.txt', path='./', folder_id=[], status_print=True):
       df = pd.DataFrame(self.output, columns = self.header) 
@@ -537,6 +539,22 @@ class spectrogram_detection:
         #import Gdrive_upload
         Gdrive=gdrive_handle(folder_id, status_print=False)
         Gdrive.upload(filename, status_print=False)
+
+  def feature_extraction(self, input, f, energy_percentile=None, interval_range=[1, 500]):
+      for n in range(0, self.detection.shape[0]):
+        detection_list=np.where(((input[:,0]>=self.detection[n,0])*(input[:,0]<=self.detection[n,1]))==1)[0]
+        # Analyze pulse structure
+        pulse_analysis_result=pulse_interval(input[detection_list,:], energy_percentile=energy_percentile, interval_range=interval_range, plot_type=None, standardization=True)
+        # Analyze spectral features
+        spectral_result=np.mean(input[detection_list,1:], axis=0)
+        if n==0:
+          self.PI_result=pulse_analysis_result.result[None,:]
+          self.PI=pulse_analysis_result.PI
+          self.spectral_result=spectral_result
+          self.f=f
+        else:
+          self.PI_result=np.vstack((self.PI_result, pulse_analysis_result.result[None,:]))
+          self.spectral_result=np.vstack((self.spectral_result, spectral_result))
     
 class performance_evaluation:
   def __init__(self, test_spec, label_filename, fpr_control=0.05, plot=True): 
@@ -565,7 +583,7 @@ class performance_evaluation:
     return threshold, fpr, tpr
 
 class pulse_interval:
-  def __init__(self, data, sf=None, energy_percentile=None, interval_range=None, plot_type='Both', standardization=True):
+  def __init__(self, data, sf=None, energy_percentile=None, interval_range=[1, 500], plot_type='Both', standardization=True):
     from scipy.signal import hilbert
     if len(data.shape)==2:
       time_vec=data[:,0]
