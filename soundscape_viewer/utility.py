@@ -63,7 +63,14 @@ class gdrive_handle:
     
 class save_parameters:
     def __init__(self):
-        self.platform='python'
+        self.platform='soundscape_IR V1.0'
+
+    def feature_extraction(self, detection, f, spectral_result, PI, PI_result):
+        self.detection=detection
+        self.f=f
+        self.spectral_result=spectral_result
+        self.PI=PI
+        self.PI_result=PI_result
     
     def supervised_nmf(self, f, W, W_cluster, source_num, feature_length, basis_num):
         self.f=f
