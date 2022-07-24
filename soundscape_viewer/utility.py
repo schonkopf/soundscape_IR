@@ -565,11 +565,14 @@ class performance_evaluation:
     return threshold, fpr, tpr
 
 class pulse_interval:
-  def __init__(self, data, sf=None, energy_percentile=50, interval_range=None, plot_type='Both', standardization=True):
+  def __init__(self, data, sf=None, energy_percentile=None, interval_range=None, plot_type='Both', standardization=True):
     from scipy.signal import hilbert
     if len(data.shape)==2:
       time_vec=data[:,0]
-      data=np.percentile(data[:,1:], energy_percentile, axis=1)
+      if energy_percentile:
+        data=np.percentile(data[:,1:], energy_percentile, axis=1)
+      else:
+        data=np.mean(data[:,1:], axis=1)
     elif len(data.shape)==1:
       data=data/np.max(np.abs(data))
       data=np.abs(hilbert(data))
