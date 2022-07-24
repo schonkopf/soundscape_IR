@@ -549,6 +549,10 @@ class spectrogram_detection:
         Gdrive.upload(filename, status_print=False)
 
   def feature_extraction(self, input, f, energy_percentile=None, interval_range=[1, 500], filename='Features.mat', folder_id=[], path='./'):
+      self.f=f
+      self.PI=np.array([])
+      self.PI_result=np.array([])
+      self.spectral_result=np.array([])
       for n in range(0, self.detection.shape[0]):
         detection_list=np.where(((input[:,0]>=self.detection[n,0])*(input[:,0]<=self.detection[n,1]))==1)[0]
         # Analyze pulse structure
@@ -559,11 +563,9 @@ class spectrogram_detection:
           self.PI_result=pulse_analysis_result.result[None,:]
           self.PI=pulse_analysis_result.PI
           self.spectral_result=spectral_result
-          self.f=f
         else:
           self.PI_result=np.vstack((self.PI_result, pulse_analysis_result.result[None,:]))
           self.spectral_result=np.vstack((self.spectral_result, spectral_result))
-
       features=save_parameters()
       features.feature_extraction(self.detection, self.f, self.spectral_result, self.PI, self.PI_result)
       savemat(path+'/'+filename, {'save_features':features})
