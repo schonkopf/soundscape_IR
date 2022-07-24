@@ -127,13 +127,16 @@ class batch_processing:
     self.energy_percentile=0
     self.save_lts_path=path
 
-  def params_pulse_interval(self, energy_percentile=50, interval_range=[1, 1000], lts_maker=False):
+  def params_feature_extraction(self, source=0, energy_percentile=None, interval_range=[1, 500], lts_maker=False, folder_id=[], path='./'):
     if lts_maker:
-      self.run_pulse_analysis=False
+      self.run_feature_extraction=False
     else:
-      self.run_pulse_analysis=True
+      self.run_feature_extraction=True
+    self.feature_source=source
     self.energy_percentile=energy_percentile
     self.interval_range=interval_range
+    self.save_feature_folder_id=folder_id
+    self.save_feature_path=path
   
   def params_load_basis(self, initial=[], dateformat='yyyymmdd_HHMMSS', year_initial=0): 
     self.run_load_basis = True
@@ -148,7 +151,6 @@ class batch_processing:
     from soundscape_IR.soundscape_viewer import pulse_interval
     from soundscape_IR.soundscape_viewer import matrix_operation
     from soundscape_IR.soundscape_viewer import source_separation
-    from soundscape_IR.soundscape_viewer import save_parameters
 
     import datetime
     import copy
@@ -176,13 +178,13 @@ class batch_processing:
             temp2.GetContentFile(temp2['title'])
             selections_filename = temp2['title']
           path='.'
-          print('Processing file no. '+str(file+1)+' :'+temp['title']+', in total: '+str(num_file)+' files', flush=True, end='')
+          print('Processing file no. '+str(file)+' :'+temp['title']+', in total: '+str(num_file)+' files', flush=True, end='')
         else:
           temp = self.audioname[file]
           path = self.link
           if self.Raven_selections:
             selections_filename = self.link + '/' + self.audioname[file][:-4]+self.Raven_selections
-          print('Processing file no. '+str(file+1)+' :'+temp+', in total: '+str(num_file)+' files', flush=True, end='')
+          print('Processing file no. '+str(file)+' :'+temp+', in total: '+str(num_file)+' files', flush=True, end='')
         
         if self.Raven_selections:
           audio = audio_visualization(self.audioname[file], path, FFT_size = self.FFT_size, time_resolution=self.time_resolution, window_overlap=self.window_overlap, f_range = self.f_range, sensitivity=self.sensitivity, 
@@ -233,21 +235,20 @@ class batch_processing:
         if self.run_detection:
           for n in range(0, len(self.source)):
             filename=self.audioname[file][:-4]+'_S'+str(self.source[n])+'.txt'
-            spectrogram_detection(model.separation[self.source[n]-1], model.f, threshold=self.threshold[n], smooth=self.smooth[n], minimum_interval=self.minimum_interval[n], minimum_duration=self.minimum_duration[n], maximum_duration=self.maximum_duration[n], pad_size=self.padding[n], filename=filename, folder_id=self.detection_folder_id, path=self.detection_path, status_print=False, show_result=self.show_result)
+            sp=spectrogram_detection(model.separation[self.source[n]-1], model.f, threshold=self.threshold[n], smooth=self.smooth[n], minimum_interval=self.minimum_interval[n], minimum_duration=self.minimum_duration[n], maximum_duration=self.maximum_duration[n], pad_size=self.padding[n], filename=filename, folder_id=self.detection_folder_id, path=self.detection_path, status_print=False, show_result=self.show_result)
       if self.run_detection:
         if not self.source[0]:
           filename=self.audioname[file][:-4]+'.txt'
-          spectrogram_detection(audio.data, audio.f, threshold=self.threshold[0], smooth=self.smooth[0], minimum_interval=self.minimum_interval[0], minimum_duration=self.minimum_duration[0], maximum_duration=self.maximum_duration[0], pad_size=self.padding[0], filename=filename, folder_id=self.detection_folder_id, path=self.detection_path, status_print=False, show_result=self.show_result)
-      if self.run_pulse_analysis:
+          sp=spectrogram_detection(audio.data, audio.f, threshold=self.threshold[0], smooth=self.smooth[0], minimum_interval=self.minimum_interval[0], minimum_duration=self.minimum_duration[0], maximum_duration=self.maximum_duration[0], pad_size=self.padding[0], filename=filename, folder_id=self.detection_folder_id, path=self.detection_path, status_print=False, show_result=self.show_result)
+      else:
+        sp=spectrogram_detection(audio.data, audio.f, threshold=0, show_result=False, status_print=False, run_detection=False)
+      if self.run_feature_extraction:
         if self.run_separation:
-          pulse_analysis_result=pulse_interval(model.separation[self.source[0]-1], energy_percentile=self.energy_percentile, interval_range=self.interval_range, plot_type=None)
+          filename=self.audioname[file][:-4]+'_S'+str(self.feature_source)+'.mat'
+          sp.feature_extraction(model.separation[self.feature_source-1], model.f, energy_percentile=self.energy_percentile, interval_range=self.interval_range, filename=filename, folder_id=self.save_feature_folder_id, path=self.save_feature_path)
         else:
-          pulse_analysis_result=pulse_interval(audio.data, energy_percentile=self.energy_percentile, interval_range=self.interval_range, plot_type=None)
-        if file==self.start:
-          self.PI_result=pulse_analysis_result.result[None]
-          self.PI=pulse_analysis_result.PI
-        else:
-          self.PI_result=np.vstack((self.PI_result, pulse_analysis_result.result[None]))
+          filename=self.audioname[file][:-4]+'.mat'
+          sp.feature_extraction(audio.data, audio.f, energy_percentile=self.energy_percentile, interval_range=self.interval_range, filename=filename, folder_id=self.save_feature_folder_id, path=self.save_feature_path)
       
       if self.run_load_basis:
         if self.cloud==2:
@@ -261,7 +262,7 @@ class batch_processing:
             path = self.save_basis_path
           else:
             path = self.link
-        print('Processing file no. '+str(file+1)+' :'+temp+', in total: '+str(num_file)+' files', flush=True, end='')
+        print('Processing file no. '+str(file)+' :'+temp+', in total: '+str(num_file)+' files', flush=True, end='')
 
         if self.dateformat:
           if file==self.start:
