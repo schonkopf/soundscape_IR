@@ -508,6 +508,8 @@ class spectrogram_detection:
         if len(begin)>0:
           begin=begin-pad_size
           ending=ending+pad_size
+          begin[begin<0]=0
+          ending[ending>input[-1,0]]=input[-1,0]
 
         min_F=np.array([])
         max_F=np.array([])
