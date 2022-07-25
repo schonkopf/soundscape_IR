@@ -12,7 +12,8 @@ class batch_processing:
     self.run_spectrogram=False  
     self.run_separation=False
     self.run_detection=False
-    self.run_pulse_analysis=False
+    self.run_feature_extraction=False
+    self.run_tonal=False
     self.run_lts=False
     self.run_adaptive_prewhiten=False
     self.run_load_basis=False
@@ -137,6 +138,14 @@ class batch_processing:
     self.interval_range=interval_range
     self.save_feature_folder_id=folder_id
     self.save_feature_path=path
+
+  def params_local_max(self, source=0, tonal_threshold=0.5, smooth=1.5, threshold=3, folder_id=[], path='./'):
+    from soundscape_IR.soundscape_viewer import tonal_detection
+    self.run_tonal=True
+    self.tonal_source=source
+    self.local_max=tonal_detection(tonal_threshold=tonal_threshold, smooth=smooth, threshold=threshold)
+    self.tonal_folder_id=folder_id
+    self.tonal_path=path
   
   def params_load_basis(self, initial=[], dateformat='yyyymmdd_HHMMSS', year_initial=0): 
     self.run_load_basis = True
@@ -236,12 +245,22 @@ class batch_processing:
           for n in range(0, len(self.source)):
             filename=self.audioname[file][:-4]+'_S'+str(self.source[n])+'.txt'
             sp=spectrogram_detection(model.separation[self.source[n]-1], model.f, threshold=self.threshold[n], smooth=self.smooth[n], minimum_interval=self.minimum_interval[n], minimum_duration=self.minimum_duration[n], maximum_duration=self.maximum_duration[n], pad_size=self.padding[n], filename=filename, folder_id=self.detection_folder_id, path=self.detection_path, status_print=False, show_result=self.show_result)
+      
+      if self.run_tonal:
+        if self.run_separation:
+          filename=self.audioname[file][:-4]+'_S'+str(self.tonal_source[n])+'.txt'
+          _,_=self.local_max.local_max(model.separation[self.tonal_source-1], model.f, filename=filename, folder_id=self.tonal_folder_id, path=self.tonal_path)
+        else:
+          filename=self.audioname[file][:-4]+'.txt'
+          _,_=self.local_max.local_max(audio.data, audio.f, filename=filename, folder_id=self.tonal_folder_id, path=self.tonal_path)
+
       if self.run_detection:
         if not self.source[0]:
           filename=self.audioname[file][:-4]+'.txt'
           sp=spectrogram_detection(audio.data, audio.f, threshold=self.threshold[0], smooth=self.smooth[0], minimum_interval=self.minimum_interval[0], minimum_duration=self.minimum_duration[0], maximum_duration=self.maximum_duration[0], pad_size=self.padding[0], filename=filename, folder_id=self.detection_folder_id, path=self.detection_path, status_print=False, show_result=self.show_result)
       else:
         sp=spectrogram_detection(audio.data, audio.f, threshold=0, show_result=False, status_print=False, run_detection=False)
+      
       if self.run_feature_extraction:
         if self.run_separation:
           filename=self.audioname[file][:-4]+'_S'+str(self.feature_source)+'.mat'
