@@ -13,6 +13,7 @@ import matplotlib.cm as cm
 import os
 import matplotlib.patches as patches
 from scipy.io import savemat
+import copy
 
 class gdrive_handle:
     def __init__(self, folder_id, status_print=True):
@@ -652,23 +653,28 @@ class pulse_interval:
       ax2.set_ylabel('Correlation score')
     
 class tonal_detection:
-  def __init__(self, tonal_threshold=6, temporal_prewhiten=50, spectral_prewhiten=50):
+  def __init__(self, tonal_threshold=0.5, temporal_prewhiten=0, spectral_prewhiten=0, smooth=1.5, threshold=3, noise_filter_width=3):
     self.tonal_threshold=tonal_threshold
     self.temporal_prewhiten=temporal_prewhiten
     self.spectral_prewhiten=spectral_prewhiten
+    self.threshold=threshold
+    self.smooth=smooth
+    self.noise_filter_width=noise_filter_width
   
-  def local_max(self, input, f, threshold=None, smooth=2):
+  def local_max(self, input, f, filename='Tonal.txt', path='./', folder_id=[]):
     # Do vertical and horizontal prewhitening
-    temp0=input[:,1:]
-    if self.spectral_prewhiten:
-      temp0, _=matrix_operation.prewhiten(temp0, prewhiten_percent=self.spectral_prewhiten, axis=1)
+    temp0=copy.deepcopy(input[:,1:])
     if self.temporal_prewhiten:
       temp0, _=matrix_operation.prewhiten(temp0, prewhiten_percent=self.temporal_prewhiten, axis=0)
+    if self.spectral_prewhiten:
+      temp0, _=matrix_operation.prewhiten(temp0, prewhiten_percent=self.spectral_prewhiten, axis=1)
+
     temp0[temp0<0]=0
 
     # Smooth the spectrogram
     from scipy.ndimage import gaussian_filter
-    temp0=gaussian_filter(temp0, sigma=smooth)
+    from scipy.signal import medfilt2d
+    temp0=gaussian_filter(temp0, sigma=self.smooth)
     
     # Applying local-max detector to extract whistle contours
     temp=(-1*np.diff(temp0,n=2,axis=1))>self.tonal_threshold
@@ -676,24 +682,22 @@ class tonal_detection:
     temp=np.hstack((temp,np.zeros([temp.shape[0],1])))
     temp2=temp*temp0
     temp2[temp2<0]=0
-
-    # Smooth the contour fragments
-    temp2=gaussian_filter(temp2, sigma=smooth)
+    output=np.hstack((input[:,0:1], temp2))
 
     # Produce detection result
-    if threshold:
-      temp3=temp*temp0
-      rc=np.nonzero((temp3)>threshold)
-      amp=temp3.flatten()
-      amp=amp[np.where((amp>threshold))[0]]
+    if self.threshold>=0:
+      temp2=medfilt2d(temp2, kernel_size=self.noise_filter_width)
+      rc=np.nonzero(temp2>self.threshold)
+      amp=temp2.flatten()
+      amp=amp[np.where((amp>self.threshold))[0]]
       detection=pd.DataFrame(np.hstack((input[rc[0],0:1], f[rc[1]][:,None], amp[:,None])), columns = ['Time','Frequency','Strength']) 
-      temp2[temp2<threshold]=threshold
+      if filename:
+        detection.to_csv(path+'/'+filename, sep='\t', index=False)
+        if folder_id:
+          #import Gdrive_upload
+          Gdrive=gdrive_handle(folder_id, status_print=False)
+          Gdrive.upload(filename, status_print=False)
     else:
       detection=np.array([])
-      
-    # Normalize energy variations 
-    temp2=matrix_operation.frame_normalization(temp2, axis=1, type='min-max')
-    temp2[np.isnan(temp)]=0
-    output=np.hstack((input[:,0:1], temp2))
 
     return output, detection
