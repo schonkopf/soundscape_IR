@@ -21,6 +21,7 @@ class batch_processing:
   def collect_folder(self, path, file_extension='.wav'):
     import os
     file_list=os.listdir(path)
+    file_list.sort(key = str.lower)
     self.link=path
     self.cloud=0   
     self.audioname=np.array([], dtype=object)
