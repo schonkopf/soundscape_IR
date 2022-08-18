@@ -9,7 +9,7 @@ The toolbox is primarily desgined for: (1) visualization of soundscape dynamics 
 
 ## Installation
 Dependencies:
-- Python >= 3.6
+- Python >= 3.7
 - scikit-learn == 0.23
 
 To install **soundscape_IR**, clone the repository in your Python environment.
