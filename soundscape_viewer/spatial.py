@@ -3,6 +3,8 @@ import numpy as np
 from datetime import timedelta
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
+from matplotlib.ticker import FormatStrFormatter
+from matplotlib.ticker import MaxNLocator
 
 class spatial_mapping():
   def __init__(self, data, gps, gps_utc=0):
@@ -86,7 +88,7 @@ class spatial_mapping():
     self.data.to_csv(filename, sep=',')
     print('Successifully save to '+filename)
     
-  def plot_map(self, plot_col=1, plot_type='contour', mapping_resolution=10, contour_levels=15, vmin=None, vmax=None, shapefile=None):
+  def plot_map(self, plot_col=1, plot_type='contour', mapping_resolution=10, contour_levels=15, bounding_box=[], vmin=None, vmax=None, shapefile=None, filename='Map.png'):
     # mapping resolution: meters
 
     x=self.data['Longitude'][:]
@@ -104,7 +106,7 @@ class spatial_mapping():
         self.grid[self.grid<vmin]=vmin
       if vmax:
         self.grid[self.grid>vmax]=vmax
-      im = ax1.contourf(self.grid.T, extent=(np.min(x),np.max(x),np.min(y),np.max(y)), levels=contour_levels, vmin=vmin, vmax=vmax, extend='both')
+      im = ax1.contourf(self.grid.T, extent=([np.min(x),np.max(x),np.min(y),np.max(y)]), levels=contour_levels, vmin=vmin, vmax=vmax, extend='both')
       cbar= fig.colorbar(im)
     if plot_type=='scatter' or plot_type=='both':
       if plot_type=='both':
@@ -112,13 +114,22 @@ class spatial_mapping():
       if plot_type=='scatter':
         im = ax1.scatter(x, y, c=z, vmin=vmin, vmax=vmax)
         cbar= fig.colorbar(im)
+      ax1.xaxis.set_major_locator(MaxNLocator(5))
+      ax1.yaxis.set_major_locator(MaxNLocator(5))
+      ax1.xaxis.set_major_formatter(FormatStrFormatter('%.3f'))
+      ax1.yaxis.set_major_formatter(FormatStrFormatter('%.3f'))
     
     if shapefile:
       import geopandas
       map_load = geopandas.read_file(shapefile).to_crs({'init': 'epsg:4326'})
       map_load.plot(ax=ax1, facecolor='gray', edgecolor='0.5')
-      _,_=plt.xlim((np.min(x),np.max(x)))
-      _,_=plt.ylim((np.min(y),np.max(y)))
+      if len(bounding_box)>0:
+        _,_=plt.xlim((bounding_box[0],bounding_box[1]))
+        _,_=plt.ylim((bounding_box[2],bounding_box[3]))
+      else:
+        _,_=plt.xlim((np.min(x),np.max(x)))
+        _,_=plt.ylim((np.min(y),np.max(y)))
 
     self.x=xx
     self.y=yy
+    plt.savefig(filename,dpi=300)
