@@ -260,7 +260,8 @@ class batch_processing:
           filename=self.audioname[file][:-4]+'.txt'
           sp=spectrogram_detection(audio.data, audio.f, threshold=self.threshold[0], smooth=self.smooth[0], minimum_interval=self.minimum_interval[0], minimum_duration=self.minimum_duration[0], maximum_duration=self.maximum_duration[0], pad_size=self.padding[0], filename=filename, folder_id=self.detection_folder_id, path=self.detection_path, status_print=False, show_result=self.show_result)
       else:
-        sp=spectrogram_detection(audio.data, audio.f, threshold=0, show_result=False, status_print=False, run_detection=False)
+        if self.run_spectrogram:
+          sp=spectrogram_detection(audio.data, audio.f, threshold=0, show_result=False, status_print=False, run_detection=False)
       
       if self.run_feature_extraction:
         if self.run_separation:
