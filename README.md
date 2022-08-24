@@ -10,7 +10,14 @@ The toolbox is primarily desgined for: (1) visualization of soundscape dynamics 
 ## Installation
 Dependencies:
 - Python >= 3.7
+- numpy==1.21.5
+- pandas==1.3.5
+- audioread==2.1.9
+- librosa==0.8.0
 - scikit-learn == 0.23
+- scipy==1.4.1
+- matplotlib==3.2.2
+- plotly==5.5.0
 
 To install **soundscape_IR**, clone the repository in your Python environment.
 ```bash
@@ -130,7 +137,6 @@ sp=spectrogram_detection(model.separation[source_num-1], model.f, threshold=5.5,
 
 ## Currently ongoing developments
 - [ ] Soundscape spatial analysis
-- [ ] Extraction of inter-pulse intervals
 - [ ] Plotly-based interactive plots
     
 ## Future works
@@ -140,7 +146,7 @@ sp=spectrogram_detection(model.separation[source_num-1], model.f, threshold=5.5,
 
 If you find this package useful in your research, we would appreciate citations to:
     
-- Sun, Y-J, Yen, S-C, & Lin, T-H (2022). soundscape_IR: A source separation toolbox for exploring acoustic diversity in soundscapes. Methods in Ecology and Evolution, 00, 1– 9. https://doi.org/10.1111/2041-210X.13960
+- Sun, Y-J, Yen, S-C, & Lin, T-H (2022). soundscape_IR: A source separation toolbox for exploring acoustic diversity in soundscapes. Methods in Ecology and Evolution, 00, 1–9. https://doi.org/10.1111/2041-210X.13960
 
 ## Bugs report and suggestions 
 If you encounter any bug or issue, please contact Dr. Tzu-Hao Lin via schonkopf@gmail.com. Suggestions are also appreciated!
