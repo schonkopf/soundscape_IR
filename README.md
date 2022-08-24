@@ -131,6 +131,7 @@ sp=spectrogram_detection(model.separation[source_num-1], model.f, threshold=5.5,
     
 - [Demo of audio source separation - Detecting deer calls from tropical forest soundscapes](./docs/tutorials/Demo_of_soundscape_IR_Case_study_I.ipynb)
 - [Demo of audio source separation - Learning the diversity of underwater sounds from subtropical estuary soundscapes](./docs/tutorials/Demo_of_soundscape_IR_Case_study_II.ipynb)
+- [Demo of batch processing - Automatically analyzing a large number of soundscape recordings](./docs/tutorials/Demo_Batch_processing.ipynb)
 - [Demo of Soundscape Viewer - Investigating soundscape dynamics via visualization of long-duration recordings, blind source separation, and clustering](./docs/tutorials/Demo_of_soundscape_information_retrieval.ipynb)
     
 </details>
