@@ -494,7 +494,7 @@ class data_organize:
         else:
             print('Time column is not removable.')
 
-    def plot_diurnal(self, col=1, vmin=None, vmax=None, fig_width=16, fig_height=6, empty_hr_remove=False, empty_day_remove=False, reduce_resolution=1, display_cluster=None, plot=True, nan_value=0):
+    def plot_diurnal(self, col=1, day_correct=0, vmin=None, vmax=None, fig_width=16, fig_height=6, empty_hr_remove=False, empty_day_remove=False, reduce_resolution=1, display_cluster=None, plot=True, nan_value=0):
         """
         Generate a heatmap for visualizing soundscape changes in diurnal and seasonal cycles.
         
@@ -504,6 +504,11 @@ class data_organize:
         ----------
         col : int ≥ 1
             Column number to plot.
+            
+        day_correct : float or 'windows'
+            A value to correct the display date. 
+            
+            There is a known issue that the date displayed in the Windows system is different from Linux system. Set ``day_correct = 'windows'`` to solve this issue.
             
         vmin, vmax : None or float, default = None
             The data range that the colormap covers. 
@@ -544,6 +549,8 @@ class data_organize:
             Hour segments of the matrix of diurnal and seasonal variations.
         
         """
+        if day_correct=='windows':
+            day_correct=-719163
         hr_boundary=[np.min(24*(self.final_result[:,0]-np.floor(self.final_result[:,0]))), np.max(24*(self.final_result[:,0]-np.floor(self.final_result[:,0])))]
         if not display_cluster:
             input_data=self.final_result[:,col]
@@ -570,7 +577,7 @@ class data_organize:
         if plot:
             fig, ax = plt.subplots(figsize=(fig_width, fig_height))
             im = plt.imshow(plot_matrix, vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
-                            extent=[python_dt[0], python_dt[-1], np.min(hr_boundary), np.max(hr_boundary)], interpolation='none')
+                            extent=[python_dt[0]+day_correct, python_dt[-1]+day_correct, np.min(hr_boundary), np.max(hr_boundary)], interpolation='none')
             ax.xaxis_date()
             ax.set_title(self.result_header[col])
             plt.ylabel('Hour')
