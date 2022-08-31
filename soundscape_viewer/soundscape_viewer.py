@@ -100,16 +100,14 @@ class lts_viewer:
 
     """
     def __init__(self, path='.', folder_id=[], f_range=None, time_sort=True, parameter_check=False, subfolder=False):
-        print('Initialized')
         self.Result_median=np.array([])
         self.Result_mean=np.array([])
         self.Result_diff=np.array([])
         self.Result_PI=np.array([])
-        file_extension='.mat'
         if not folder_id:
-            self.collect_folder(path, f_range, time_sort, parameter_check, file_extension, subfolder)
+            self.collect_folder(path, f_range, time_sort, parameter_check, subfolder)
         else:
-            self.collect_Gdrive(folder_id, f_range, time_sort, parameter_check, file_extension, subfolder)
+            self.collect_Gdrive(folder_id, f_range, time_sort, parameter_check, subfolder)
 
     def assemble(self, data, time_sort=1, f_range=[], location=0):
         if any('PI' in s for s in data['Result'].dtype.names):
@@ -177,7 +175,7 @@ class lts_viewer:
         print('Minima and maxima frequancy bin:', min(self.f), 'Hz and ', max(self.f), 'Hz')
         print('Frequancy resolution:' ,self.f[1]-self.f[0], 'Hz')
 
-    def collect_folder(self, path='.', f_range=[], time_sort=1, parameter_check=False, file_extension = '.mat', subfolder=False):
+    def collect_folder(self, path='.', f_range=[], time_sort=1, parameter_check=False, subfolder=False, file_extension='.mat'):
         if subfolder:
             subfolder_list = [folder for folder in os.listdir(path) if os.path.isdir(os.path.join(path, folder))]
             subfolder_path = [os.path.join(path, folder) for folder in subfolder_list]
@@ -199,7 +197,7 @@ class lts_viewer:
                         self.assemble(data, time_sort, f_range, location=subfolder_list[n])
             n+=1
 
-    def collect_Gdrive(self, folder_id, f_range=[], time_sort=1, file_extension = '.mat', parameter_check=False, subfolder=False):
+    def collect_Gdrive(self, folder_id, f_range=[], time_sort=1, parameter_check=False, subfolder=False, file_extension='.mat'):
         Gdrive=gdrive_handle(folder_id)
         Gdrive.list_query(file_extension, subfolder=subfolder)
         n=0
