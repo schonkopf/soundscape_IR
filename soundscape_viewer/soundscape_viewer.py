@@ -394,7 +394,7 @@ class lts_viewer:
             time_vec=input_data[:,0]
             if prewhiten_percent>0:
                 input_data, ambient=matrix_operation.prewhiten(input_data, prewhiten_percent, 0)
-                #input_data[input_data<threshold]=threshold
+                input_data[input_data<0]=0
                 input_data[:,0]=time_vec
             if gap_fill:
                 input_data=matrix_operation().gap_fill(time_vec=time_vec, data=input_data[:,1:], tail=[])
