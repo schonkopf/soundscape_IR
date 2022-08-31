@@ -25,7 +25,7 @@ class lts_viewer:
     
     Parameters
     ----------
-    path : str
+    path : None or str, default = None
         Folder path for analysis.
     
     folder_id : [] or str, default = []
@@ -99,13 +99,14 @@ class lts_viewer:
     .. [2] Lin, T.-H., Akamatsu, T.*, Sinniger, F., Harii, S. (2021) Exploring coral reef biodiversity via underwater soundscapes. Biological Conservation, 253: 108901. https://doi.org/10.1016/j.biocon.2020.108901
 
     """
-    def __init__(self, path='.', folder_id=[], f_range=None, time_sort=True, parameter_check=False, subfolder=False):
+    def __init__(self, path=None, folder_id=[], f_range=None, time_sort=True, parameter_check=False, subfolder=False):
         self.Result_median=np.array([])
         self.Result_mean=np.array([])
         self.Result_diff=np.array([])
         self.Result_PI=np.array([])
         if not folder_id:
-            self.collect_folder(path, f_range, time_sort, parameter_check, subfolder)
+            if path:
+                self.collect_folder(path, f_range, time_sort, parameter_check, subfolder)
         else:
             self.collect_Gdrive(folder_id, f_range, time_sort, parameter_check, subfolder)
 
