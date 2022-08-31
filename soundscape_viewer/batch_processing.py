@@ -392,18 +392,19 @@ class batch_processing:
                     print('Processing file no. '+str(file+1)+' :'+temp['title']+', in total: '+str(num_file)+' files', flush=True, end='')
                 else:
                     temp = self.audioname[file]
+                    path = self.link
                     if self.Raven_selections:
                         selections_filename = self.link + '/' + self.audioname[file][:-4]+self.Raven_selections
                     print('Processing file no. '+str(file+1)+' :'+temp+', in total: '+str(num_file)+' files', flush=True, end='')
 
                 if self.Raven_selections:
-                    audio = audio_visualization(self.audioname[file], path=self.link, channel=self.channel, FFT_size=self.FFT_size, 
+                    audio = audio_visualization(self.audioname[file], path=path, channel=self.channel, FFT_size=self.FFT_size, 
                                                 time_resolution=self.time_resolution, window_overlap=self.window_overlap, 
                                                 f_range = self.f_range, sensitivity=self.sensitivity,
                                                 environment=self.environment, plot_type=None, prewhiten_percent=self.prewhiten_percent,
                                                 annotation = selections_filename, padding = self.annotation_padding, mel_comp=self.mel_comp)
                 else:
-                    audio = audio_visualization(self.audioname[file], path=self.link, channel=self.channel, FFT_size=self.FFT_size,
+                    audio = audio_visualization(self.audioname[file], path=path, channel=self.channel, FFT_size=self.FFT_size,
                                                 time_resolution=self.time_resolution, window_overlap=self.window_overlap, 
                                                 offset_read=self.offset_read, f_range = self.f_range, sensitivity=self.sensitivity,
                                                 environment=self.environment, plot_type=None, 
