@@ -1,6 +1,6 @@
 # Base ----------------------------------------
-numpy==1.21.5
-scipy==1.4.1
+numpy==1.21.6
+scipy==1.7.3
 
 # Plotting ------------------------------------
 matplotlib==3.2.2
@@ -10,5 +10,5 @@ geopandas==0.9.0
 
 # Audio processing ----------------------------
 audioread==2.1.9
-librosa==0.8.0
+librosa==0.8.1
 scikit-learn==0.23.2
