@@ -517,7 +517,7 @@ class batch_processing:
                         format_idx.filename_check(dateformat=self.dateformat, initial=self.format_initial, 
                                                   year_initial=self.year_initial, filename=temp)
                     format_idx.get_file_time(temp)
-                    str2ord=-366+format_idx.time_vec/24/3600
+                    str2ord=format_idx.time_vec/24/3600
                 else:
                     str2ord=int(temp[len(self.format_initial):-4])
                     
