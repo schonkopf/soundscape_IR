@@ -340,7 +340,7 @@ class lts_maker:
                     sf=temp.samplerate
             x, self.sf = librosa.load(path+'/'+self.audioname[file], sr=sf, mono=False)
             if len(x.shape)==2:
-                x=x[channel-1,:]
+                x=x[self.channel-1,:]
             x=x-np.mean(x)
 
             if duration_read:
