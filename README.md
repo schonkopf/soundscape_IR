@@ -149,7 +149,7 @@ sp=spectrogram_detection(model.separation[source_num-1], model.f, threshold=5.5,
 
 If you find this package useful in your research, we would appreciate citations to:
     
-- Sun, Y-J, Yen, S-C, & Lin, T-H (2022). soundscape_IR: A source separation toolbox for exploring acoustic diversity in soundscapes. Methods in Ecology and Evolution, 00, 1–9. https://doi.org/10.1111/2041-210X.13960
+- Sun, Y-J, Yen, S-C, & Lin, T-H (2022). soundscape_IR: A source separation toolbox for exploring acoustic diversity in soundscapes. Methods in Ecology and Evolution, 13: 2347-2355. https://doi.org/10.1111/2041-210X.13960
 
 ## Bugs report and suggestions 
 If you encounter any bug or issue, please contact Dr. Tzu-Hao Lin via schonkopf@gmail.com. Suggestions are also appreciated!
