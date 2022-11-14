@@ -1049,7 +1049,7 @@ class tonal_detection:
         self.smooth=smooth
         self.noise_filter_width=noise_filter_width
     
-    def local_max(self, input, f, filename='Tonal.txt', path='./', folder_id=[]):
+    def local_max(self, input, f, axis=1, filename='Tonal.txt', path='./', folder_id=[]):
         """
         Run local-max detector and save tonal detection results.
         
@@ -1090,9 +1090,13 @@ class tonal_detection:
         temp0=gaussian_filter(temp0, sigma=self.smooth)
 
         # Applying local-max detector to extract whistle contours
-        temp=(-1*np.diff(temp0,n=2,axis=1))>self.tonal_threshold
-        temp=np.hstack((np.zeros([temp.shape[0],1]),temp))
-        temp=np.hstack((temp,np.zeros([temp.shape[0],1])))
+        temp=(-1*np.diff(temp0,n=2,axis=axis))>self.tonal_threshold
+        if axis==1:
+            temp=np.hstack((np.zeros([temp.shape[0],1]),temp))
+            temp=np.hstack((temp,np.zeros([temp.shape[0],1])))
+        elif axis==0:
+            temp=np.vstack((np.zeros([1,temp.shape[1]]),temp))
+            temp=np.vstack((temp,np.zeros([1,temp.shape[1]])))
         temp2=temp*temp0
         temp2[temp2<0]=0
         output=np.hstack((input[:,0:1], temp2))
