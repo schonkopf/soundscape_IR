@@ -953,8 +953,8 @@ class pulse_interval:
             ax1.set_ylabel('Amplitude')
 
         data=data-np.median(data)
-        if (max(time_vec)-min(time_vec))<max(interval_range)/1000:
-            time_vec=np.arange(time_vec[0],time_vec[0]+2.5*max(interval_range)/1000,time_vec[1]-time_vec[0])
+        if (max(time_vec)-min(time_vec))<1.5*max(interval_range)/1000:
+            time_vec=np.arange(time_vec[0],time_vec[0]+1.5*max(interval_range)/1000,time_vec[1]-time_vec[0])
             data_new=np.zeros(time_vec.shape)
             data_new[0:len(data)]=data
             data=data_new
