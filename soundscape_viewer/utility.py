@@ -954,7 +954,7 @@ class pulse_interval:
 
         data=data-np.median(data)
         if max(time_vec)<max(interval_range):
-            time_vec=np.arange(time_vec[0],max(interval_range),time_vec[1]-time_vec[0])
+            time_vec=np.arange(time_vec[0],time_vec[0]+max(interval_range)/1000,time_vec[1]-time_vec[0])
             data_new=np.zeros(time_vec.shape)
             data_new[0:len(data)]=data
             data=data_new
