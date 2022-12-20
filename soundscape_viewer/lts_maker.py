@@ -361,8 +361,8 @@ class lts_maker:
                 if (read_interval[1]-read_interval[0])>(0.5*self.time_resolution*sf):
                     self.f,t,P = scipy.signal.spectrogram(x[int(read_interval[0]):int(read_interval[1])], fs=sf, window=('hann'), nperseg=self.FFT_size, noverlap=self.overlap, nfft=self.FFT_size, return_onesided=True, mode='psd')
                     P = P/np.power(self.pref,2)
-                    self.time_vec=self.time_vec+duration_read*segment_run
                     self.compress_spectrogram(P.T, t, self.time_resolution, linear_scale=True)
+                self.time_vec=self.time_vec+duration_read
 
             if self.cloud>=1:
                 os.remove(self.audioname[file])
