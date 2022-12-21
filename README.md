@@ -11,13 +11,13 @@ See https://meil-brcas-org.github.io/V1.1/index.html for technical documentation
 
 ## Installation
 Dependencies:
-- Python >= 3.7
-- numpy==1.21.5
+- Python>=3.7
+- numpy==1.21.6
 - pandas==1.3.5
 - audioread==2.1.9
-- librosa==0.8.0
-- scikit-learn == 0.23
-- scipy==1.4.1
+- librosa==0.8.1
+- scikit-learn==1.0.2
+- scipy==1.7.3
 - matplotlib==3.2.2
 - plotly==5.5.0
 
