@@ -449,7 +449,7 @@ class batch_processing:
                         lts.sf=audio.sf
                         lts.link=[]
                     lts.get_file_time(self.audioname[file])
-                    lts.compress_spectrogram(10**(model.separation[self.lts_source[0]-1][:,1:]/10), 
+                    lts.compress_spectrogram(10**(model.separation[self.lts_source-1][:,1:]/10), 
                                              model.separation[self.lts_source-1][:,0], self.lts_time_resolution, 
                                              linear_scale=True, interval_range=self.interval_range,
                                              energy_percentile=self.energy_percentile)
