@@ -262,7 +262,7 @@ class batch_processing:
         self.energy_percentile=0
         self.save_lts_path=path
 
-    def params_feature_extraction(self, source=0, energy_percentile=None, interval_range=[1, 500], lts_maker=False, folder_id=[], path='./'):
+    def params_feature_extraction(self, source=0, energy_percentile=None, interval_range=[1, 500], waveform_extraction=False, lts_maker=False, folder_id=[], path='./'):
         """
         Define feature extraction parameters. 
         
@@ -280,6 +280,7 @@ class batch_processing:
         self.interval_range=interval_range
         self.save_feature_folder_id=folder_id
         self.save_feature_path=path
+        self.waveform_extraction=waveform_extraction
 
     def params_tonal_detection(self, source=0, tonal_threshold=0.5, smooth=1.5, threshold=3, folder_id=[], path='./'):
         """
@@ -488,9 +489,13 @@ class batch_processing:
             if self.run_feature_extraction:
                 if self.run_separation:
                     filename=self.audioname[file][:-4]+'_S'+str(self.feature_source)+'.mat'
-                    #sp.feature_extraction(model.separation[self.feature_source-1], model.f, 
-                    #                      energy_percentile=self.energy_percentile, interval_range=self.interval_range, 
-                    #                      filename=filename, folder_id=self.save_feature_folder_id, path=self.save_feature_path)
+                    if self.waveform_extraction:
+                        audio.FFT_size=np.round(audio.FFT_size/(audio.sf/(self.f_range[1]*2)))
+                        audio.sf=self.f_range[1]*2
+                        audio.convert_audio(model.separation[self.feature_source-1])
+                        sp.x=audio.xrec
+                        sp.sf=audio.sf
+                        sp.input_type='Waveform'
                 else:
                     filename=self.audioname[file][:-4]+'.mat'
                 sp.feature_extraction(interval_range=self.interval_range, energy_percentile=self.energy_percentile,
