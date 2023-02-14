@@ -730,6 +730,7 @@ class spectrogram_detection:
     """
     def __init__(self, input, f, threshold, smooth=0, minimum_interval=0, minimum_duration=None, maximum_duration=None, pad_size=0, filename='Detection.txt', folder_id=[], path='./', status_print=True, show_result=True, run_detection=True):
         from scipy.ndimage import gaussian_filter
+        self.input_type='Spectrogram'
         self.input=input
         self.f=f
         if not run_detection:
@@ -878,7 +879,11 @@ class spectrogram_detection:
         for n in range(0, self.detection.shape[0]):
             detection_list=np.where(((self.input[:,0]>=self.detection[n,0])*(self.input[:,0]<=self.detection[n,1]))==1)[0]
             # Analyze pulse structure
-            pulse_analysis_result=pulse_interval(self.input[detection_list,:], energy_percentile=energy_percentile, interval_range=interval_range, plot_type=None, standardization=True)
+            if self.input_type=='Spectrogram':
+                pulse_analysis_result=pulse_interval(self.input[detection_list,:], energy_percentile=energy_percentile, interval_range=interval_range, plot_type=None, standardization=True)
+            elif self.input_type=='Waveform':
+                event_list=[np.floor(self.detection[n,0]*self.sf), np.ceil(self.detection[n,1]*self.sf)]############
+                pulse_analysis_result=pulse_interval(self.x[int(event_list[0]):int(event_list[1])], sf=self.sf, interval_range=interval_range, plot_type=None, standardization=True)############
             # Analyze spectral features
             spectral_result=np.mean(self.input[detection_list,1:], axis=0)
             if n==0:
