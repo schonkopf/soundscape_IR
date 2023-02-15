@@ -882,8 +882,12 @@ class spectrogram_detection:
             if self.input_type=='Spectrogram':
                 pulse_analysis_result=pulse_interval(self.input[detection_list,:], energy_percentile=energy_percentile, interval_range=interval_range, plot_type=None, standardization=True)
             elif self.input_type=='Waveform':
-                event_list=[np.floor(self.detection[n,0]*self.sf), np.ceil(self.detection[n,1]*self.sf)]############
-                pulse_analysis_result=pulse_interval(self.x[int(event_list[0]):int(event_list[1])], sf=self.sf, interval_range=interval_range, plot_type=None, standardization=True)############
+                event_list=[np.floor(self.detection[n,0]*self.sf), np.ceil(self.detection[n,1]*self.sf)]
+                if event_list[0]<0:
+                    event_list[0]=0
+                if event_list[1]>len(self.x):
+                    event_list[1]=len(self.x)
+                pulse_analysis_result=pulse_interval(self.x[int(event_list[0]):int(event_list[1])], sf=self.sf, interval_range=interval_range, plot_type=None, standardization=True)
             # Analyze spectral features
             spectral_result=np.mean(self.input[detection_list,1:], axis=0)
             if n==0:
