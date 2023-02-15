@@ -490,10 +490,10 @@ class batch_processing:
                 if self.run_separation:
                     filename=self.audioname[file][:-4]+'_S'+str(self.feature_source)+'.mat'
                     if self.waveform_extraction:
-                        audio.FFT_size=np.round(audio.FFT_size/(audio.sf/(self.f_range[1]*2)))
-                        audio.sf=self.f_range[1]*2
+                        audio.FFT_size=np.round(audio.FFT_size/(audio.sf/np.round(audio.f[-1]*2)))
+                        audio.sf=np.round(audio.f[-1]*2)
                         audio.convert_audio(model.separation[self.feature_source-1])
-                        sp.x=audio.xrec
+                        sp.x=np.append(np.zeros((int(np.round(self.offset_read*audio.sf)),1)), audio.xrec)
                         sp.sf=audio.sf
                         sp.input_type='Waveform'
                 else:
