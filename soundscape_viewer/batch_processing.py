@@ -343,6 +343,7 @@ class batch_processing:
         self.format_initial = initial
         self.dateformat = dateformat
         self.year_initial = year_initial
+        self.time_vec=np.array([])
 
     def run(self, start=1, num_file=None):
         """
@@ -538,16 +539,17 @@ class batch_processing:
                         self.model.time_vec = np.concatenate((self.model.time_vec,str2ord*np.ones((temp_model.W.shape[1],))), axis=None)
                 elif self.run_load_result==2:
                     data = loadmat(path+'/'+temp)
-                    if file==self.start:
-                        self.PI = np.array(data['save_features']['PI'].item()[0])
-                        self.PI_result = data['save_features']['PI_result'].item()
-                        self.f = np.array(data['save_features']['f'].item()[0])
-                        self.spectral_result = data['save_features']['spectral_result'].item()
-                        self.time_vec = data['save_features']['detection'].item()[:,0]+str2ord*24*3600
-                    else:
-                        self.time_vec = np.append(self.time_vec, data['save_features']['detection'].item()[:,0]+str2ord*24*3600)
-                        self.PI_result = np.vstack((self.PI_result, data['save_features']['PI_result'].item()))
-                        self.spectral_result = np.vstack((self.spectral_result, data['save_features']['spectral_result'].item()))
+                    if len(data['save_features']['PI'].item())>0:
+                        if len(self.time_vec)==0:
+                            self.PI = np.array(data['save_features']['PI'].item()[0])
+                            self.PI_result = data['save_features']['PI_result'].item()
+                            self.f = np.array(data['save_features']['f'].item()[0])
+                            self.spectral_result = data['save_features']['spectral_result'].item()
+                            self.time_vec = data['save_features']['detection'].item()[:,0]+str2ord*24*3600
+                        else:
+                            self.time_vec = np.append(self.time_vec, data['save_features']['detection'].item()[:,0]+str2ord*24*3600)
+                            self.PI_result = np.vstack((self.PI_result, data['save_features']['PI_result'].item()))
+                            self.spectral_result = np.vstack((self.spectral_result, data['save_features']['spectral_result'].item()))
                 elif self.run_load_result==3:
                     df = pd.read_table(path+'/'+temp,index_col=0) 
                     df[['Begin Time (s)', 'End Time (s)']]=df[['Begin Time (s)', 'End Time (s)']]+str2ord*24*3600
