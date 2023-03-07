@@ -355,7 +355,7 @@ class source_separation:
         return output
     
     def nmf_output(self, data, time_vec, baseline=0):
-        self.original_level = 10*np.log10((10**(data.T[:,1:]/10)).sum(axis=1))
+        self.original_level = 10*np.log10((10**((data.T[:,1:]+baseline)/10)).sum(axis=1))
         separation=np.zeros(self.source_num, dtype=object)
         relative_level=np.zeros(self.source_num, dtype=object)
         matrix_shape=data.shape
