@@ -186,7 +186,7 @@ class batch_processing:
         self.save_basis_folder_id = folder_id
         self.save_basis_path = path
 
-    def params_spectrogram_detection(self, source=0, threshold=6, smooth=0, minimum_interval=0, minimum_duration = None, maximum_duration=None, pad_size=0, folder_id=[], path='./', show_result=False):
+    def params_spectrogram_detection(self, source=0, threshold=6, smooth=0, minimum_interval=0, minimum_duration = None, maximum_duration=None, pad_size=0, folder_id=[], path='./', show_result=False, save_clip_path=None):
         """
         Define parameters for spectrogram-based sound detection. 
         
@@ -236,6 +236,7 @@ class batch_processing:
         self.detection_folder_id = folder_id
         self.detection_path = path
         self.show_result = show_result
+        self.save_clip_path = save_clip_path
   
     def params_lts_maker(self, source=1, time_resolution=[], dateformat='yyyymmdd_HHMMSS', initial=[], year_initial=0, filename='Separation_LTS.mat', folder_id=[], path='./'):
         """
@@ -464,6 +465,11 @@ class batch_processing:
                                                  minimum_duration=self.minimum_duration[n], maximum_duration=self.maximum_duration[n],
                                                  pad_size=self.padding[n], filename=filename, folder_id=self.detection_folder_id,
                                                  path=self.detection_path, status_print=False, show_result=self.show_result)
+                        if self.save_clip_path:
+                            if sp.detection.shape[0]>0:
+                                audio = audio_visualization(self.audioname[file], path=path, channel=self.channel, sensitivity=self.sensitivity,
+                                                environment=self.environment, plot_type=None,
+                                                annotation = self.detection_path+'/'+filename, save_clip_path=self.save_clip_path)
 
             if self.run_tonal:
                 if self.run_separation:
