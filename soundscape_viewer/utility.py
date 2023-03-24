@@ -9,6 +9,7 @@ import os
 import matplotlib.patches as patches
 from scipy.io import savemat
 import copy
+import soundfile
 
 class gdrive_handle:
     def __init__(self, folder_id, status_print=True):
@@ -237,7 +238,7 @@ class audio_visualization:
     
     .. [2] Lin, T.-H., Akamatsu, T., & Tsao, Y. (2021). Sensing ecosystem dynamics via audio source separation: A case study of marine soundscapes off northeastern Taiwan. PLoS Computational Biology, 17(2), e1008698. https://doi.org/10.1371/journ al.pcbi.1008698
     """
-    def __init__(self, filename, path=None,  channel=1, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=None, sensitivity=0, environment='wat', plot_type='Spectrogram', vmin=None, vmax=None, prewhiten_percent=None, mel_comp=None, annotation=None, padding=0):
+    def __init__(self, filename, path=None,  channel=1, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=None, sensitivity=0, environment='wat', plot_type='Spectrogram', vmin=None, vmax=None, prewhiten_percent=None, mel_comp=None, annotation=None, padding=0, save_clip_path=None):
         if not path:
             path=os.getcwd()
         
@@ -266,7 +267,9 @@ class audio_visualization:
                         time_notation = (i+1)*np.ones((spec.shape[0],1),dtype = int)
                     else:
                         spec = np.vstack((spec, self.data))
-                        time_notation = np.vstack((time_notation, (i+1)*np.ones((self.data.shape[0],1),dtype = int)))              
+                        time_notation = np.vstack((time_notation, (i+1)*np.ones((self.data.shape[0],1),dtype = int)))
+                    if save_clip_path:
+                        soundfile.write(save_clip_path+'/'+filename+str(i+1)+'.wav', x, sf)
 
                 spec[:,0]=np.arange(spec.shape[0])*(spec[1,0]-spec[0,0])
                 self.data=np.array(spec)
