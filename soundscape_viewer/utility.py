@@ -269,7 +269,7 @@ class audio_visualization:
                         spec = np.vstack((spec, self.data))
                         time_notation = np.vstack((time_notation, (i+1)*np.ones((self.data.shape[0],1),dtype = int)))
                     if save_clip_path:
-                        soundfile.write(save_clip_path+'/'+filename+str(i+1)+'.wav', x, sf)
+                        soundfile.write(save_clip_path+'/'+filename[0:-3]+str(i+1)+'.wav', x, sf)
 
                 spec[:,0]=np.arange(spec.shape[0])*(spec[1,0]-spec[0,0])
                 self.data=np.array(spec)
