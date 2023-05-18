@@ -374,7 +374,7 @@ class batch_processing:
 
         self.start = start-1
         if not num_file:
-            num_file=len(self.audioname)
+            num_file=len(self.audioname)-self.start
         run_list=range(self.start, self.start+num_file)
 
         if self.run_separation:
