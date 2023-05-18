@@ -398,7 +398,7 @@ class lts_viewer:
                 input_data[:,0]=time_vec
             if gap_fill:
                 input_data=matrix_operation().gap_fill(time_vec=time_vec, data=input_data[:,1:], tail=[])
-                input_data[:,0]=input_data[:,0]+693960-366
+                input_data[:,0]=input_data[:,0]+693960
             return input_data, f
 
 class data_organize:
