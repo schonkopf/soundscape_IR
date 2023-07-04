@@ -127,6 +127,12 @@ class lts_viewer:
         f_list=np.concatenate([np.array([0]), f_list+1])
         Result_median = data['Result']['LTS_median'].item()[:,f_list]
         Result_mean = data['Result']['LTS_mean'].item()[:,f_list]
+        self.f = np.array(data['Result']['f'].item()[0])
+        self.FFT_size = data['Parameters']['FFT_size']
+        self.overlap = data['Parameters']['overlap']
+        self.sensitivity = data['Parameters']['sensitivity']
+        self.sampling_freq = data['Parameters']['sampling_freq']
+        self.channel = data['Parameters']['channel']
 
         if self.Result_median.size == 0:
             self.Result_median = np.array(Result_median)
@@ -400,6 +406,27 @@ class lts_viewer:
                 input_data=matrix_operation().gap_fill(time_vec=time_vec, data=input_data[:,1:], tail=[])
                 input_data[:,0]=input_data[:,0]+693960
             return input_data, f
+
+    def section_fragment(self, slice_df):
+        ndf=np.array([])
+        for i in range(len(slice_df)):
+            list=np.where(((self.Result_median[:,0:1]>=slice_df['Begin_time'][i])*(self.Result_median[:,0:1]<=slice_df['End_time'][i]))==1)[0]
+            if ndf.size == 0:
+                ndf=self.Result_median[list,]
+                ndf2=self.Result_mean[list,]
+            else:
+                ndf=np.vstack((ndf, self.Result_median[list,]))
+                ndf2=np.vstack((ndf2, self.Result_mean[list,]))
+        self.Result_median=np.array(ndf)
+        self.Result_mean=np.array(ndf2)
+
+    def save_lts(self, save_filename):
+        Result=save_parameters()
+        Parameters=save_parameters()
+        Result.LTS_Result(self.Result_median, self.Result_mean, self.f)
+        Parameters.LTS_Parameters(self.FFT_size, self.overlap, self.sensitivity, self.sampling_freq, self.channel)
+        savemat(save_filename, {'Result':Result,'Parameters':Parameters})
+        print('Successifully save to '+save_filename)
 
 class data_organize:
     """
