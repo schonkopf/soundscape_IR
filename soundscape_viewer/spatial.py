@@ -117,7 +117,7 @@ class spatial_mapping():
     yy=np.arange(np.floor(np.min(y)/mapping_resolution)*mapping_resolution,np.ceil(np.max(y)/mapping_resolution)*mapping_resolution+mapping_resolution,mapping_resolution)
     grid_x, grid_y = np.meshgrid(xx, yy, indexing='ij')
 
-    #fig, ax = plt.subplots(figsize=(int(np.round(10*(np.max(x)-np.min(x))/(np.max(y)-np.min(y)))), int(np.round(10*(np.max(y)-np.min(y))/(np.max(x)-np.min(x))))))
+    fig, ax = plt.subplots(figsize=(int(np.round(10*(np.max(x)-np.min(x))/(np.max(y)-np.min(y)))), int(np.round(10*(np.max(y)-np.min(y))/(np.max(x)-np.min(x))))))
     if plot_type=='contour' or plot_type=='both':
       self.grid = griddata(np.hstack((x[:,None],y[:,None])), z, (grid_x, grid_y), method='cubic')
       if vmin:
@@ -150,6 +150,7 @@ class spatial_mapping():
       else:
         _,_=plt.xlim((np.min(x),np.max(x)))
         _,_=plt.ylim((np.min(y),np.max(y)))
+    plt.show()
     return fig, ax
 
   def interactive_map(self, input_data, plot_type='markers+lines', vmin=None, vmax=None, title=None, fig_width=800, fig_height=600, html_name=None):
