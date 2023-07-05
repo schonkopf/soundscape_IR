@@ -8,12 +8,12 @@ from matplotlib.ticker import MaxNLocator
 import plotly.graph_objects as go
 
 class spatial_mapping():
-  def __init__(self, data, gps, fragments, resolution=None, tolerance=60, mean=True, gps_utc=0):
+  def __init__(self, data, gps, fragments=None, resolution=None, tolerance=60, mean=True, gps_utc=0):
     data=pd.DataFrame(data,columns=['Time',1])
     data['Time']=pd.to_datetime(data['Time']-693962,unit='D',origin=pd.Timestamp('1900-01-01'),utc=True)
     gps=pd.read_csv(gps)
     gps.time=pd.to_datetime(gps.time)+timedelta(hours=gps_utc)
-    if fragments:
+    if type(fragments)!='NoneType':
         self.data=self.extract_fragments(data, gps, fragments, resolution, tolerance, mean, fragment_method='time')
 
   def add_transect(self, data, gps, fragments=None, resolution=None, tolerance=60, mean=True, gps_utc=0):
@@ -21,26 +21,25 @@ class spatial_mapping():
     data['Time']=pd.to_datetime(data['Time']-693962,unit='D',origin=pd.Timestamp('1900-01-01'),utc=True)
     gps=pd.read_csv(gps)
     gps.time=pd.to_datetime(gps.time)+timedelta(hours=gps_utc)
-    if fragments:
+    if type(fragments)!='NoneType':
         self.data=self.data.append(self.extract_fragments(data, gps, fragments, resolution, tolerance, mean, fragment_method='time'),ignore_index=True)
         
   def extract_fragments(self, data, gps, fragments, resolution=None, tolerance=60, mean=True, fragment_method='time'):
     # fragments: a csv file contains beginning and ending time of recording sessions
     # Or providing a time interval (seconds) for separating recording sessions
-    if type(fragments)==str:
-      if fragments[-3:].lower()=='csv':
-        slice_df=pd.read_csv(fragments, sep=',')
+    if type(fragments)==int:
+        segment_list=np.diff(data['Time'])
+        slice_df=pd.DataFrame()
+        slice_df['Begin_time']=data['Time'].values[np.concatenate(([0],np.where(segment_list>timedelta(seconds=fragments))[0]+1))]
+        slice_df['End_time']=data['Time'].values[np.concatenate((np.where(segment_list>timedelta(seconds=fragments))[0],[len(data)-1]))]
+        slice_df['Begin_time']=pd.to_datetime(slice_df['Begin_time'],utc=True)
+        slice_df['End_time']=pd.to_datetime(slice_df['End_time'],utc=True)
+    else:
+        slice_df=fragments
         if fragment_method=='time':
-          slice_df['Begin_time']=pd.to_datetime(slice_df['Begin_time'],utc=True)
-          slice_df['End_time']=pd.to_datetime(slice_df['End_time'],utc=True)
-    elif type(fragments)==int:
-      segment_list=np.diff(data['Time'])
-      slice_df=pd.DataFrame()
-      slice_df['Begin_time']=data['Time'].values[np.concatenate(([0],np.where(segment_list>timedelta(seconds=fragments))[0]+1))]
-      slice_df['End_time']=data['Time'].values[np.concatenate((np.where(segment_list>timedelta(seconds=fragments))[0],[len(data)-1]))]
-      slice_df['Begin_time']=pd.to_datetime(slice_df['Begin_time'],utc=True)
-      slice_df['End_time']=pd.to_datetime(slice_df['End_time'],utc=True)
-
+          slice_df['Begin_time']=pd.to_datetime(slice_df['Begin_time']-2,unit='D',origin=pd.Timestamp('1900-01-01'),utc=True)
+          slice_df['End_time']=pd.to_datetime(slice_df['End_time']-2,unit='D',origin=pd.Timestamp('1900-01-01'),utc=True)
+        
     ndf=pd.DataFrame()
     if fragment_method=='time':
       for i in range(0, len(slice_df)):
@@ -48,7 +47,6 @@ class spatial_mapping():
         data_list=np.where(temp>=timedelta(seconds=0))[0]
         temp2=data['Time']-slice_df['End_time'][i]
         data_list2=np.where(temp2<=timedelta(seconds=0))[0]
-
         if mean:
           fragment_data=data.loc[data_list[temp[data_list].argmin()]:data_list2[temp2[data_list2].argmax()]+1]
           if not resolution:
