@@ -293,7 +293,7 @@ class lts_viewer:
         cbar3 = fig.colorbar(im3, ax=ax3)
         #cbar3.set_label('SNR')
 
-    def input_selection(self, var_name='median', begin_date=None, end_date=None, f_range=None, prewhiten_percent=0, gap_fill=False, annotation=None, padding=0, annotation_target=None):
+    def input_selection(self, var_name='median', begin_date=None, end_date=None, f_range=None, prewhiten_percent=0, gap_fill=False, annotation=None, padding=0, annotation_target=None, zero_replace=True):
         """
         Extract a specific part of long-term spectrogram.
         
@@ -400,7 +400,8 @@ class lts_viewer:
             time_vec=input_data[:,0]
             if prewhiten_percent>0:
                 input_data, ambient=matrix_operation.prewhiten(input_data, prewhiten_percent, 0)
-                input_data[input_data<0]=0
+                if zero_replace:
+                    input_data[input_data<0]=0
                 input_data[:,0]=time_vec
             if gap_fill:
                 input_data=matrix_operation().gap_fill(time_vec=time_vec, data=input_data[:,1:], tail=[])
