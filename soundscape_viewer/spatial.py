@@ -47,18 +47,19 @@ class spatial_mapping():
         data_list=np.where(temp>=timedelta(seconds=0))[0]
         temp2=data['Time']-slice_df['End_time'][i]
         data_list2=np.where(temp2<=timedelta(seconds=0))[0]
-        if mean:
-          fragment_data=data.loc[data_list[temp[data_list].argmin()]:data_list2[temp2[data_list2].argmax()]+1]
-          if not resolution:
-            result=np.mean(fragment_data)
-            result['Time']=data.loc[data_list[temp[data_list].argmin()],'Time']
-          else:
-            fragment_data.set_index('Time', inplace=True)
-            result=fragment_data.resample(f'{resolution}S', origin='start').mean()
-            result.reset_index(drop=False, inplace=True)
-        else:
-          result=data.loc[data_list[temp[data_list].argmin()]:data_list2[temp2[data_list2].argmax()]+1]
-        ndf=ndf.append(result,ignore_index=True)
+        if len(data_list)>0:
+            if mean:
+                fragment_data=data.loc[data_list[temp[data_list].argmin()]:data_list2[temp2[data_list2].argmax()]+1]
+                if not resolution:
+                    result=np.mean(fragment_data)
+                    result['Time']=data.loc[data_list[temp[data_list].argmin()],'Time']
+                else:
+                    fragment_data.set_index('Time', inplace=True)
+                    result=fragment_data.resample(f'{resolution}S', origin='start').mean()
+                    result.reset_index(drop=False, inplace=True)
+            else:
+                result=data.loc[data_list[temp[data_list].argmin()]:data_list2[temp2[data_list2].argmax()]+1]
+            ndf=ndf.append(result,ignore_index=True)
     elif fragment_method=='site':
       site_list=np.unique(fragments)
       for site in site_list:
@@ -174,3 +175,4 @@ class spatial_mapping():
     if html_name:
         fig.write_html(file=html_name)
     return fig
+    
