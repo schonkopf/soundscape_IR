@@ -8,13 +8,15 @@ from matplotlib.ticker import MaxNLocator
 import plotly.graph_objects as go
 
 class spatial_mapping():
-  def __init__(self, data, gps, fragments=None, resolution=None, tolerance=60, mean=True, gps_utc=0):
+  def __init__(self, data, gps, fragments=None, resolution=None, tolerance=60, mean=True, gps_utc=0, fragment_method='time'):
     data=pd.DataFrame(data,columns=['Time',1])
     data['Time']=pd.to_datetime(data['Time']-693962,unit='D',origin=pd.Timestamp('1900-01-01'),utc=True)
     gps=pd.read_csv(gps)
     gps.time=pd.to_datetime(gps.time)+timedelta(hours=gps_utc)
-    if type(fragments)!='NoneType':
-        self.data=self.extract_fragments(data, gps, fragments, resolution, tolerance, mean, fragment_method='time')
+    if fragments!=None:
+        self.data=self.extract_fragments(data, gps, fragments, resolution, tolerance, mean, fragment_method=fragment_method)
+    else:
+        self.data=self.gps_mapping(data, gps, fragment_method, tolerance)
 
   def add_transect(self, data, gps, fragments=None, resolution=None, tolerance=60, mean=True, gps_utc=0):
     data=pd.DataFrame(data,columns=['Time',1])
@@ -175,4 +177,3 @@ class spatial_mapping():
     if html_name:
         fig.write_html(file=html_name)
     return fig
-    
