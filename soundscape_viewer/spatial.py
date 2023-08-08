@@ -13,7 +13,7 @@ class spatial_mapping():
     data['Time']=pd.to_datetime(data['Time']-693962,unit='D',origin=pd.Timestamp('1900-01-01'),utc=True)
     gps=pd.read_csv(gps)
     gps.time=pd.to_datetime(gps.time)+timedelta(hours=gps_utc)
-    if fragments!=None:
+    if fragments is None:
         self.data=self.extract_fragments(data, gps, fragments, resolution, tolerance, mean, fragment_method=fragment_method)
     else:
         self.data=self.gps_mapping(data, gps, fragment_method, tolerance)
