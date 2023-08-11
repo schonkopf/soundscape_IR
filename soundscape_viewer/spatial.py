@@ -14,9 +14,9 @@ class spatial_mapping():
     gps=pd.read_csv(gps)
     gps.time=pd.to_datetime(gps.time)+timedelta(hours=gps_utc)
     if fragments is None:
-        self.data=self.extract_fragments(data, gps, fragments, resolution, tolerance, mean, fragment_method=fragment_method)
-    else:
         self.data=self.gps_mapping(data, gps, fragment_method, tolerance)
+    else:
+        self.data=self.extract_fragments(data, gps, fragments, resolution, tolerance, mean, fragment_method=fragment_method)
 
   def add_transect(self, data, gps, fragments=None, resolution=None, tolerance=60, mean=True, gps_utc=0):
     data=pd.DataFrame(data,columns=['Time',1])
