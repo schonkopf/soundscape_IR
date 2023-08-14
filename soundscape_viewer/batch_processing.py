@@ -526,29 +526,26 @@ class batch_processing:
                         path = self.link
                 print('Processing file no. '+str(file+1)+' :'+temp+', in total: '+str(num_file)+' files', flush=True, end='')
 
-                if not self.dateformat is None:
-                    if self.dateformat:
-                        if file==self.start:
-                            format_idx = lts_maker()
-                            format_idx.filename_check(dateformat=self.dateformat, initial=self.format_initial, 
-                                                    year_initial=self.year_initial, filename=temp)
-                        format_idx.get_file_time(temp)
-                        str2ord=format_idx.time_vec/24/3600
-                    else:
-                        str2ord=int(temp[len(self.format_initial):-4])
+                if self.dateformat:
+                    if file==self.start:
+                        format_idx = lts_maker()
+                        format_idx.filename_check(dateformat=self.dateformat, initial=self.format_initial, 
+                                                year_initial=self.year_initial, filename=temp)
+                    format_idx.get_file_time(temp)
+                    str2ord=format_idx.time_vec/24/3600
+                else:
+                    str2ord=int(temp[len(self.format_initial):-4])
                     
                 if self.run_load_result==1:
                     temp_model = source_separation()
                     temp_model.load_model(path+'/'+temp, model_check = False)
                     if file==self.start:
                         self.model = copy.deepcopy(temp_model)
-                        if not self.dateformat is None:
-                            self.model.time_vec = str2ord*np.ones((temp_model.W.shape[1],))
+                        self.model.time_vec = str2ord*np.ones((temp_model.W.shape[1],))
                     else:
                         self.model.W = np.concatenate((self.model.W, temp_model.W), axis=1)
                         self.model.W_cluster = np.concatenate((self.model.W_cluster, temp_model.W_cluster), axis=None)
-                        if not self.dateformat is None:
-                            self.model.time_vec = np.concatenate((self.model.time_vec,str2ord*np.ones((temp_model.W.shape[1],))), axis=None)
+                        self.model.time_vec = np.concatenate((self.model.time_vec,str2ord*np.ones((temp_model.W.shape[1],))), axis=None)
                 elif self.run_load_result==2:
                     data = loadmat(path+'/'+temp)
                     if len(data['save_features']['PI'].item())>0:
@@ -576,7 +573,7 @@ class batch_processing:
                     os.remove(temp2['title'])
 
         if self.run_load_result==1:
-            if not self.dateformat is None:
+            if self.dateformat:
                 temp = np.argsort(self.model.time_vec)
                 self.model.W=self.model.W[:,temp]
                 self.model.W_cluster=self.model.W_cluster[temp]
