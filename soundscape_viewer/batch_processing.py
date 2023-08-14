@@ -66,11 +66,11 @@ class batch_processing:
     >>> batch.run()
 
     """
-    def __init__(self, folder=[], folder_id=[], file_extension='.wav', annotation_extension=None):
+    def __init__(self, folder=[], folder_id=[], file_extension='.wav', annotation_extension=None, query_list=None):
         if folder:
             self.collect_folder(folder, file_extension)
         elif folder_id:
-            self.Gdrive, self.link, self.audioname=self.collect_Gdrive(folder_id, file_extension)
+            self.Gdrive, self.link, self.audioname=self.collect_Gdrive(folder_id, file_extension, query_list)
             if annotation_extension:
                 self.Gdrive_selections, _, _=self.collect_Gdrive(folder_id, '.txt')
         self.Raven_selections=annotation_extension
@@ -95,11 +95,14 @@ class batch_processing:
                 self.audioname = np.append(self.audioname, filename)
         print('Identified ', len(self.audioname), 'files')
     
-    def collect_Gdrive(self, folder_id, file_extension='.wav'):
+    def collect_Gdrive(self, folder_id, file_extension='.wav', query_list=None):
         from soundscape_IR.soundscape_viewer.utility import gdrive_handle
         from natsort import index_natsorted
-        Gdrive=gdrive_handle(folder_id, status_print=False)
-        Gdrive.list_query(file_extension=file_extension)
+        if not query_list:
+            Gdrive=gdrive_handle(folder_id)
+            Gdrive.list_query(file_extension=file_extension)
+        else:
+            Gdrive=query_list
         self.cloud=2
         link=np.array([], dtype=object)
         audioname=np.array([], dtype=object)
