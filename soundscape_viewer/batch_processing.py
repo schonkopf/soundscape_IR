@@ -534,7 +534,10 @@ class batch_processing:
                     format_idx.get_file_time(temp)
                     str2ord=format_idx.time_vec/24/3600
                 else:
-                    str2ord=int(temp[len(self.format_initial):-4])
+                    if len(temp[len(self.format_initial):-4])==0:
+                        str2ord=0
+                    else:
+                        str2ord=int(temp[len(self.format_initial):-4])
                     
                 if self.run_load_result==1:
                     temp_model = source_separation()
