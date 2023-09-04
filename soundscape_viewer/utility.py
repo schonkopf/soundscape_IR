@@ -794,7 +794,7 @@ class spectrogram_detection:
                 snr=np.append(snr, np.max(psd))
             self.output=np.vstack([np.arange(len(begin))+1, np.repeat('Spectrogram',len(begin)), np.repeat(1,len(begin)), begin, ending, min_F, max_F, snr]).T
             self.detection=np.vstack((begin, ending)).T
-            self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)', 'Maximum SNR (dB)']
+            self.header=['Selection', 'View', 'Channel', 'Begin Time (s)', 'End Time (s)', 'Low Freq (Hz)', 'High Freq (Hz)', 'Maximum SNR (dB)']
             if filename:
                 self.save_txt(filename=filename, path=path, folder_id=folder_id, status_print=status_print)
             if show_result:
@@ -1124,7 +1124,7 @@ class tonal_detection:
             rc=np.nonzero(temp2>self.threshold)
             amp=temp2.flatten()
             amp=amp[np.where((amp>self.threshold))[0]]
-            detection=pd.DataFrame(np.hstack((input[rc[0],0:1], input[rc[0],0:1], f[rc[1]][:,None], f[rc[1]][:,None], amp[:,None])), columns = ['Begin Time (s)', 'End Time (s)', 'Low Frequency (Hz)', 'High Frequency (Hz)','SNR (dB)'])
+            detection=pd.DataFrame(np.hstack((input[rc[0],0:1], input[rc[0],0:1], f[rc[1]][:,None], f[rc[1]][:,None], amp[:,None])), columns = ['Begin Time (s)', 'End Time (s)', 'Low Freq (Hz)', 'High Freq (Hz)','SNR (dB)'])
             if filename:
                 detection.to_csv(path+'/'+filename, sep='\t', index=False)
                 if folder_id:
