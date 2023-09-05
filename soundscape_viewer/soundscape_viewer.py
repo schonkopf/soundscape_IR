@@ -99,7 +99,7 @@ class lts_viewer:
     .. [2] Lin, T.-H., Akamatsu, T.*, Sinniger, F., Harii, S. (2021) Exploring coral reef biodiversity via underwater soundscapes. Biological Conservation, 253: 108901. https://doi.org/10.1016/j.biocon.2020.108901
 
     """
-    def __init__(self, path=None, folder_id=[], f_range=None, time_sort=True, parameter_check=False, subfolder=False):
+    def __init__(self, path=None, folder_id=[], f_range=None, time_sort=True, parameter_check=False, subfolder=False, utc=0):
         self.Result_median=np.array([])
         self.Result_mean=np.array([])
         self.Result_diff=np.array([])
@@ -109,6 +109,12 @@ class lts_viewer:
                 self.collect_folder(path, f_range, time_sort, parameter_check, subfolder)
         else:
             self.collect_Gdrive(folder_id, f_range, time_sort, parameter_check, subfolder)
+        if self.Result_median.size>0:
+            self.Result_median[:,0:1]=self.Result_median[:,0:1]+utc/24
+            self.Result_mean[:,0:1]=self.Result_mean[:,0:1]+utc/24
+            self.Result_diff[:,0:1]=self.Result_diff[:,0:1]+utc/24
+        if self.Result_PI.size>0:
+            self.Result_PI[:,0:1]=self.Result_PI[:,0:1]+utc/24
 
     def assemble(self, data, time_sort=1, f_range=[], location=0):
         if any('PI' in s for s in data['Result'].dtype.names):
