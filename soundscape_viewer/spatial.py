@@ -49,7 +49,7 @@ class spatial_mapping():
         data_list=np.where(temp>=timedelta(seconds=0))[0]
         temp2=data['Time']-slice_df['End_time'][i]
         data_list2=np.where(temp2<=timedelta(seconds=0))[0]
-        if len(data_list)>0:
+        if len(data_list)*len(data_list2)>0:
             if mean:
                 fragment_data=data.loc[data_list[temp[data_list].argmin()]:data_list2[temp2[data_list2].argmax()]+1]
                 if not resolution:
