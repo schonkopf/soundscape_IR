@@ -426,6 +426,8 @@ class lts_viewer:
                 ndf2=np.vstack((ndf2, self.Result_mean[list,]))
         self.Result_median=np.array(ndf)
         self.Result_mean=np.array(ndf2)
+        self.Result_diff = self.Result_mean-self.Result_median
+        self.Result_diff[:,0] = self.Result_mean[:,0]
 
     def save_lts(self, save_filename):
         Result=save_parameters()
