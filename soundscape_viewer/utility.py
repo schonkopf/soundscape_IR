@@ -936,7 +936,7 @@ class performance_evaluation:
         return threshold, fpr, tpr
 
 class pulse_interval:
-    def __init__(self, data, sf=None, energy_percentile=None, interval_range=[1, 500], plot_type='Both', standardization=True):
+    def __init__(self, data, sf=None, energy_percentile=None, interval_range=[1, 500], plot_type='Both', standardization=True, envelope=True):
         from scipy.signal import hilbert
         if len(data.shape)==2:
             time_vec=data[:,0]
@@ -946,7 +946,8 @@ class pulse_interval:
                 data=np.mean(data[:,1:], axis=1)
         elif len(data.shape)==1:
             data=data/np.max(np.abs(data))
-            data=np.abs(hilbert(data))
+            if envelope:
+                data=np.abs(hilbert(data))
             time_vec=np.arange(len(data))/sf
         self.autocorrelation(data, time_vec, interval_range, plot_type, millisec=True, standardization=standardization)
         
