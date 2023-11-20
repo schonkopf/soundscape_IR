@@ -6,6 +6,7 @@ from scipy.interpolate import griddata
 from matplotlib.ticker import FormatStrFormatter
 from matplotlib.ticker import MaxNLocator
 import plotly.graph_objects as go
+import math
 
 class spatial_mapping():
   def __init__(self, data=None, gps=None, fragments=None, resolution=None, tolerance=60, mean=True, gps_utc=0, fragment_method='time'):
@@ -178,3 +179,39 @@ class spatial_mapping():
     if html_name:
         fig.write_html(file=html_name)
     return fig
+
+  def transform(self, coordinates, reference_point, angle_degrees):
+    radians = angle_degrees * np.pi / 180
+    transformed_coordinates = np.array([])
+
+    for lat, lon in coordinates:
+        d_lat = lat - reference_point[0]
+        d_lon = (lon - reference_point[1]) * math.cos(reference_point[0] * np.pi / 180)
+
+        x_new = d_lon * math.cos(radians) - d_lat * math.sin(radians)
+        y_new = d_lon * math.sin(radians) + d_lat * math.cos(radians)
+
+        if transformed_coordinates.size == 0:
+            transformed_coordinates = np.array([[x_new, y_new]])
+        else:
+            transformed_coordinates = np.vstack((transformed_coordinates, [x_new, y_new]))
+
+    return transformed_coordinates
+
+  def inverse_transform(self, transformed_coordinates, reference_point, angle_degrees):
+    radians = -angle_degrees * np.pi / 180
+    original_coordinates = np.array([])
+
+    for x, y in transformed_coordinates:
+        x_original = x * math.cos(radians) - y * math.sin(radians)
+        y_original = x * math.sin(radians) + y * math.cos(radians)
+
+        original_lat = y_original + reference_point[0]
+        original_lon = x_original / math.cos(reference_point[0] * np.pi / 180) + reference_point[1]
+
+        if original_coordinates.size == 0:
+            original_coordinates = np.array([[original_lat, original_lon]])
+        else:
+            original_coordinates = np.vstack((original_coordinates, [original_lat, original_lon]))
+
+    return original_coordinates
