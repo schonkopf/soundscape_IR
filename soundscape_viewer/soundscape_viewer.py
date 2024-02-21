@@ -133,7 +133,7 @@ class lts_viewer:
         f_list=np.concatenate([np.array([0]), f_list+1])
         Result_median = data['Result']['LTS_median'].item()[:,f_list]
         Result_mean = data['Result']['LTS_mean'].item()[:,f_list]
-        self.f = np.array(data['Result']['f'].item()[0])
+
         self.FFT_size = data['Parameters']['FFT_size']
         self.overlap = data['Parameters']['overlap']
         self.sensitivity = data['Parameters']['sensitivity']
