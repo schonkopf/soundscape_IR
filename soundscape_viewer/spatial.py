@@ -26,7 +26,7 @@ class spatial_mapping():
     gps=pd.read_csv(gps)
     gps.time=pd.to_datetime(gps.time)+timedelta(hours=gps_utc)
     if type(fragments)!='NoneType':
-        self.data=self.data.append(self.extract_fragments(data, gps, fragments, resolution, tolerance, mean, fragment_method='time'),ignore_index=True)
+        self.data=pd.concat([self.data, self.extract_fragments(data, gps, fragments, resolution, tolerance, mean, fragment_method='time')], ignore_index=True)
         
   def extract_fragments(self, data, gps, fragments, resolution=None, tolerance=60, mean=True, fragment_method='time'):
     # fragments: a csv file contains beginning and ending time of recording sessions
@@ -41,8 +41,9 @@ class spatial_mapping():
     else:
         slice_df=fragments
         if fragment_method=='time':
-          slice_df['Begin_time']=pd.to_datetime(slice_df['Begin_time']-2,unit='D',origin=pd.Timestamp('1900-01-01'),utc=True)
-          slice_df['End_time']=pd.to_datetime(slice_df['End_time']-2,unit='D',origin=pd.Timestamp('1900-01-01'),utc=True)
+          slice_df=slice_df-2
+          slice_df['Begin_time']=pd.to_datetime(slice_df['Begin_time'],unit='D',origin=pd.Timestamp('1900-01-01'),utc=True)
+          slice_df['End_time']=pd.to_datetime(slice_df['End_time'],unit='D',origin=pd.Timestamp('1900-01-01'),utc=True)
         
     ndf=pd.DataFrame()
     if fragment_method=='time':
@@ -63,7 +64,7 @@ class spatial_mapping():
                     result.reset_index(drop=False, inplace=True)
             else:
                 result=data.loc[data_list[temp[data_list].argmin()]:data_list2[temp2[data_list2].argmax()]+1]
-            ndf=ndf.append(result,ignore_index=True)
+            ndf=pd.concat([ndf, result], ignore_index=True)
     elif fragment_method=='site':
       site_list=np.unique(fragments)
       for site in site_list:
@@ -74,7 +75,7 @@ class spatial_mapping():
         else:
           result=data.loc[list_site]
           result['Site']=fragments[list_site]
-        ndf=ndf.append(result,ignore_index=True)
+        ndf=pd.concat([ndf, result], ignore_index=True)
     ndf=ndf.dropna().reset_index(drop=True)
     data=self.gps_mapping(ndf, gps, fragment_method, tolerance)
     return data
@@ -98,7 +99,7 @@ class spatial_mapping():
 
   def add_site(self, data_to_add, x, y):
     df=pd.DataFrame({1:data_to_add[:,1],'Time':data_to_add[:,0],'Longitude':np.matlib.repmat(x,data_to_add.shape[0],1)[:,0],'Latitude':np.matlib.repmat(y,data_to_add.shape[0],1)[:,0]})
-    self.data=self.data.append(df,ignore_index=True)
+    self.data=pd.concat([self.data, df], ignore_index=True)
 
   def hour_day_convert(self):
     self.data['Hour']=24*(self.data['Time']-np.floor(self.data['Time']))
@@ -109,7 +110,7 @@ class spatial_mapping():
     for n in np.arange(self.data.shape[0]):
         i=np.argmin(np.abs(self.data['Longitude'][n]-lon))
         j=np.argmin(np.abs(self.data['Latitude'][n]-lat))
-        depth=np.append(depth, depth_matrix[j,i])
+        depth=pd.concat([depth, depth_matrix[j,i]])
     self.data['Depth']=depth
     
   def plot_map(self, input_data, plot_type='contour', mapping_resolution=10, contour_levels=15, bounding_box=[], title=None, vmin=None, vmax=None, shapefile=None, colorbar=False):
