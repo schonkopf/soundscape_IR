@@ -110,7 +110,7 @@ class spatial_mapping():
     for n in np.arange(self.data.shape[0]):
         i=np.argmin(np.abs(self.data['Longitude'][n]-lon))
         j=np.argmin(np.abs(self.data['Latitude'][n]-lat))
-        depth=pd.concat([depth, depth_matrix[j,i]])
+        depth=np.append(depth, depth_matrix[j,i])
     self.data['Depth']=depth
     
   def plot_map(self, input_data, plot_type='contour', mapping_resolution=10, contour_levels=15, bounding_box=[], title=None, vmin=None, vmax=None, shapefile=None, colorbar=False):
