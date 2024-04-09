@@ -114,8 +114,8 @@ class spatial_mapping():
     self.data['Depth']=depth
     
   def plot_map(self, input_data, plot_type='contour', mapping_resolution=10, contour_levels=15, bounding_box=[], title=None, vmin=None, vmax=None, shapefile=None, colorbar=False):
-    x=input_data['Longitude']
-    y=input_data['Latitude']
+    x=input_data['Longitude'].to_numpy()
+    y=input_data['Latitude'].to_numpy()
     z=input_data[1]
     # mapping resolution: meters
     mapping_resolution=mapping_resolution/1000/1.852/60
