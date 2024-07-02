@@ -238,7 +238,7 @@ class audio_visualization:
     
     .. [2] Lin, T.-H., Akamatsu, T., & Tsao, Y. (2021). Sensing ecosystem dynamics via audio source separation: A case study of marine soundscapes off northeastern Taiwan. PLoS Computational Biology, 17(2), e1008698. https://doi.org/10.1371/journ al.pcbi.1008698
     """
-    def __init__(self, filename, path=None,  channel=1, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=None, sensitivity=0, environment='wat', plot_type='Spectrogram', vmin=None, vmax=None, prewhiten_percent=None, mel_comp=None, annotation=None, padding=0, save_clip_path=None):
+    def __init__(self, filename, path=None,  channel=1, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=None, sensitivity=0, environment='wat', plot_type='Spectrogram', vmin=None, vmax=None, prewhiten_percent=None, mel_comp=None, annotation=None, padding=0, save_clip_path=None, resolution_method='mean'):
         if not path:
             path=os.getcwd()
         
@@ -261,7 +261,7 @@ class audio_visualization:
                     if len(x.shape)==2:
                         x=x[channel-1,:]
                     x=x-np.mean(x)
-                    self.run(x, sf, df.iloc[i,idx_st]-padding, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, None, vmin, vmax, prewhiten_percent, mel_comp)
+                    self.run(x, sf, df.iloc[i,idx_st]-padding, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, None, vmin, vmax, prewhiten_percent, mel_comp, resolution_method)
                     if i==0:
                         spec = np.array(self.data)
                         time_notation = (i+1)*np.ones((spec.shape[0],1),dtype = int)
@@ -298,10 +298,10 @@ class audio_visualization:
                 if len(x.shape)==2:
                     x=x[channel-1,:]
                 self.x=x-np.mean(x)
-                self.run(self.x, sf, offset_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp)
+                self.run(self.x, sf, offset_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp, resolution_method)
 
             
-    def run(self, x, sf, offset_read=0, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=None, mel_comp=None):
+    def run(self, x, sf, offset_read=0, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=None, mel_comp=None, resolution_method='mean'):
         if environment=='wat':
             P_ref=1
         elif environment=='air':
@@ -326,7 +326,7 @@ class audio_visualization:
         f,t,P = scipy.signal.stft(x, fs=sf, window='hann', nperseg=FFT_size, noverlap=int(window_overlap*FFT_size), nfft=FFT_size, detrend='constant', boundary=None, padded=False)
         if time_resolution:
             P = np.abs(P)/np.power(P_ref,2)
-            P_scaled = matrix_operation().rescale(np.hstack((t[:,None], P.T)), time_resolution)
+            P_scaled = matrix_operation().rescale(np.hstack((t[:,None], P.T)), time_resolution, resolution_method)
             data=10*np.log10(P_scaled[:,1:].T)-sensitivity
             t=P_scaled[:,0]
         else:
@@ -426,12 +426,15 @@ class matrix_operation:
     def __init__(self, header=[]):
         self.header=header
 
-    def rescale(self, spec, time_reso):
+    def rescale(self, spec, time_reso, method='mean'):
         rescale_spec=spec
         time_ori=spec[0,0]
         if time_reso>(spec[1,0]-spec[0,0]):
             spec[:,0]=np.floor((spec[:,0]-spec[0,0])/time_reso)
-            rescale_spec=np.array(pd.DataFrame(spec).groupby(by=[0]).mean().reset_index())
+            if method=='mean':
+                rescale_spec=np.array(pd.DataFrame(spec).groupby(by=[0]).mean().reset_index())
+            elif method=='median':
+                rescale_spec=np.array(pd.DataFrame(spec).groupby(by=[0]).median().reset_index())
             rescale_spec[:,0]=time_reso*rescale_spec[:,0]+time_ori
         return rescale_spec
     
