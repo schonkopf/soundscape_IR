@@ -918,7 +918,7 @@ class performance_evaluation:
         time_vec=test_spec[:,0]
         self.label=0*time_vec
         for n in range(len(annotations)):
-            self.label[(time_vec>=annotations.iloc[n,2])*(time_vec<=annotations.iloc[n,3])]=1
+            self.label[((time_vec+np.diff(time_vec[0:2]))>annotations.iloc[n,2])*(time_vec<annotations.iloc[n,3])]=1
         self.level=test_spec[:,1:].max(axis=1)
         if fpr_control>0:
             threshold, fpr, tpr=self.auc(self.label, self.level, fpr_control=fpr_control, plot=plot)
