@@ -435,6 +435,10 @@ class matrix_operation:
                 rescale_spec=np.array(pd.DataFrame(spec).groupby(by=[0]).mean().reset_index())
             elif method=='median':
                 rescale_spec=np.array(pd.DataFrame(spec).groupby(by=[0]).median().reset_index())
+            elif method=='max':
+                rescale_spec=np.array(pd.DataFrame(spec).groupby(by=[0]).max().reset_index())
+            elif method=='min':
+                rescale_spec=np.array(pd.DataFrame(spec).groupby(by=[0]).min().reset_index())
             rescale_spec[:,0]=time_reso*rescale_spec[:,0]+time_ori
         return rescale_spec
     
