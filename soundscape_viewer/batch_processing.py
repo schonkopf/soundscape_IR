@@ -66,14 +66,19 @@ class batch_processing:
     >>> batch.run()
 
     """
-    def __init__(self, folder=[], folder_id=[], file_extension='.wav', annotation_extension=None, query_list=None):
+    def __init__(self, folder=[], folder_id=[], file_extension='.wav', annotation_extension=None, annotation_folder=None, query_list=None):
         if folder:
+            if not annotation_folder:
+                annotation_folder=folder
             self.collect_folder(folder, file_extension)
         elif folder_id:
             self.Gdrive, self.link, self.audioname=self.collect_Gdrive(folder_id, file_extension, query_list)
             if annotation_extension:
-                self.Gdrive_selections, _, _=self.collect_Gdrive(folder_id, '.txt')
+                if not annotation_folder:
+                    annotation_folder=folder_id
+                self.Gdrive_selections, _, _=self.collect_Gdrive(annotation_folder, '.txt')
         self.Raven_selections=annotation_extension
+        self.Raven_folder=annotation_folder
         self.run_spectrogram=False  
         self.run_separation=False
         self.run_detection=False
@@ -400,7 +405,7 @@ class batch_processing:
                     temp = self.audioname[file]
                     path = self.link
                     if self.Raven_selections:
-                        selections_filename = self.link + '/' + self.audioname[file][:-4]+self.Raven_selections
+                        selections_filename = self.Raven_folder + '/' + self.audioname[file][:-4]+self.Raven_selections
                     print('Processing file no. '+str(file+1)+' :'+temp+', in total: '+str(num_file)+' files', flush=True, end='')
 
                 if self.Raven_selections:
