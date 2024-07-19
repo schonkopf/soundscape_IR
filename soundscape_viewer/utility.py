@@ -272,27 +272,27 @@ class audio_visualization:
                         if save_clip_path:
                             soundfile.write(save_clip_path+'/'+filename[0:-3]+str(i+1)+'.wav', x, sf)
 
-                spec[:,0]=np.arange(spec.shape[0])*(spec[1,0]-spec[0,0])
-                self.data=np.array(spec)
-                self.time_notation=time_notation
-
-                if plot_type=='Spectrogram':
-                    fig, ax2 = plt.subplots(figsize=(14, 6))
-                    im = ax2.imshow(self.data[:,1:].T, vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
-                              extent=[self.data[0,0], self.data[-1,0], self.f[0], self.f[-1]], interpolation='none')
-                    ax2.set_ylabel('Frequency')
-                    ax2.set_xlabel('Time')
-                    ax2.set_title('Concatenated spectrogram of %s' % self.filename)
-
-                    if mel_comp:
-                        ymin, ymax = ax2.get_ylim()
-                        N=6
-                        ax2.set_yticks(np.round(np.linspace(ymin, ymax, N), 2)) 
-                        idx = np.linspace(0, len(self.f)-1, N, dtype = 'int')
-                        yticks = self.f[idx]+0.5
-                        ax2.set_yticklabels(yticks.astype(int))
-                    cbar = fig.colorbar(im, ax=ax2)
-                    #cbar.set_label('PSD')
+                    spec[:,0]=np.arange(spec.shape[0])*(spec[1,0]-spec[0,0])
+                    self.data=np.array(spec)
+                    self.time_notation=time_notation
+    
+                    if plot_type=='Spectrogram':
+                        fig, ax2 = plt.subplots(figsize=(14, 6))
+                        im = ax2.imshow(self.data[:,1:].T, vmin=vmin, vmax=vmax, origin='lower',  aspect='auto', cmap=cm.jet,
+                                  extent=[self.data[0,0], self.data[-1,0], self.f[0], self.f[-1]], interpolation='none')
+                        ax2.set_ylabel('Frequency')
+                        ax2.set_xlabel('Time')
+                        ax2.set_title('Concatenated spectrogram of %s' % self.filename)
+    
+                        if mel_comp:
+                            ymin, ymax = ax2.get_ylim()
+                            N=6
+                            ax2.set_yticks(np.round(np.linspace(ymin, ymax, N), 2)) 
+                            idx = np.linspace(0, len(self.f)-1, N, dtype = 'int')
+                            yticks = self.f[idx]+0.5
+                            ax2.set_yticklabels(yticks.astype(int))
+                        cbar = fig.colorbar(im, ax=ax2)
+                        #cbar.set_label('PSD')
             
             else:
                 x, _ = librosa.load(path+'/'+filename, sr=sf, offset=offset_read, duration=duration_read, mono=False)
