@@ -256,20 +256,21 @@ class audio_visualization:
                 df = pd.read_table(annotation,index_col=0) 
                 idx_st = np.where(df.columns.values == 'Begin Time (s)')[0][0]
                 idx_et = np.where(df.columns.values == 'End Time (s)')[0][0]
-                for i in range(len(df)):
-                    x, _ = librosa.load(path+'/'+filename, sr=sf, offset=df.iloc[i,idx_st]-padding, duration=df.iloc[i,idx_et]-df.iloc[i,idx_st]+padding*2, mono=False)
-                    if len(x.shape)==2:
-                        x=x[channel-1,:]
-                    x=x-np.mean(x)
-                    self.run(x, sf, df.iloc[i,idx_st]-padding, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, None, vmin, vmax, prewhiten_percent, mel_comp, resolution_method)
-                    if i==0:
-                        spec = np.array(self.data)
-                        time_notation = (i+1)*np.ones((spec.shape[0],1),dtype = int)
-                    else:
-                        spec = np.vstack((spec, self.data))
-                        time_notation = np.vstack((time_notation, (i+1)*np.ones((self.data.shape[0],1),dtype = int)))
-                    if save_clip_path:
-                        soundfile.write(save_clip_path+'/'+filename[0:-3]+str(i+1)+'.wav', x, sf)
+                if len(df)>0:
+                    for i in range(len(df)):
+                        x, _ = librosa.load(path+'/'+filename, sr=sf, offset=df.iloc[i,idx_st]-padding, duration=df.iloc[i,idx_et]-df.iloc[i,idx_st]+padding*2, mono=False)
+                        if len(x.shape)==2:
+                            x=x[channel-1,:]
+                        x=x-np.mean(x)
+                        self.run(x, sf, df.iloc[i,idx_st]-padding, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, None, vmin, vmax, prewhiten_percent, mel_comp, resolution_method)
+                        if i==0:
+                            spec = np.array(self.data)
+                            time_notation = (i+1)*np.ones((spec.shape[0],1),dtype = int)
+                        else:
+                            spec = np.vstack((spec, self.data))
+                            time_notation = np.vstack((time_notation, (i+1)*np.ones((self.data.shape[0],1),dtype = int)))
+                        if save_clip_path:
+                            soundfile.write(save_clip_path+'/'+filename[0:-3]+str(i+1)+'.wav', x, sf)
 
                 spec[:,0]=np.arange(spec.shape[0])*(spec[1,0]-spec[0,0])
                 self.data=np.array(spec)
