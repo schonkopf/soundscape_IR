@@ -250,6 +250,7 @@ class audio_visualization:
             self.FFT_size=FFT_size
             self.overlap=window_overlap
             self.filename = filename
+            self.data=np.array([])
 
             # load audio data  
             if annotation:
