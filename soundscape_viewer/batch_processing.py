@@ -384,6 +384,7 @@ class batch_processing:
         if not num_file:
             num_file=len(self.audioname)-self.start
         run_list=range(self.start, self.start+num_file)
+        folder_data=np.array([])
 
         if self.run_separation:
             model_backup = copy.deepcopy(self.model)
@@ -421,14 +422,14 @@ class batch_processing:
                                                 environment=self.environment, plot_type=None, 
                                                 prewhiten_percent=self.prewhiten_percent, mel_comp=self.mel_comp)
                 if self.folder_combine:
-                    if file==self.start:
-                        folder_data=audio.data
-                    else:
-                        folder_data=np.vstack((folder_data, audio.data))
-
-                    folder_data[:,0]=np.arange(folder_data.shape[0])*(folder_data[1,0]-folder_data[0,0])
-                    self.spectrogram=np.array(folder_data)
-                    self.f=np.array(audio.f)
+                    if len(audio.data)>0:
+                        if len(folder_data)==0:
+                            folder_data=audio.data
+                        else:
+                            folder_data=np.vstack((folder_data, audio.data))
+                            folder_data[:,0]=np.arange(folder_data.shape[0])*(folder_data[1,0]-folder_data[0,0])  
+                            self.spectrogram=folder_data
+                            self.f=audio.f
                 else:
                     if self.run_adaptive_prewhiten:
                         if file==self.start:
@@ -601,3 +602,4 @@ class batch_processing:
                 lts.save_lts(self.lts_filename, self.lts_folder_id, status_print=False)
             else:
                 lts.save_lts(self.save_lts_path+'/'+self.lts_filename, status_print=False)
+                
