@@ -113,7 +113,7 @@ class spatial_mapping():
         depth=np.append(depth, depth_matrix[j,i])
     self.data['Depth']=depth
     
-  def plot_map(self, input_data, plot_type='contour', mapping_resolution=10, contour_levels=15, bounding_box=[], title=None, vmin=None, vmax=None, shapefile=None, colorbar=False):
+  def plot_map(self, input_data, plot_type='contour', mapping_resolution=10, contour_levels=15, bounding_box=[], title=None, vmin=None, vmax=None, shapefile=None, colorbar=False, figsize=(20, 5)):
     x=input_data['Longitude'].to_numpy()
     y=input_data['Latitude'].to_numpy()
     z=input_data[1]
@@ -123,7 +123,7 @@ class spatial_mapping():
     yy=np.arange(np.floor(np.min(y)/mapping_resolution)*mapping_resolution,np.ceil(np.max(y)/mapping_resolution)*mapping_resolution+mapping_resolution,mapping_resolution)
     grid_x, grid_y = np.meshgrid(xx, yy, indexing='ij')
 
-    fig, ax = plt.subplots(figsize=(int(np.round(10*(np.max(x)-np.min(x))/(np.max(y)-np.min(y)))), int(np.round(10*(np.max(y)-np.min(y))/(np.max(x)-np.min(x))))))
+    fig, ax = plt.subplots(figsize=figsize)
     if plot_type=='contour' or plot_type=='both':
       self.grid = griddata(np.hstack((x[:,None],y[:,None])), z, (grid_x, grid_y), method='cubic')
       if vmin:
