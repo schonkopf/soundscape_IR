@@ -140,7 +140,7 @@ class spatial_mapping():
         im = ax.scatter(x, y, c=z, vmin=vmin, vmax=vmax)
         if colorbar:
           cbar= fig.colorbar(im)
-    ax.xaxis.set_major_locator(MaxNLocator(5))
+    ax.xaxis.set_major_locator(MaxNLocator(3))
     ax.yaxis.set_major_locator(MaxNLocator(5))
     ax.xaxis.set_major_formatter(FormatStrFormatter('%.3f'))
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.3f'))
