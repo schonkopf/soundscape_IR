@@ -119,9 +119,9 @@ class spatial_mapping():
     z=input_data[1]
     # mapping resolution: meters
     mapping_resolution=mapping_resolution/1000/1.852/60
-    xx=np.arange(np.floor(np.min(x)/mapping_resolution)*mapping_resolution,np.ceil(np.max(x)/mapping_resolution)*mapping_resolution+mapping_resolution,mapping_resolution)
-    yy=np.arange(np.floor(np.min(y)/mapping_resolution)*mapping_resolution,np.ceil(np.max(y)/mapping_resolution)*mapping_resolution+mapping_resolution,mapping_resolution)
-    grid_x, grid_y = np.meshgrid(xx, yy, indexing='ij')
+    self.xx=np.arange(np.floor(np.min(x)/mapping_resolution)*mapping_resolution,np.ceil(np.max(x)/mapping_resolution)*mapping_resolution+mapping_resolution,mapping_resolution)
+    self.yy=np.arange(np.floor(np.min(y)/mapping_resolution)*mapping_resolution,np.ceil(np.max(y)/mapping_resolution)*mapping_resolution+mapping_resolution,mapping_resolution)
+    grid_x, grid_y = np.meshgrid(self.xx, self.yy, indexing='ij')
 
     fig, ax = plt.subplots(figsize=figsize)
     if plot_type=='contour' or plot_type=='both':
