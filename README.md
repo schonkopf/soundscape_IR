@@ -12,7 +12,7 @@ See https://meil-brcas-org.github.io/V1.1/index.html for technical documentation
 ## Installation
 Dependencies:
 - Python>=3.7
-- numpy==1.21.6
+- numpy==1.22
 - pandas==1.3.5
 - audioread==2.1.9
 - librosa==0.8.1
