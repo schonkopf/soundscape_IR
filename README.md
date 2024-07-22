@@ -12,14 +12,14 @@ See https://meil-brcas-org.github.io/V1.1/index.html for technical documentation
 ## Installation
 Dependencies:
 - Python>=3.7
-- numpy==1.22
-- pandas==1.3.5
-- audioread==2.1.9
-- librosa==0.8.1
-- scikit-learn==1.0.2
-- scipy==1.7.3
-- matplotlib==3.2.2
-- plotly==5.5.0
+- numpy>=1.22
+- pandas>=1.3.5
+- audioread>=2.1.9
+- librosa>=0.8.1
+- scikit-learn>=1.0.2
+- scipy>=1.7.3
+- matplotlib>=3.2.2
+- plotly>=5.5.0
 
 To install **soundscape_IR**, clone the repository in your Python environment.
 ```bash
