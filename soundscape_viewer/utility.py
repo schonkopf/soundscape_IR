@@ -300,7 +300,8 @@ class audio_visualization:
                 if len(x.shape)==2:
                     x=x[channel-1,:]
                 self.x=x-np.mean(x)
-                self.run(self.x, sf, offset_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp, resolution_method)
+                if FFT_size:
+                    self.run(self.x, sf, offset_read, FFT_size, time_resolution, window_overlap, f_range, sensitivity, environment, plot_type, vmin, vmax, prewhiten_percent, mel_comp, resolution_method)
 
             
     def run(self, x, sf, offset_read=0, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=[], sensitivity=0, environment='wat', plot_type='Both', vmin=None, vmax=None, prewhiten_percent=None, mel_comp=None, resolution_method='mean'):
