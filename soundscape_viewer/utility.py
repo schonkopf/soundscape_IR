@@ -239,6 +239,7 @@ class audio_visualization:
     .. [2] Lin, T.-H., Akamatsu, T., & Tsao, Y. (2021). Sensing ecosystem dynamics via audio source separation: A case study of marine soundscapes off northeastern Taiwan. PLoS Computational Biology, 17(2), e1008698. https://doi.org/10.1371/journ al.pcbi.1008698
     """
     def __init__(self, filename, path=None,  channel=1, offset_read=0, duration_read=None, FFT_size=512, time_resolution=None, window_overlap=0.5, f_range=None, sensitivity=0, environment='wat', plot_type='Spectrogram', vmin=None, vmax=None, prewhiten_percent=None, mel_comp=None, annotation=None, padding=0, save_clip_path=None, resolution_method='mean'):
+        self.filename = filename
         if not path:
             path=os.getcwd()
         
@@ -249,7 +250,6 @@ class audio_visualization:
             self.sf=sf
             self.FFT_size=FFT_size
             self.overlap=window_overlap
-            self.filename = filename
             self.data=np.array([])
 
             # load audio data  
