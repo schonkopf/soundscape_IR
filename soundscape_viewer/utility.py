@@ -365,7 +365,8 @@ class audio_visualization:
                        extent=[t[0], t[-1], f[0], f[-1]], interpolation='none')
             ax2.set_ylabel('Frequency')
             ax2.set_xlabel('Time')
-            ax2.set_title('Spectrogram of %s' % self.filename)
+            if self.filename:
+                ax2.set_title('Spectrogram of %s' % self.filename)
             if mel_comp:
                 ymin, ymax = ax2.get_ylim()
                 N=6
