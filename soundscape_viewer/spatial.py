@@ -158,7 +158,7 @@ class spatial_mapping():
           grid = np.clip(grid, vmin, vmax) # limit lower and upper bounds
         grid = np.nan_to_num(grid, nan=0) # nan caused by the 'cubic' method does not extrapolate, fill the values with 0
         grid = [(v - np.min(grid)) / (np.max(grid) - np.min(grid)) for v in grid] # normalize to [0, 1] interval
-        self.grid[i] = np.nan_to_num(grid, nan=0) # nan caused by zero division (min==max), fill the values with 1
+        self.grid[i] = np.nan_to_num(grid, nan=0) # nan caused by zero division (min==max), fill the values with 0
       self.grid = np.stack(self.grid, axis=-1) # shape: 3xMxN -> MxNx3, each element is a length 3 tuple to store a (R, G, B) value
       self.grid = self.grid[::-1]
     else:
