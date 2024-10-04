@@ -113,49 +113,98 @@ class spatial_mapping():
         depth=np.append(depth, depth_matrix[j,i])
     self.data['Depth']=depth
     
-  def plot_map(self, input_data, plot_type='contour', mapping_resolution=10, contour_levels=15, bounding_box=[], title=None, vmin=None, vmax=None, shapefile=None, colorbar=False, figsize=(20, 5)):
-    x=input_data['Longitude'].to_numpy()
-    y=input_data['Latitude'].to_numpy()
-    z=input_data[1]
+  def plot_map(self, input_data, plot_type='contour', z_type='1d', mapping_resolution=10, bounding_box=[], title=None, vmin=None, vmax=None, shapefile=None, colorbar=False, cax=None, figsize=(20, 5),):
+    x = input_data['Longitude'].to_numpy()
+    y = input_data['Latitude'].to_numpy()
     # mapping resolution: meters
     mapping_resolution=mapping_resolution/1000/1.852/60
-    self.xx=np.arange(np.floor(np.min(x)/mapping_resolution)*mapping_resolution,np.ceil(np.max(x)/mapping_resolution)*mapping_resolution+mapping_resolution,mapping_resolution)
-    self.yy=np.arange(np.floor(np.min(y)/mapping_resolution)*mapping_resolution,np.ceil(np.max(y)/mapping_resolution)*mapping_resolution+mapping_resolution,mapping_resolution)
+    self.xx = np.arange(np.floor(np.min(x)/mapping_resolution)*mapping_resolution,np.ceil(np.max(x)/mapping_resolution)*mapping_resolution+mapping_resolution,mapping_resolution)
+    self.yy = np.arange(np.floor(np.min(y)/mapping_resolution)*mapping_resolution,np.ceil(np.max(y)/mapping_resolution)*mapping_resolution+mapping_resolution,mapping_resolution)
     grid_x, grid_y = np.meshgrid(self.xx, self.yy, indexing='ij')
 
-    fig, ax = plt.subplots(figsize=figsize)
-    if plot_type=='contour' or plot_type=='both':
-      self.grid = griddata(np.hstack((x[:,None],y[:,None])), z, (grid_x, grid_y), method='cubic')
-      if vmin:
-        self.grid[self.grid<vmin]=vmin
-      if vmax:
-        self.grid[self.grid>vmax]=vmax
-      im = ax.contourf(self.grid.T, extent=([np.min(x),np.max(x),np.min(y),np.max(y)]), levels=contour_levels, vmin=vmin, vmax=vmax, extend='both')
-      if colorbar:
-        cbar= fig.colorbar(im)
-    if plot_type=='scatter' or plot_type=='both':
-      if plot_type=='both':
-        im = ax.scatter(x, y, marker='o', edgecolors='k', facecolors='none')
-      if plot_type=='scatter':
-        im = ax.scatter(x, y, c=z, vmin=vmin, vmax=vmax)
-        if colorbar:
-          cbar= fig.colorbar(im)
+    # extract z values based on `z_type`
+    if z_type == '1d':
+      z = input_data.iloc[:, 1].to_numpy() # shape: K
+    elif z_type == '2d':
+      z = input_data.iloc[:, 1:3].to_numpy() # shape: Kx2
+      z = np.insert(z, 2, 0, axis=1)
+      z_type = '3d'
+    elif z_type == '3d':
+      z = input_data.iloc[:, 1:4].to_numpy() # shape: Kx3
+      print()
+    else:
+      raise ValueError("`z_type` should be '1d', '2d' or '3d'")
+
+    # process z values based on `plot_type` and `z_type`
+    if plot_type == 'scatter':
+      if vmin or vmax:
+        z = np.clip(z, vmin, vmax)
+      if z_type == '3d':
+        z = [[(v - np.min(z[:, i])) / (np.max(z[:, i]) - np.min(z[:, i])) for v in z[:, i]]
+                                                                          for i in range(z.shape[1])] # # normalize to [0, 1] interval
+        z = np.nan_to_num(z, nan=0) # nan caused by zero division (min==mix), fill the values with 0
+        z = np.transpose(z)
+    elif plot_type in ('contour', 'both') and z_type == '1d':
+      self.grid = griddata(np.hstack((x[:, None], y[:, None])), z, (grid_x, grid_y), method='cubic') # interpolate, shape: MxN
+      if vmin or vmax:
+        self.grid = np.clip(self.grid, vmin, vmax) # normalize to [0, 1] interval
+      self.grid = np.nan_to_num(self.grid, nan=0) # nan caused by the 'cubic' method does not extrapolate, fill the values with 0
+      self.grid = self.grid[::-1]
+    elif plot_type in ('contour', 'both') and z_type == '3d':
+      self.grid = np.zeros((3, grid_x.shape[0], grid_x.shape[1]))
+      for i in range(z.shape[1]):
+        grid = griddata(np.hstack((x[:, None], y[:, None])), z[:, i], (grid_x, grid_y), method='cubic') # interpolate, shape: MxN
+        if vmin or vmax:
+          grid = np.clip(grid, vmin, vmax) # limit lower and upper bounds
+        grid = np.nan_to_num(grid, nan=0) # nan caused by the 'cubic' method does not extrapolate, fill the values with 0
+        grid = [(v - np.min(grid)) / (np.max(grid) - np.min(grid)) for v in grid] # normalize to [0, 1] interval
+        self.grid[i] = np.nan_to_num(grid, nan=0) # nan caused by zero division (min==max), fill the values with 1
+      self.grid = np.stack(self.grid, axis=-1) # shape: 3xMxN -> MxNx3, each element is a length 3 tuple to store a (R, G, B) value
+      self.grid = self.grid[::-1]
+    else:
+      raise ValueError("`plot_type` should be 'contour', 'scatter', or 'both'")
+
+    # plot fig
+    fig = plt.figure(figsize = figsize)
+    ax = plt.axes()
+    if plot_type in ('contour', 'both'):
+      im = ax.imshow(self.grid, extent=[np.min(x), np.max(x), np.min(y), np.max(y)])
+      if plot_type == 'both':
+        _ = ax.scatter(x, y, marker='o', edgecolors='k', facecolors='none')
+    else:
+      im = ax.scatter(x, y, c=z, vmin=vmin, vmax=vmax)
+
+    # add z value's colorbar (`z_type` = '1d') or color scatter plot (`z_type` = '3d')
+    if colorbar and z_type == '1d':
+      cax = cax or [0.93, 0.134, 0.02, 0.72]
+      cax = fig.add_axes(cax)
+      _ = fig.colorbar(im, cax=cax, ax=ax)
+    elif colorbar and z_type == '3d':
+      c_p = z.reshape(-1, 3) if plot_type == 'scatter' else self.grid.reshape(-1, 3)
+      cax = cax or [0.798, 0.66, 0.23, 0.23]
+      ax2 = plt.axes(cax, projection='3d')
+      ax2.scatter(c_p[:, 0], c_p[:, 1], c_p[:, 2], c=c_p)
+      ax2.set(xlabel='R', ylabel='G', zlabel='B',
+              xlim=(0, 1), ylim=(0, 1), zlim=(0, 1))
+    else:
+      pass
+
     ax.xaxis.set_major_locator(MaxNLocator(3))
     ax.yaxis.set_major_locator(MaxNLocator(5))
     ax.xaxis.set_major_formatter(FormatStrFormatter('%.3f'))
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.3f'))
     ax.set_title(title)
-    
+
     if shapefile:
       import geopandas
       map_load = geopandas.read_file(shapefile).to_crs({'init': 'epsg:4326'})
       map_load.plot(ax=ax, facecolor='gray', edgecolor='0.5')
       if len(bounding_box)>0:
-        _,_=plt.xlim((bounding_box[0],bounding_box[1]))
-        _,_=plt.ylim((bounding_box[2],bounding_box[3]))
+        _, _ = ax.set_xlim((bounding_box[0],bounding_box[1]))
+        _, _ = ax.set_ylim((bounding_box[2],bounding_box[3]))
       else:
-        _,_=plt.xlim((np.min(x),np.max(x)))
-        _,_=plt.ylim((np.min(y),np.max(y)))
+        _, _ = ax.set_xlim((np.min(x),np.max(x)))
+        _, _ = ax.set_ylim((np.min(y),np.max(y)))
     plt.show()
     return fig, ax
 
