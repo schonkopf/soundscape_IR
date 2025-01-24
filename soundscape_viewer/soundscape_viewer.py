@@ -202,12 +202,13 @@ class lts_viewer:
             items.sort(key = str.lower)
             for names in items:
                 if names.endswith(file_extension):
-                    print('Loading file: %s' % (names))
+                    print('Loading file: %s' % (names), flush=True, end='')
                     data = loadmat(path+'/'+names)
                     if parameter_check == True:
                         self.LTS_check(data, f_range)
                     else:
                         self.assemble(data, time_sort, f_range, location=subfolder_list[n])
+                print('\r', end='')
             n+=1
 
     def collect_Gdrive(self, folder_id, f_range=[], time_sort=1, parameter_check=False, subfolder=False, file_extension='.mat'):
@@ -215,7 +216,7 @@ class lts_viewer:
         Gdrive.list_query(file_extension, subfolder=subfolder)
         n=0
         for file in Gdrive.file_list:
-            print('Loading file: %s' % (file['title']))
+            print('Loading file: %s' % (file['title']), flush=True, end='')
             infilename=file['title']
             file.GetContentFile(file['title'])
             data = loadmat(file['title'])
@@ -225,6 +226,7 @@ class lts_viewer:
                 self.assemble(data, time_sort, f_range, location=Gdrive.subfolder_list[n])
                 n+=1
                 os.remove(infilename)
+            print('\r', end='')
 
     def plot_lts(self, day_correct=0, fig_width=12, fig_height=18, gap_fill=True):
         """
