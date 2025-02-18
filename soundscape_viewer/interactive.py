@@ -25,3 +25,4 @@ def interactive_matrix(input_data, f, vmin=None, vmax=None, x_title=None, y_titl
     html_save=True
   if html_save:
       fig.write_html(file=html_name)
+  return fig
