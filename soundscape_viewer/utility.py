@@ -525,7 +525,7 @@ class matrix_operation:
         self.hour_selection=hour_selection
         self.month_selection=month_selection
 
-    def plot_psd(self, freq_scale='linear', amplitude_range=[], f_range=[], fig_width=6, fig_height=6, title=[]):
+    def plot_psd(self, freq_scale='linear', x_label='Frequency', y_label='PSD', amplitude_range=[], f_range=[], fig_width=6, fig_height=6, title=[]):
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
         cmap=cm.get_cmap('jet', len(self.percentile))
         cmap_table=cmap(range(len(self.percentile)))
@@ -545,15 +545,15 @@ class matrix_operation:
         
         if len(amplitude_range)>0:
             plt.ylim(np.min(amplitude_range), np.max(amplitude_range))
-        plt.xlabel('Frequency')
-        plt.ylabel('Amplitude')
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
         if title:
             plt.title(title)
         
         if len(self.percentile)>5:
-            cbar=fig.colorbar(cbar, ticks=self.percentile[::int(np.ceil(len(self.percentile)/5))])
+            cbar=fig.colorbar(cbar, ax=ax, ticks=self.percentile[::int(np.ceil(len(self.percentile)/5))])
         else:
-            cbar=fig.colorbar(cbar, ticks=self.percentile)
+            cbar=fig.colorbar(cbar, ax=ax, ticks=self.percentile)
         cbar.set_label('Percentile')
         return fig, ax
     
