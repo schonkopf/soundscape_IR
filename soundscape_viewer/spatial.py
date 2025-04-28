@@ -169,11 +169,12 @@ class spatial_mapping():
     fig.update_layout(mapbox_style="carto-positron", mapbox_zoom=12,
         mapbox_center={"lat": np.mean(y), "lon": np.mean(x)},
         title=title)
-
-    fig.add_trace(go.Scattermapbox(lon=x, lat=y, text=t,
+  fig.add_trace(go.Scattermapbox(lon=x, lat=y, text=t,
         mode=plot_type, marker=dict(color=z, size=9, colorscale='Viridis', cmin=vmin, cmax=vmax, showscale=True),
         hovertemplate=
         "<b>%{text}</b><br><br>" +
+        "Longitude: %{lon}<br>" +
+        "Latitude: %{lat}<br>" +
         "Value: %{marker.color:,.2f}<br>""<extra></extra>",))
     fig.update_layout(width=fig_width, height=fig_height)
     fig.show()
