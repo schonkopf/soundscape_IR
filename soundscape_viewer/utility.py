@@ -933,8 +933,8 @@ class performance_evaluation:
 
     def f1_confidence(self, label, level, plot=False):
         from sklearn.metrics import f1_score
-        f1_threshold=np.linspace(0, np.ceil(np.max(self.level)), num=100)
-        f1_result=0*np.linspace(0, np.ceil(np.max(self.level)), num=100)
+        f1_threshold=np.linspace(0, np.ceil(np.max(level)), num=100)
+        f1_result=0*np.linspace(0, np.ceil(np.max(level)), num=100)
         for a in np.arange(len(f1_threshold)):
             f1_result[a]=f1_score(label, level>f1_threshold[a], average='binary')
         if plot:
