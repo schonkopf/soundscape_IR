@@ -931,6 +931,29 @@ class performance_evaluation:
         if fpr_control>0:
             threshold, fpr, tpr=self.auc(self.label, self.level, fpr_control=fpr_control, plot=plot)
 
+    def f1_confidence(self, label, level, plot=False):
+        from sklearn.metrics import f1_score
+        f1_threshold=np.linspace(0, np.ceil(np.max(self.level)), num=100)
+        f1_result=0*np.linspace(0, np.ceil(np.max(self.level)), num=100)
+        for a in np.arange(len(f1_threshold)):
+            f1_result[a]=f1_score(label, level>f1_threshold[a], average='binary')
+        if plot:
+            plt.figure()
+            plt.plot(f1_threshold, f1_result)
+            plt.xlabel('Threshold')
+            plt.ylabel('F1 score')
+        return f1_threshold, f1_result
+
+    def precision_recall(self, label, level, plot=False):
+        from sklearn.metrics import precision_recall_curve
+        precision, recall, thresholds = precision_recall_curve(label, level)
+        if plot:
+            plt.figure()
+            plt.plot(recall, precision)
+            plt.xlabel('Recall')
+            plt.ylabel('Precision')
+        return precision, recall, thresholds
+
     def auc(self, label, level, fpr_control=0.05, plot=True):
         from sklearn.metrics import roc_curve, auc
         fpr, tpr, thresholds = roc_curve(label, level)
