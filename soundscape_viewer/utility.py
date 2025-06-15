@@ -942,6 +942,9 @@ class performance_evaluation:
             plt.plot(f1_threshold, f1_result)
             plt.xlabel('Threshold')
             plt.ylabel('F1 score')
+            plt.title('Highest F1 score: '+str(np.round(np.max(f1_result)*100)/100))
+            plt.show()
+            print('Threshold = '+str(np.round(f1_threshold[np.argmax(f1_result)]*100)/100)+' @ max F1 score')
         return f1_threshold, f1_result
 
     def precision_recall(self, label, level, plot=False):
