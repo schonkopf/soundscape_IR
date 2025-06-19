@@ -440,7 +440,7 @@ class batch_processing:
                                 ambient=None
                             audio.data[:,1:], ambient=matrix_operation.adaptive_prewhiten(audio.data[:,1:], axis=0, noise_init=ambient,
                                                                                           eps=self.eps, smooth=self.adaptive_smooth)
-                        audio.data[np.isnan(audio.data)]=0
+                audio.data[np.isnan(audio.data)]=0
 
             if self.run_separation:
                 model = copy.deepcopy(model_backup)
