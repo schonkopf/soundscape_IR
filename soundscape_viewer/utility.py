@@ -998,7 +998,7 @@ class pulse_interval:
 
         # plot the waveform
         if plot_type=='Both' or plot_type=='Time':
-            ax1.plot(time_vec, self.data)
+            ax1.plot(time_vec, data)
             ax1.set_xlabel('Time')
             ax1.set_ylabel('Amplitude')
 
