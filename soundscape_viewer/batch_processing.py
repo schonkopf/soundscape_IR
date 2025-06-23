@@ -564,10 +564,14 @@ class batch_processing:
                             self.f = np.array(data['save_features']['f'].item()[0])
                             self.spectral_result = data['save_features']['spectral_result'].item()
                             self.time_vec = data['save_features']['detection'].item()[:,0]+str2ord*24*3600
+                            if 'embedding_result' in data['save_features'].dtype.names:
+                                self.embedding_result = data['save_features']['embedding_result'].item()
                         else:
                             self.time_vec = np.append(self.time_vec, data['save_features']['detection'].item()[:,0]+str2ord*24*3600)
                             self.PI_result = np.vstack((self.PI_result, data['save_features']['PI_result'].item()))
                             self.spectral_result = np.vstack((self.spectral_result, data['save_features']['spectral_result'].item()))
+                            if 'embedding_result' in data['save_features'].dtype.names:
+                                self.embedding_result = np.vstack((self.embedding_result, data['save_features']['embedding_result'].item()))
                 elif self.run_load_result==3:
                     df = pd.read_table(path+'/'+temp,index_col=0) 
                     df[['Begin Time (s)', 'End Time (s)']]=df[['Begin Time (s)', 'End Time (s)']]+str2ord*24*3600
@@ -592,6 +596,8 @@ class batch_processing:
             self.PI_result=self.PI_result[temp,:]
             self.spectral_result=self.spectral_result[temp,:]
             self.time_vec=self.time_vec[temp]/24/3600
+            if 'embedding_result' in data['save_features'].dtype.names:
+                self.embedding_result = self.embedding_result[temp,:]
         elif self.run_load_result==3:
             self.detection_result[['Begin Time (s)', 'End Time (s)']]=self.detection_result[['Begin Time (s)', 'End Time (s)']]/24/3600
             self.detection_result.sort_values(by=['Begin Time (s)'],inplace=True)
