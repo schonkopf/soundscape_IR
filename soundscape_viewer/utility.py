@@ -911,14 +911,16 @@ class spectrogram_detection:
             else:
                 self.PI_result=np.vstack((self.PI_result, pulse_analysis_result.result[None,:]))
                 self.spectral_result=np.vstack((self.spectral_result, spectral_result))
-        features=save_parameters()
-        features.feature_extraction(self.detection, self.f, self.spectral_result, self.PI, self.PI_result)
-        savemat(path+'/'+filename, {'save_features':features})
 
-        # save the result in Gdrive as a mat file
-        if folder_id:
-            Gdrive=gdrive_handle(folder_id, status_print=False)
-            Gdrive.upload(filename, status_print=False)
+        if filename:
+            features=save_parameters()
+            features.feature_extraction(self.detection, self.f, self.spectral_result, self.PI, self.PI_result)
+            savemat(path+'/'+filename, {'save_features':features})
+    
+            # save the result in Gdrive as a mat file
+            if folder_id:
+                Gdrive=gdrive_handle(folder_id, status_print=False)
+                Gdrive.upload(filename, status_print=False)
     
 class performance_evaluation:
     def __init__(self, test_spec, label_filename, fpr_control=0.05, plot=True): 
