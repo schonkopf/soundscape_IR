@@ -273,7 +273,8 @@ class lts_maker:
         Result.LTS_Result(self.Result_median, self.Result_mean, self.f, self.link, self.PI, self.Result_PI)
         Parameters.LTS_Parameters(self.FFT_size, self.overlap, self.sen, self.sf, self.channel)
         savemat(save_filename, {'Result':Result,'Parameters':Parameters})
-        print('Successifully save to '+save_filename)
+        if status_print:
+            print('Successifully save to '+save_filename)
 
         if folder_id:
             Gdrive=gdrive_handle(folder_id, status_print=True)
