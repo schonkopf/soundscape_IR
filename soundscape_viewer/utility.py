@@ -903,7 +903,7 @@ class spectrogram_detection:
                     event_list[1]=len(self.x)
                 pulse_analysis_result=pulse_interval(self.x[int(event_list[0]):int(event_list[1])], sf=self.sf, interval_range=interval_range, plot_type=None, standardization=True)
             # Analyze spectral features
-            if spectral_method=='mean:
+            if spectral_method=='mean':
                 spectral_result=np.mean(self.input[detection_list,1:], axis=0)
             elif spectral_method=='sum':
                 spectral_result=np.sum(self.input[detection_list,1:], axis=0)
