@@ -833,7 +833,7 @@ class spectrogram_detection:
             Gdrive=gdrive_handle(folder_id, status_print=False)
             Gdrive.upload(filename, status_print=False)
 
-    def feature_extraction(self, interval_range=[1, 500], energy_percentile=None, filename='Features.mat', folder_id=[], path='./'):
+    def feature_extraction(self, interval_range=[1, 500], energy_percentile=None, filename='Features.mat', spectral_method='mean', folder_id=[], path='./'):
         """
         This method extracts spectral and temporal features from regions of interest. 
         
@@ -903,7 +903,10 @@ class spectrogram_detection:
                     event_list[1]=len(self.x)
                 pulse_analysis_result=pulse_interval(self.x[int(event_list[0]):int(event_list[1])], sf=self.sf, interval_range=interval_range, plot_type=None, standardization=True)
             # Analyze spectral features
-            spectral_result=np.mean(self.input[detection_list,1:], axis=0)
+            if spectral_method=='mean:
+                spectral_result=np.mean(self.input[detection_list,1:], axis=0)
+            elif spectral_method=='sum':
+                spectral_result=np.sum(self.input[detection_list,1:], axis=0)
             if n==0:
                 self.PI_result=pulse_analysis_result.result[None,:]
                 self.PI=pulse_analysis_result.PI
