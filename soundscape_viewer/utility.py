@@ -924,6 +924,18 @@ class spectrogram_detection:
             if folder_id:
                 Gdrive=gdrive_handle(folder_id, status_print=False)
                 Gdrive.upload(filename, status_print=False)
+
+    def embedding_extraction(self, embedding_data, time_bin=30):
+        self.embedding_result=np.array([])
+        for n in range(0, self.detection.shape[0]):
+            detection_list=np.where(((embedding_data[:,0]>=self.detection[n,0])*(embedding_data[:,0]<=self.detection[n,1]))==1)[0]
+            embedding_result=embedding_data[detection_list,1:]
+            if embedding_result.shape[0]<time_bin:
+                embedding_result=np.vstack((embedding_result, np.zeros((time_bin-embedding_result.shape[0], embedding_result.shape[1]))))
+            if n==0:
+                self.embedding_result=embedding_result.reshape((1, -1))
+            else:
+                self.embedding_result=np.vstack((self.embedding_result, embedding_result.reshape((1, -1))))
     
 class performance_evaluation:
     def __init__(self, test_spec, label_filename, fpr_control=0.05, plot=True): 
