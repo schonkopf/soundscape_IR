@@ -932,6 +932,8 @@ class spectrogram_detection:
             embedding_result=embedding_data[detection_list,1:]
             if embedding_result.shape[0]<time_bin:
                 embedding_result=np.vstack((embedding_result, np.zeros((time_bin-embedding_result.shape[0], embedding_result.shape[1]))))
+            elif embedding_result.shape[0]>time_bin:
+                embedding_result=embedding_result[0:time_bin,:]
             if n==0:
                 self.embedding_result=embedding_result.reshape((1, -1))
             else:
