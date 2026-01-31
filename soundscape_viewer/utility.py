@@ -430,7 +430,7 @@ class audio_visualization:
         if not threshold:
             threshold=np.mean(self.data)
         data_presence=self.data>threshold
-        data=np.zeros(self.data.shape)
+        data=np.zeros(self.data.shape)+np.nan
 
         if type(annotation)==str:
             df = pd.read_table(annotation,index_col=0)
@@ -446,7 +446,6 @@ class audio_visualization:
             for i in range(len(df)):
                 data[np.where(self.data[:,0]>=df.iloc[i,idx_st])[0][0]:np.where(self.data[:,0]<=df.iloc[i,idx_et])[0][-1],1:]=color[i]
         data[data_presence==False]=np.nan
-        data[data==0]=np.nan
         
         fig, ax = plt.subplots(1, 1, figsize=(14, 6))
         # plot the spectrogram
