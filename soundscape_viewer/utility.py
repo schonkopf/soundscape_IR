@@ -426,7 +426,7 @@ class audio_visualization:
         temp=np.multiply(10**(magnitude_spec[:,1:].T*snr_factor/10), np.exp(1j*self.phase))
         _, self.xrec = scipy.signal.istft(temp, fs=self.sf, nperseg=self.FFT_size, noverlap=int(self.overlap*self.FFT_size))
 
-    def color_annotated_spectrogram(self, annotation, threshold=None, color=[], vmin=None, vmax=None, alpha=0.25):
+    def color_annotated_spectrogram(self, annotation, threshold=None, color=[], alpha=0.25, colormap='jet', vmin=None, vmax=None, cmin=None, cmax=None):
         if not threshold:
             threshold=np.mean(self.data)
         data_presence=self.data>threshold
@@ -441,10 +441,13 @@ class audio_visualization:
             color=np.arange(df.shape[0])+1
         elif type(color)==str:
             color=df[color].values
+        df['Color']=color
 
+        df=df[df['Begin Time (s)']>=self.data[0,0]].reset_index(drop=True)
+        df=df[df['End Time (s)']<=self.data[-1,0]].reset_index(drop=True)
         if len(df)>0:
             for i in range(len(df)):
-                data[np.where(self.data[:,0]>=df.iloc[i,idx_st])[0][0]:np.where(self.data[:,0]<=df.iloc[i,idx_et])[0][-1],1:]=color[i]
+                data[np.where(self.data[:,0]>=df.iloc[i,idx_st])[0][0]:np.where(self.data[:,0]<=df.iloc[i,idx_et])[0][-1],1:]=df['Color'][i]
         data[data_presence==False]=np.nan
         
         fig, ax = plt.subplots(1, 1, figsize=(14, 6))
@@ -458,8 +461,9 @@ class audio_visualization:
             ax.set_title('Spectrogram of %s' % self.filename)
 
         # plot the colored signals
-        im = ax.pcolormesh(self.data[:,0], self.f, data[:,1:].T,
-                           cmap=cm.jet, shading="auto", alpha=alpha)
+        cmap = plt.get_cmap(colormap)
+        im = ax.pcolormesh(self.data[:,0], self.f, data[:,1:].T, vmin=cmin, vmax=cmax, 
+                           cmap=cmap, shading="auto", alpha=alpha)
         cbar = fig.colorbar(im, ax=ax)
         return fig, ax
 
