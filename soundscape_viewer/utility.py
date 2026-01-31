@@ -620,6 +620,53 @@ class matrix_operation:
         cbar = fig.colorbar(im, ax=ax)
         #cbar.set_label('Amplitude')
         return fig, ax
+
+    def plot_source_composition(input_data, f, source_mask=[], threshold=[0], day_correct=0, vmin=None, vmax=None, fig_width=18, fig_height=6, lts=True, mel=False, alpha=0.25, source_colormap=[], source_vmax=[]):
+        if day_correct=='windows':
+            day_correct=-719163
+        if lts:
+            temp=matrix_operation().gap_fill(time_vec=input_data[:,0], data=input_data[:,1:], tail=[])
+            temp[:,0]=temp[:,0]+693960-366
+        else:
+            temp=input_data
+        
+        fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+        im = ax.imshow(temp[:,1:].T, vmin=vmin, vmax=vmax,
+                       origin='lower',  aspect='auto', cmap=cm.binary,
+                       extent=[np.min(temp[:,0]+day_correct), np.max(temp[:,0]+day_correct), f[0], f[-1]], interpolation='none')
+        ax.set_ylabel('Frequency')
+
+        if len(source_mask)>0:
+            if len(source_colormap)==0:
+                source_colormap=['Reds','Greens','Blues']
+            
+            if len(source_vmax)==0:
+                source_vmax=np.max(source_mask[0][:,1:])
+            if len(source_vmax)==1:
+                source_vmax=source_vmax*np.ones(len(source_mask))
+            if len(threshold)==1:
+                threshold=threshold*np.ones(len(source_mask))
+
+            for n in range(len(source_mask)):
+                # plot the colored signals
+                cmap = plt.get_cmap(source_colormap[n])
+                data = source_mask[n][:,1:]
+                data[data<=threshold[n]]=np.nan
+                im = ax.pcolormesh(temp[:,0], f, data.T,
+                                   cmap=cmap, shading="auto", alpha=alpha, vmax=source_vmax[n])
+
+        if lts:
+            ax.xaxis_date()
+        if mel:
+            ymin, ymax = ax.get_ylim()
+            N=6
+            ax.set_yticks(np.round(np.linspace(ymin, ymax, N), 2)) 
+            idx = np.linspace(0, len(f)-1, N, dtype = 'int')
+            yticks = f[idx]+0.5
+            ax.set_yticklabels(yticks.astype(int))
+        #cbar = fig.colorbar(im, ax=ax)
+        #cbar.set_label('Amplitude')
+        return fig, ax
         
     def prewhiten(input_data, prewhiten_percent, axis):
         import numpy.matlib
