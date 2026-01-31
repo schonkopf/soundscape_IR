@@ -426,7 +426,7 @@ class audio_visualization:
         temp=np.multiply(10**(magnitude_spec[:,1:].T*snr_factor/10), np.exp(1j*self.phase))
         _, self.xrec = scipy.signal.istft(temp, fs=self.sf, nperseg=self.FFT_size, noverlap=int(self.overlap*self.FFT_size))
 
-    def color_annotated_spectrogram(self, annotation, threshold=None, color=None, vmin=None, vmax=None, alpha=0.25):
+    def color_annotated_spectrogram(self, annotation, threshold=None, color=[], vmin=None, vmax=None, alpha=0.25):
         if not threshold:
             threshold=np.mean(self.data)
         data_presence=self.data>threshold
@@ -437,7 +437,7 @@ class audio_visualization:
         idx_st = np.where(df.columns.values == 'Begin Time (s)')[0][0]
         idx_et = np.where(df.columns.values == 'End Time (s)')[0][0]
 
-        if not color:
+        if len(color)==0:
             color=np.arange(df.shape[0])+1
         elif type(color)==str:
             color=df[color].values
