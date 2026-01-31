@@ -426,6 +426,44 @@ class audio_visualization:
         temp=np.multiply(10**(magnitude_spec[:,1:].T*snr_factor/10), np.exp(1j*self.phase))
         _, self.xrec = scipy.signal.istft(temp, fs=self.sf, nperseg=self.FFT_size, noverlap=int(self.overlap*self.FFT_size))
 
+    def color_annotated_spectrogram(self, annotation, threshold=None, color=None, vmin=None, vmax=None, alpha=0.25):
+        if not threshold:
+            threshold=np.mean(self.data)
+        data_presence=self.data>threshold
+        data=np.zeros(self.data.shape)
+
+        if type(annotation)==str:
+            df = pd.read_table(annotation,index_col=0)
+        idx_st = np.where(df.columns.values == 'Begin Time (s)')[0][0]
+        idx_et = np.where(df.columns.values == 'End Time (s)')[0][0]
+
+        if not color:
+            color=np.arange(df.shape[0])+1
+        elif type(color)==str:
+            color=df[color].values
+
+        if len(df)>0:
+            for i in range(len(df)):
+                data[np.where(self.data[:,0]>=df.iloc[i,idx_st])[0][0]:np.where(self.data[:,0]<=df.iloc[i,idx_et])[0][-1],1:]=color[i]
+        data[data_presence==False]=np.nan
+        data[data==0]=np.nan
+        
+        fig, ax = plt.subplots(1, 1, figsize=(14, 6))
+        # plot the spectrogram
+        im = ax.imshow(self.data[:,1:].T, vmin=vmin, vmax=vmax, 
+                       origin='lower',  aspect='auto', cmap=cm.binary,
+                       extent=[self.data[0,0], self.data[-1,0], self.f[0], self.f[-1]], interpolation='none')
+        ax.set_ylabel('Frequency')
+        ax.set_xlabel('Time')
+        if self.filename:
+            ax.set_title('Spectrogram of %s' % self.filename)
+
+        # plot the colored signals
+        im = ax.pcolormesh(self.data[:,0], self.f, data[:,1:].T,
+                           cmap=cm.jet, shading="auto", alpha=alpha)
+        cbar = fig.colorbar(im, ax=ax)
+        return fig, ax
+
 class matrix_operation:
     def __init__(self, header=[]):
         self.header=header
