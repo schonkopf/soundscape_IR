@@ -454,7 +454,7 @@ class source_separation:
             else:
                 ax.set_title('Separation')
 
-    def learn_feature(self, input_data, f, alpha=0, method='NMF', iter=200, show_result=False):  
+    def learn_feature(self, input_data, f, alpha=0, method='NMF', num_source=2, iter=200, show_result=False):  
         """
         This method supports the use of NMF or PC-NMF in the feature learning procedure. 
         
@@ -542,7 +542,7 @@ class source_separation:
         elif method=='PCNMF':
             pcnmf_model=pcnmf(feature_length=self.feature_length, basis_num=self.basis_num, 
                               alpha=alpha, beta_loss=2, sparseness=1)
-            self.W, self.H, self.W_cluster = pcnmf_model.unsupervised_separation(input_data, f, source_num=2, iter=iter)
+            self.W, self.H, self.W_cluster = pcnmf_model.unsupervised_separation(input_data, f, source_num=num_source, iter=iter)
             self.source_num = 2
             if show_result:
                 pcnmf_model.plot_pcnmf(source=1)
