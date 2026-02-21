@@ -408,13 +408,13 @@ class source_separation:
             if time_range:
                 H_list=np.where((self.time_vec>=time_range[0])*(self.time_vec<time_range[1])==1)[0]
             x_lim=[self.time_vec[H_list[0]][0], self.time_vec[H_list[-1]][0]]
-
-        # Prepare W
-        if self.W.shape[0]>len(self.f):
-            W=np.vstack((np.full((len(self.f),len(W_list)),np.nan), self.W[:,W_list])).T.reshape(1,-1)
-            W=W.reshape((-1,len(self.f))).T
-        elif self.W.shape[0]==len(self.f):
-            W=np.array(self.W[:,W_list])
+        else:
+            # Prepare W
+            if self.W.shape[0]>len(self.f):
+                W=np.vstack((np.full((len(self.f),len(W_list)),np.nan), self.W[:,W_list])).T.reshape(1,-1)
+                W=W.reshape((-1,len(self.f))).T
+            elif self.W.shape[0]==len(self.f):
+                W=np.array(self.W[:,W_list])
 
         # Plot
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
@@ -658,11 +658,14 @@ class source_separation:
             Time-series intensities of the input spectrogram.
         
         """
-        self.f=f
+        f_list=(f>=self.f[0])*(f<=self.f[-1])
+        f_list=np.where(f_list==True)[0]
+        input_zeros=np.zeros((input_data.shape)) 
+        
         self.time_vec=input_data[:,0:1]
         self.adaptive_alpha=adaptive_alpha
         self.additional_basis=additional_basis
-        input_data=input_data[:,1:].T
+        input_data=input_data[:,f_list+1].T
         baseline=input_data.min()
         input_data=input_data-baseline
 
@@ -711,7 +714,10 @@ class source_separation:
         self.W=W
         self.H=Ht.T
         self.nmf_output(input_data, self.time_vec, baseline)
-        #self.time_vec=self.time_vec[:,0]
+        if len(self.f)<len(f):
+            for run in range(self.source_num):
+                input_zeros[:,f_list+1]=self.separation[run][:,1:].copy()
+                self.separation[run]=np.hstack((self.separation[run][:,0:1], input_zeros[:,1:].copy()))
 
     def save_model(self, filename='NMF_model.mat', folder_id=[]):
         """
