@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import copy
 
 class batch_processing:
     """
@@ -379,7 +380,6 @@ class batch_processing:
         from soundscape_IR.soundscape_viewer import source_separation
 
         import datetime
-        import copy
         import os
         if self.cloud==1:
             import urllib.request
