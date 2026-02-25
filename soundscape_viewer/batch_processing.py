@@ -195,11 +195,14 @@ class batch_processing:
         self.save_basis_folder_id = folder_id
         self.save_basis_path = path
         self.save_basis = save_basis
-        if save_basis:
+        if not type(save_basis)==bool:
             if isinstance(save_basis, int):
                 self.save_basis_idx = [save_basis]
             else:
                 self.save_basis_idx = save_basis
+        if type(save_basis)==bool:
+            if save_basis:
+                self.save_basis_idx = np.arange(model.basis_num)
 
     def params_spectrogram_detection(self, source=0, threshold=6, smooth=0, minimum_interval=0, minimum_duration = None, maximum_duration=None, pad_size=0, folder_id=[], path='./', show_result=False, save_clip_path=None):
         """
