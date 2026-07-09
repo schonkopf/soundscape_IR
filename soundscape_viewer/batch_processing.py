@@ -194,7 +194,7 @@ class batch_processing:
         self.save_basis_folder_id = folder_id
         self.save_basis_path = path
 
-    def params_spectrogram_detection(self, source=0, threshold=6, smooth=0, minimum_interval=0, minimum_duration = None, maximum_duration=None, pad_size=0, folder_id=[], path='./', show_result=False, save_clip_path=None):
+    def params_spectrogram_detection(self, source=0, threshold=6, smooth=0, minimum_interval=0, minimum_duration = None, maximum_duration=None, pad_size=0, folder_id=[], path='./', show_result=False, save_clip_path=None, annotation_extension=None, annotation_folder=None):
         """
         Define parameters for spectrogram-based sound detection. 
         
@@ -241,6 +241,10 @@ class batch_processing:
         else:
             self.padding = pad_size
 
+        self.annotation_extension=annotation_extension
+        self.annotation_folder=annotation_folder
+        if self.annotation_extension:
+            self.run_detection=False
         self.detection_folder_id = folder_id
         self.detection_path = path
         self.show_result = show_result
@@ -501,6 +505,9 @@ class batch_processing:
             else:
                 if self.run_feature_extraction:
                     sp=spectrogram_detection(audio.data, audio.f, threshold=0, show_result=False, status_print=False, run_detection=False)
+                    df=pd.read_table(self.annotation_folder+'/'+self.audioname[file][:-4]+self.annotation_extension, index_col=0)
+                    df.sort_values(by=['Begin Time (s)'],inplace=True)
+                    sp.detection=df[['Begin Time (s)','End Time (s)']].values
 
             if self.run_feature_extraction:
                 if self.run_separation:
