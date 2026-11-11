@@ -518,9 +518,9 @@ class matrix_operation:
         for run in np.arange(split_point.shape[1]):
             i=np.argmin(np.abs(n_time_vec-time_vec[split_point[0,run]]))
             if data.ndim>1:
-                save_result[np.arange(i,i+np.diff(split_point[:,run])+1),1:]=output[np.arange(split_point[0,run], split_point[1,run]+1),:]
+                save_result[np.arange(i,i+np.diff(split_point[:,run])[0]+1),1:]=output[np.arange(split_point[0,run], split_point[1,run]+1),:]
             else:
-                save_result[np.arange(i,i+np.diff(split_point[:,run])+1),1]=output[np.arange(split_point[0,run], split_point[1,run]+1)]
+                save_result[np.arange(i,i+np.diff(split_point[:,run])[0]+1),1]=output[np.arange(split_point[0,run], split_point[1,run]+1)]
         
         if np.mean(save_result[-1,1:])==value_input:
             save_result=np.delete(save_result, -1, 0)
